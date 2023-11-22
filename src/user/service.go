@@ -34,8 +34,8 @@ type IUserService interface {
 	GetAllUsers() ([]*User, error)
 	GetUser(id string) (*User, error)
 	DeleteUser(id string) error
-	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto) (*User, error)
-	UpdateBody(doc *UpdateBodyDto) (*User, error)
+	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error)
+	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
 }
 
 func coalesce(value, defaultValue interface{}) interface{} {
@@ -96,13 +96,13 @@ func (us *UserService) DeleteUser(id string) error {
 	return nil
 }
 
-func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto) (*User, error) {
-	oid, err := primitive.ObjectIDFromHex(doc.ID)
+func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
-	user, err := us.GetUser(doc.ID)
+	user, err := us.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
@@ -138,13 +138,13 @@ func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto) (
 	return UpdatedUser, nil
 }
 
-func (us *UserService) UpdateBody(doc *UpdateBodyDto) (*User, error) {
-	oid, err := primitive.ObjectIDFromHex(doc.ID)
+func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
-	user, err := us.GetUser(doc.ID)
+	user, err := us.GetUser(id)
 	if err != nil {
 		return nil, err
 	}

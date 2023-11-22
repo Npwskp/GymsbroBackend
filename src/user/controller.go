@@ -24,14 +24,12 @@ type CreateUserDto struct {
 }
 
 type UpadateUsernamePasswordDto struct {
-	ID          string `json:"id"` // TODO: validate id
 	Username    string `json:"username"`
 	Password    string `json:"password" validate:"required"`
 	NewPassword string `json:"newPassword"`
 }
 
 type UpdateBodyDto struct {
-	ID            string  `json:"id"` // TODO: validate id
 	Weight        float64 `json:"weight"`
 	Height        float64 `json:"height"`
 	Age           int     `json:"age"`
@@ -103,7 +101,6 @@ func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 	id := c.Params("id")
 	validate := validator.New()
 	doc := new(UpadateUsernamePasswordDto)
-	doc.ID = id
 	if err := c.BodyParser(&doc); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
@@ -116,7 +113,7 @@ func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := uc.Service.UpdateUsernamePassword(doc)
+	user, err := uc.Service.UpdateUsernamePassword(doc, id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
@@ -129,7 +126,6 @@ func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 	id := c.Params("id")
 	validate := validator.New()
 	doc := new(UpdateBodyDto)
-	doc.ID = id
 	if err := c.BodyParser(&doc); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
@@ -142,7 +138,7 @@ func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := uc.Service.UpdateBody(doc)
+	user, err := uc.Service.UpdateBody(doc, id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
