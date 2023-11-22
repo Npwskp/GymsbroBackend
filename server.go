@@ -1,41 +1,68 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"context"
+	"time"
+
+	"github.com/Npwskp/GymsbroBackend/src/utils"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Gym struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+type MongoInstance struct {
+	Client *mongo.Client
+	Db     *mongo.Database
 }
 
-var gyms []Gym
+var mg *MongoInstance
 
-func main() {
-	http.HandleFunc("/gyms", getGyms)
-	http.HandleFunc("/gyms/add", addGym)
+const dbname = "GymsBro"
+const mongoURI = "mongodb+srv://npwskp:YV57BjDS6DwFzmxT@npwskp.l9cg7pi.mongodb.net/"
 
-	fmt.Println("Server listening on port 8080...")
-	http.ListenAndServe(":8080", nil)
-}
+func connectDB() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
-func getGyms(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(gyms)
-}
-
-func addGym(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var gym Gym
-	err := json.NewDecoder(r.Body).Decode(&gym)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return err
 	}
 
-	gyms = append(gyms, gym)
-	json.NewEncoder(w).Encode(gym)
+	mg = &MongoInstance{
+		Client: client,
+		Db:     client.Database(dbname),
+	}
+
+	return nil
+}
+
+func disconnectDB() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	err := mg.Client.Disconnect(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func main() {
+	app := fiber.New()
+
+	app.Use(logger.New())
+
+	connectDB()
+	defer disconnectDB()
+
+	utils.InjectApp(app, mg.Db)
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World 👋!")
+	})
+
+	app.Listen(":8080")
 }

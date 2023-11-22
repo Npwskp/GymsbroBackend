@@ -48,7 +48,17 @@ func (uc *UserController) PostUsersHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
+func (uc *UserController) GetUsersHandler(c *fiber.Ctx) error {
+	users, err := uc.Service.GetAllUsers()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(users)
+}
+
 func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/users")
-	g.Post("/", uc.PostUsersHandler)
+	g.Post("", uc.PostUsersHandler)
 }
