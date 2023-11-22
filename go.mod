@@ -1,4 +1,4 @@
-module github.com/npwskp/GymsBroBackend
+module github.com/Npwskp/GymsbroBackend
 
 go 1.21.4
 
