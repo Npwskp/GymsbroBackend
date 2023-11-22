@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/Npwskp/GymsbroBackend/src/function"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -36,13 +37,6 @@ type IUserService interface {
 	DeleteUser(id string) error
 	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
-}
-
-func coalesce(value, defaultValue interface{}) interface{} {
-	if value == nil {
-		return defaultValue
-	}
-	return value
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
@@ -111,8 +105,8 @@ func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, i
 	}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "username", Value: coalesce(doc.Username, user.Username)},
-			{Key: "password", Value: coalesce(doc.NewPassword, user.Password)},
+			{Key: "username", Value: function.Coalesce(doc.Username, user.Username)},
+			{Key: "password", Value: function.Coalesce(doc.NewPassword, user.Password)},
 		}},
 	}
 
@@ -150,14 +144,14 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "weight", Value: coalesce(doc.Weight, user.Weight)},
-			{Key: "height", Value: coalesce(doc.Height, user.Height)},
-			{Key: "age", Value: coalesce(doc.Age, user.Age)},
-			{Key: "gender", Value: coalesce(doc.Gender, user.Gender)},
-			{Key: "neck", Value: coalesce(doc.Neck, user.Neck)},
-			{Key: "waist", Value: coalesce(doc.Waist, user.Waist)},
-			{Key: "hip", Value: coalesce(doc.Hip, user.Hip)},
-			{Key: "activityLevel", Value: coalesce(doc.ActivityLevel, user.ActivityLevel)},
+			{Key: "weight", Value: function.Coalesce(doc.Weight, user.Weight)},
+			{Key: "height", Value: function.Coalesce(doc.Height, user.Height)},
+			{Key: "age", Value: function.Coalesce(doc.Age, user.Age)},
+			{Key: "gender", Value: function.Coalesce(doc.Gender, user.Gender)},
+			{Key: "neck", Value: function.Coalesce(doc.Neck, user.Neck)},
+			{Key: "waist", Value: function.Coalesce(doc.Waist, user.Waist)},
+			{Key: "hip", Value: function.Coalesce(doc.Hip, user.Hip)},
+			{Key: "activityLevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
 		}},
 	}
 	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
