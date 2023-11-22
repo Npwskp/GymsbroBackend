@@ -48,7 +48,7 @@ func (uc *UserController) PostUsersHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
-func (uc *UserController) GetUsersHandler(c *fiber.Ctx) error {
+func (uc *UserController) GetAllUsersHandler(c *fiber.Ctx) error {
 	users, err := uc.Service.GetAllUsers()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -58,7 +58,20 @@ func (uc *UserController) GetUsersHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(users)
 }
 
+func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	user, err := uc.Service.GetUser(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
+}
+
 func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/users")
 	g.Post("", uc.PostUsersHandler)
+	g.Get("", uc.GetAllUsersHandler)
+	g.Get("/:id", uc.GetUserHandler)
 }

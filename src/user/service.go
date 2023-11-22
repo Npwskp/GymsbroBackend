@@ -29,6 +29,8 @@ type UserService struct {
 
 type IUserService interface {
 	CreateUser(user *CreateUserDto) (*User, error)
+	GetAllUsers() ([]*User, error)
+	GetUser(id string) (*User, error)
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
@@ -55,4 +57,17 @@ func (us *UserService) GetAllUsers() ([]*User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (us *UserService) GetUser(id string) (*User, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
+	user := &User{}
+	if err := us.DB.Collection("users").FindOne(context.Background(), filter).Decode(user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
