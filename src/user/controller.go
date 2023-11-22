@@ -23,6 +23,25 @@ type CreateUserDto struct {
 	ActivityLevel int     `json:"activityLevel" default:"0"` // default:"0" is not working
 }
 
+type UpadateUsernamePasswordDto struct {
+	ID          string `json:"id"` // TODO: validate id
+	Username    string `json:"username"`
+	Password    string `json:"password" validate:"required"`
+	NewPassword string `json:"newPassword"`
+}
+
+type UpdateBodyDto struct {
+	ID            string  `json:"id"` // TODO: validate id
+	Weight        float64 `json:"weight"`
+	Height        float64 `json:"height"`
+	Age           int     `json:"age"`
+	Gender        string  `json:"gender"`
+	Neck          float64 `json:"neck"`
+	Waist         float64 `json:"waist"`
+	Hip           float64 `json:"hip"`
+	ActivityLevel int     `json:"activityLevel"`
+}
+
 func (uc *UserController) PostUsersHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	user := new(CreateUserDto)
@@ -69,9 +88,74 @@ func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
+func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	err := uc.Service.DeleteUser(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
+	id := c.Params("id")
+	validate := validator.New()
+	doc := new(UpadateUsernamePasswordDto)
+	doc.ID = id
+	if err := c.BodyParser(&doc); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if err := validate.Struct(*doc); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	user, err := uc.Service.UpdateUsernamePassword(doc)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
+}
+
+func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
+	id := c.Params("id")
+	validate := validator.New()
+	doc := new(UpdateBodyDto)
+	doc.ID = id
+	if err := c.BodyParser(&doc); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if err := validate.Struct(*doc); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	user, err := uc.Service.UpdateBody(doc)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
+}
+
 func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/users")
 	g.Post("", uc.PostUsersHandler)
 	g.Get("", uc.GetAllUsersHandler)
 	g.Get("/:id", uc.GetUserHandler)
+	g.Patch("/:id/usepass", uc.UpdateUsernamePassword)
+	g.Patch("/:id/body", uc.UpdateBody)
 }

@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,6 +33,16 @@ type IUserService interface {
 	CreateUser(user *CreateUserDto) (*User, error)
 	GetAllUsers() ([]*User, error)
 	GetUser(id string) (*User, error)
+	DeleteUser(id string) error
+	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto) (*User, error)
+	UpdateBody(doc *UpdateBodyDto) (*User, error)
+}
+
+func coalesce(value, defaultValue interface{}) interface{} {
+	if value == nil {
+		return defaultValue
+	}
+	return value
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
@@ -70,4 +82,101 @@ func (us *UserService) GetUser(id string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (us *UserService) DeleteUser(id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
+	if _, err := us.DB.Collection("users").DeleteOne(context.Background(), filter); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto) (*User, error) {
+	oid, err := primitive.ObjectIDFromHex(doc.ID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
+	user, err := us.GetUser(doc.ID)
+	if err != nil {
+		return nil, err
+	}
+	if strings.Compare(user.Password, doc.Password) != 0 {
+		return nil, errors.New("password is not correct")
+	}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "username", Value: coalesce(doc.Username, user.Username)},
+			{Key: "password", Value: coalesce(doc.NewPassword, user.Password)},
+		}},
+	}
+
+	// Perform the update
+	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if any document was modified
+	if result.ModifiedCount == 0 {
+		return nil, errors.New("no user found for the given ID")
+	}
+
+	// Retrieve the updated document
+	filter = bson.D{{Key: "_id", Value: oid}}
+	UpdatedUser := &User{}
+	updatedRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
+	if err := updatedRecord.Decode(&UpdatedUser); err != nil {
+		return nil, err
+	}
+
+	return UpdatedUser, nil
+}
+
+func (us *UserService) UpdateBody(doc *UpdateBodyDto) (*User, error) {
+	oid, err := primitive.ObjectIDFromHex(doc.ID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
+	user, err := us.GetUser(doc.ID)
+	if err != nil {
+		return nil, err
+	}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "weight", Value: coalesce(doc.Weight, user.Weight)},
+			{Key: "height", Value: coalesce(doc.Height, user.Height)},
+			{Key: "age", Value: coalesce(doc.Age, user.Age)},
+			{Key: "gender", Value: coalesce(doc.Gender, user.Gender)},
+			{Key: "neck", Value: coalesce(doc.Neck, user.Neck)},
+			{Key: "waist", Value: coalesce(doc.Waist, user.Waist)},
+			{Key: "hip", Value: coalesce(doc.Hip, user.Hip)},
+			{Key: "activityLevel", Value: coalesce(doc.ActivityLevel, user.ActivityLevel)},
+		}},
+	}
+	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if any document was modified
+	if result.ModifiedCount == 0 {
+		return nil, errors.New("no user found for the given ID")
+	}
+
+	// Retrieve the updated document
+	filter = bson.D{{Key: "_id", Value: oid}}
+	UpdatedUser := &User{}
+	updatedRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
+	if err := updatedRecord.Decode(&UpdatedUser); err != nil {
+		return nil, err
+	}
+
+	return UpdatedUser, nil
 }
