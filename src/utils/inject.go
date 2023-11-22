@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"github.com/Npwskp/GymsbroBackend/src/user"
 	"github.com/gofiber/fiber/v2"
-	"github.com/npwskp/GymsbroBackend/src/user"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
