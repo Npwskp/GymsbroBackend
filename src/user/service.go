@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Npwskp/GymsbroBackend/src/function"
 	"go.mongodb.org/mongo-driver/bson"
@@ -24,7 +25,7 @@ type User struct {
 	Waist         float64            `json:"waist" default:"0"`         // default:"0" is not working
 	Hip           float64            `json:"hip" default:"0"`           // default:"0" is not working
 	ActivityLevel int                `json:"activitylevel" default:"0"` // default:"0" is not working
-	CreatedAt     string             `json:"createdat" default:"CURRENT_TIMESTAMP"`
+	CreatedAt     time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
 type UserService struct {
@@ -41,6 +42,7 @@ type IUserService interface {
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
+	user.CreatedAt = time.Now()
 	result, err := us.DB.Collection("users").InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err

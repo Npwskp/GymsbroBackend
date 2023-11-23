@@ -1,6 +1,10 @@
 package nutrition
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type NutritionController struct {
 	Instance *fiber.App
@@ -8,11 +12,12 @@ type NutritionController struct {
 }
 
 type CreateNutritionDto struct {
-	UserID   string `json:"userid" validate:"required"`
-	Carb     string `json:"carb"`
-	Protein  string `json:"protein"`
-	Fat      string `json:"fat"`
-	Calories string `json:"calories"`
+	UserID    string    `json:"userid" validate:"required"`
+	Carb      string    `json:"carb"`
+	Protein   string    `json:"protein"`
+	Fat       string    `json:"fat"`
+	Calories  string    `json:"calories"`
+	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
 type UpdateNutritionDto struct {
