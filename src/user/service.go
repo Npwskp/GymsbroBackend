@@ -43,11 +43,6 @@ type IUserService interface {
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 	user.CreatedAt = time.Now()
-	localLocation, err := time.LoadLocation("Asia/Bangkok")
-	if err != nil {
-		return nil, err
-	}
-	user.CreatedAt = user.CreatedAt.In(localLocation)
 	result, err := us.DB.Collection("users").InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err

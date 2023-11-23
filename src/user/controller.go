@@ -23,7 +23,7 @@ type CreateUserDto struct {
 	Waist         float64   `json:"waist" default:"0"`         // default:"0" is not working
 	Hip           float64   `json:"hip" default:"0"`           // default:"0" is not working
 	ActivityLevel int       `json:"activityLevel" default:"0"` // default:"0" is not working
-	CreatedAt     time.Time `json:"created_at" bson:"created_at,omitempty"`
+	CreatedAt     time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
 type UpadateUsernamePasswordDto struct {
