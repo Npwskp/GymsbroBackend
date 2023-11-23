@@ -31,6 +31,7 @@ type IPlanService interface {
 	DeletePlan(id string) error
 	DeleteByUserDay(userid string, day string) error
 	UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error)
+	UpdatePlanByUserDay(doc *UpdatePlanDto, userid string, day string) (*Plan, error)
 }
 
 func (ps *PlanService) CreatePlan(plan *CreatePlanDto) (*Plan, error) {
@@ -135,6 +136,34 @@ func (ps *PlanService) UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error) 
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
 	plan, err := ps.GetPlan(id)
+	if err != nil {
+		return nil, err
+	}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "userid", Value: function.Coalesce(doc.UserID, uid)},
+			{Key: "typeofplan", Value: function.Coalesce(doc.TypeOfPlan, plan.TypeOfPlan)},
+			{Key: "exercise", Value: function.Coalesce(doc.Exercise, plan.Exercise)},
+		}},
+	}
+	if _, err := ps.DB.Collection("plans").UpdateOne(context.Background(), filter, update); err != nil {
+		return nil, err
+	}
+	updatedRecord := ps.DB.Collection("plans").FindOne(context.Background(), filter)
+	updatedPlan := &Plan{}
+	if err := updatedRecord.Decode(updatedPlan); err != nil {
+		return nil, err
+	}
+	return updatedPlan, nil
+}
+
+func (ps *PlanService) UpdatePlanByUserDay(doc *UpdatePlanDto, userid string, day string) (*Plan, error) {
+	uid, err := primitive.ObjectIDFromHex(doc.UserID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "userid", Value: userid}, {Key: "dayofweek", Value: day}}
+	plan, err := ps.GetPlanByUserDay(userid, day)
 	if err != nil {
 		return nil, err
 	}
