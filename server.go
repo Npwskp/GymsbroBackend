@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/src/utils"
@@ -62,7 +61,6 @@ func main() {
 	utils.InjectApp(app, mg.Db)
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		fmt.Println(utils.Mon)
 		return c.SendString("Hello, World 👋!")
 	})
 

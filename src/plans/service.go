@@ -3,7 +3,6 @@ package plans
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/Npwskp/GymsbroBackend/src/function"
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,13 +35,10 @@ type IPlanService interface {
 
 func (ps *PlanService) CreatePlan(plan *CreatePlanDto) (*Plan, error) {
 	find := bson.D{{Key: "userid", Value: plan.UserID}, {Key: "dayofweek", Value: plan.DayOfWeek}}
-	fmt.Println(plan.UserID, plan.DayOfWeek)
 	res, err := ps.DB.Collection("plans").CountDocuments(context.Background(), find)
-	fmt.Println("doccount =", res)
 	if err != nil {
 		return nil, err
 	} else if res > 0 {
-		fmt.Println("doccount =", res)
 		return nil, errors.New("Plan already exist")
 	}
 	if plan.Exercise == nil {
@@ -58,7 +54,6 @@ func (ps *PlanService) CreatePlan(plan *CreatePlanDto) (*Plan, error) {
 	if err := createdRecord.Decode(createdPlan); err != nil {
 		return nil, err
 	}
-	fmt.Println("createdPlan =", createdPlan)
 	return createdPlan, nil
 }
 
