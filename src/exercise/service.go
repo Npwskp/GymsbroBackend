@@ -15,6 +15,7 @@ type Exercise struct {
 	Name        string   `json:"name" validate:"required"`
 	Description string   `json:"description" validate:"required"`
 	Type        []string `json:"type" validate:"required"`
+	Muscle      []string `json:"muscle" validate:"required"`
 	Image       string   `json:"image" validate:"required"`
 }
 
@@ -114,6 +115,7 @@ func (es *ExerciseService) UpdateExercise(doc *UpdateExerciseDto, id string) (*E
 			{Key: "name", Value: function.Coalesce(doc.Name, exercise.Name)},
 			{Key: "description", Value: function.Coalesce(doc.Description, exercise.Description)},
 			{Key: "type", Value: function.Coalesce(doc.Type, exercise.Type)},
+			{Key: "muscle", Value: function.Coalesce(doc.Muscle, exercise.Muscle)},
 			{Key: "image", Value: function.Coalesce(doc.Image, exercise.Image)},
 		}},
 	}

@@ -15,6 +15,7 @@ type CreateExerciseDto struct {
 	Name        string   `json:"name" validate:"required"`
 	Description string   `json:"description" validate:"required"`
 	Type        []string `json:"type" validate:"required"`
+	Muscle      []string `json:"muscle" validate:"required"`
 	Image       string   `json:"image" validate:"required"`
 }
 
@@ -22,6 +23,7 @@ type UpdateExerciseDto struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Type        []string `json:"type"`
+	Muscle      []string `json:"muscle"`
 	Image       string   `json:"image"`
 }
 
@@ -37,6 +39,11 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 	for _, t := range exercise.Type {
 		if !function.CheckExerciseType(t) {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
+		}
+	}
+	for _, m := range exercise.Muscle {
+		if !function.CheckMuscleGroup(m) {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
 	createdExercise, err := ec.Service.CreateExercise(exercise)
@@ -93,6 +100,11 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	for _, t := range exercise.Type {
 		if !function.CheckExerciseType(t) {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
+		}
+	}
+	for _, m := range exercise.Muscle {
+		if !function.CheckMuscleGroup(m) {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
 	updatedExercise, err := ec.Service.UpdateExercise(exercise, id)
