@@ -23,8 +23,8 @@ type User struct {
 	Neck          float64            `json:"neck" default:"0"`          // default:"0" is not working
 	Waist         float64            `json:"waist" default:"0"`         // default:"0" is not working
 	Hip           float64            `json:"hip" default:"0"`           // default:"0" is not working
-	ActivityLevel int                `json:"activityLevel" default:"0"` // default:"0" is not working
-	CreatedAt     string             `json:"createdAt" default:"CURRENT_TIMESTAMP"`
+	ActivityLevel int                `json:"activitylevel" default:"0"` // default:"0" is not working
+	CreatedAt     string             `json:"createdat" default:"CURRENT_TIMESTAMP"`
 }
 
 type UserService struct {
@@ -153,7 +153,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 			{Key: "neck", Value: function.Coalesce(doc.Neck, user.Neck)},
 			{Key: "waist", Value: function.Coalesce(doc.Waist, user.Waist)},
 			{Key: "hip", Value: function.Coalesce(doc.Hip, user.Hip)},
-			{Key: "activityLevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
+			{Key: "activitylevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
 		}},
 	}
 	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
