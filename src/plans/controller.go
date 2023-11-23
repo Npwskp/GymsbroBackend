@@ -116,6 +116,24 @@ func (pc *PlanController) UpdatePlanHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(plan)
 }
 
+func (pc *PlanController) UpdatePlanByUserDayHandler(c *fiber.Ctx) error {
+	user_id := c.Params("user_id")
+	day := c.Params("day")
+	validate := validator.New()
+	doc := new(UpdatePlanDto)
+	if err := c.BodyParser(&doc); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	}
+	if err := validate.Struct(*doc); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	}
+	plan, err := pc.Service.UpdatePlanByUserDay(doc, user_id, day)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(plan)
+}
+
 func (pc *PlanController) Handle() {
 	g := pc.Instance.Group("/plans")
 	g.Post("/", pc.PostPlansHandler)
@@ -126,4 +144,5 @@ func (pc *PlanController) Handle() {
 	g.Delete("/:id", pc.DeletePlanHandler)
 	g.Delete("/:user_id/:day", pc.DeletePlanByUserDayHandler)
 	g.Put("/:id", pc.UpdatePlanHandler)
+	g.Put("/:user_id/:day", pc.UpdatePlanByUserDayHandler)
 }
