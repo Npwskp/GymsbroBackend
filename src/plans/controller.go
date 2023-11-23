@@ -58,18 +58,35 @@ func (pc *PlanController) GetPlanHandler(c *fiber.Ctx) error {
 
 func (pc *PlanController) GetPlanByUserHandler(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
-	day := c.Params("day")
-	plans, err := pc.Service.GetAllPlanByUser(user_id, day)
+	plans, err := pc.Service.GetAllPlanByUser(user_id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(plans)
 }
 
+func (pc *PlanController) GetPlanByUserDayHandler(c *fiber.Ctx) error {
+	user_id := c.Params("user_id")
+	day := c.Params("day")
+	plan, err := pc.Service.GetPlanByUserDay(user_id, day)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(plan)
+}
+
 func (pc *PlanController) DeletePlanHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if err := pc.Service.DeletePlan(id); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+func (pc *PlanController) DeletePlanByUserDayHandler(c *fiber.Ctx) error {
+	user_id := c.Params("user_id")
 	day := c.Params("day")
-	if err := pc.Service.DeletePlan(id, day); err != nil {
+	if err := pc.Service.DeleteByUserDay(user_id, day); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 	return c.SendStatus(fiber.StatusNoContent)
@@ -97,7 +114,9 @@ func (pc *PlanController) Handle() {
 	g.Post("/", pc.PostPlansHandler)
 	g.Get("/", pc.GetPlansHandler)
 	g.Get("/:id", pc.GetPlanHandler)
-	g.Get("/:user_id/:day", pc.GetPlanByUserHandler)
-	g.Delete("/:id/:day", pc.DeletePlanHandler)
+	g.Get("/user/:user_id", pc.GetPlanByUserHandler)
+	g.Get("/user/:user_id/:day", pc.GetPlanByUserDayHandler)
+	g.Delete("/:id", pc.DeletePlanHandler)
+	g.Delete("/:user_id/:day", pc.DeletePlanByUserDayHandler)
 	g.Put("/:id", pc.UpdatePlanHandler)
 }

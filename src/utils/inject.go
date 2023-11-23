@@ -15,4 +15,5 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	planService := plans.PlanService{DB: db}
 	planController := plans.PlanController{Instance: app, Service: &planService}
 	planController.Handle()
+
 }

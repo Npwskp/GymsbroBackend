@@ -3,18 +3,20 @@ package plans
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/Npwskp/GymsbroBackend/src/function"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Plan struct {
-	ID         string   `json:"id,omitempty" bson:"_id,omitempty"`
-	UserID     string   `json:"userId" validate:"required"`
-	TypeOfPlan string   `json:"typeOfPlan" validate:"required"`
-	DayOfWeek  string   `json:"dayOfWeek" validate:"required"`
-	Exercise   []string `json:"exercise" default:"[]"`
+	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	UserID     string             `json:"userid" validate:"required" bson:"userid"`
+	TypeOfPlan string             `json:"typeofplan" validate:"required"`
+	DayOfWeek  string             `json:"dayofweek" validate:"required"`
+	Exercise   []string           `json:"exercise" default:"[]"`
 }
 
 type PlanService struct {
@@ -25,16 +27,26 @@ type IPlanService interface {
 	CreatePlan(plan *CreatePlanDto) (*Plan, error)
 	GetAllPlans() ([]*Plan, error)
 	GetPlan(id string) (*Plan, error)
-	GetAllPlanByUser(user_id string, day string) ([]*Plan, error)
-	DeletePlan(id string, day string) error
+	GetAllPlanByUser(user_id string) ([]*Plan, error)
+	GetPlanByUserDay(user_id string, day string) (*Plan, error)
+	DeletePlan(id string) error
+	DeleteByUserDay(userid string, day string) error
 	UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error)
 }
 
 func (ps *PlanService) CreatePlan(plan *CreatePlanDto) (*Plan, error) {
-	find := bson.D{{Key: "userId", Value: plan.UserID}, {Key: "dayOfWeek", Value: plan.DayOfWeek}}
-	res := ps.DB.Collection("plans").FindOne(context.Background(), find)
-	if res != nil {
-		return nil, errors.New("plan already exists")
+	find := bson.D{{Key: "userid", Value: plan.UserID}, {Key: "dayofweek", Value: plan.DayOfWeek}}
+	fmt.Println(plan.UserID, plan.DayOfWeek)
+	res, err := ps.DB.Collection("plans").CountDocuments(context.Background(), find)
+	fmt.Println("doccount =", res)
+	if err != nil {
+		return nil, err
+	} else if res > 0 {
+		fmt.Println("doccount =", res)
+		return nil, errors.New("Plan already exist")
+	}
+	if plan.Exercise == nil {
+		plan.Exercise = []string{}
 	}
 	result, err := ps.DB.Collection("plans").InsertOne(context.Background(), plan)
 	if err != nil {
@@ -46,6 +58,7 @@ func (ps *PlanService) CreatePlan(plan *CreatePlanDto) (*Plan, error) {
 	if err := createdRecord.Decode(createdPlan); err != nil {
 		return nil, err
 	}
+	fmt.Println("createdPlan =", createdPlan)
 	return createdPlan, nil
 }
 
@@ -62,7 +75,11 @@ func (ps *PlanService) GetAllPlans() ([]*Plan, error) {
 }
 
 func (ps *PlanService) GetPlan(id string) (*Plan, error) {
-	filter := bson.D{{Key: "_id", Value: id}}
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
 	plan := &Plan{}
 	if err := ps.DB.Collection("plans").FindOne(context.Background(), filter).Decode(plan); err != nil {
 		return nil, err
@@ -70,8 +87,8 @@ func (ps *PlanService) GetPlan(id string) (*Plan, error) {
 	return plan, nil
 }
 
-func (ps *PlanService) GetAllPlanByUser(user_id string, day string) ([]*Plan, error) {
-	filter := bson.D{{Key: "dayOfWeek", Value: day}, {Key: "userId", Value: user_id}}
+func (ps *PlanService) GetAllPlanByUser(user_id string) ([]*Plan, error) {
+	filter := bson.D{{Key: "userid", Value: user_id}}
 	cursor, err := ps.DB.Collection("plans").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
@@ -83,24 +100,53 @@ func (ps *PlanService) GetAllPlanByUser(user_id string, day string) ([]*Plan, er
 	return plans, nil
 }
 
-func (ps *PlanService) DeletePlan(id string, day string) error {
-	filter := bson.D{{Key: "_id", Value: id}, {Key: "dayOfWeek", Value: day}}
+func (ps *PlanService) GetPlanByUserDay(user_id string, day string) (*Plan, error) {
+	filter := bson.D{{Key: "userid", Value: user_id}, {Key: "dayofweek", Value: day}}
+	plan := &Plan{}
+	if err := ps.DB.Collection("plans").FindOne(context.Background(), filter).Decode(plan); err != nil {
+		return nil, err
+	}
+	return plan, nil
+}
+
+func (ps *PlanService) DeletePlan(id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
 	if _, err := ps.DB.Collection("plans").DeleteOne(context.Background(), filter); err != nil {
 		return err
 	}
 	return nil
 }
 
+func (ps *PlanService) DeleteByUserDay(userid string, day string) error {
+	filter := bson.D{{Key: "userid", Value: userid}, {Key: "dayofweek", Value: day}}
+	if _, err := ps.DB.Collection("plans").DeleteMany(context.Background(), filter); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ps *PlanService) UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error) {
-	filter := bson.D{{Key: "_id", Value: id}}
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	uid, err := primitive.ObjectIDFromHex(doc.UserID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_id", Value: oid}}
 	plan, err := ps.GetPlan(id)
 	if err != nil {
 		return nil, err
 	}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "userId", Value: function.Coalesce(doc.UserID, plan.UserID)},
-			{Key: "typeOfPlan", Value: function.Coalesce(doc.TypeOfPlan, plan.TypeOfPlan)},
+			{Key: "userid", Value: function.Coalesce(doc.UserID, uid)},
+			{Key: "typeofplan", Value: function.Coalesce(doc.TypeOfPlan, plan.TypeOfPlan)},
 			{Key: "exercise", Value: function.Coalesce(doc.Exercise, plan.Exercise)},
 		}},
 	}
