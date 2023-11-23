@@ -6,7 +6,7 @@ import (
 
 var Day = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
 
-var ExerciseType = []string{"Push", "Pull", "Leg", "Chest", "Back", "Legs", "Shoulders", "Arms", "Abs"}
+var ExerciseType = []string{"Rest", "Push", "Pull", "Chest", "Back", "Legs", "Shoulders", "Arms", "Abs"}
 
 func CheckDay(day string) bool {
 	checked := false

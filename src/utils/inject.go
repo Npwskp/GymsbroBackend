@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/Npwskp/GymsbroBackend/src/exercise"
 	"github.com/Npwskp/GymsbroBackend/src/plans"
 	"github.com/Npwskp/GymsbroBackend/src/user"
 	"github.com/gofiber/fiber/v2"
@@ -16,4 +17,7 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	planController := plans.PlanController{Instance: app, Service: &planService}
 	planController.Handle()
 
+	exerciseService := exercise.ExerciseService{DB: db}
+	exerciseController := exercise.ExerciseController{Instance: app, Service: &exerciseService}
+	exerciseController.Handle()
 }

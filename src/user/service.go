@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/Npwskp/GymsbroBackend/src/function"
@@ -142,6 +143,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(user.Weight, "(", doc.Weight, ")")
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "weight", Value: function.Coalesce(doc.Weight, user.Weight)},
