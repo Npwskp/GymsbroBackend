@@ -32,6 +32,9 @@ type IExerciseService interface {
 }
 
 func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto) (*Exercise, error) {
+	if exercise.Type == nil {
+		exercise.Type = []string{}
+	}
 	result, err := es.DB.Collection("exercises").InsertOne(context.Background(), exercise)
 	if err != nil {
 		return nil, err
