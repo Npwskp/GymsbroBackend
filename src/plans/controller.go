@@ -1,6 +1,7 @@
 package plans
 
 import (
+	"github.com/Npwskp/GymsbroBackend/src/function"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -31,6 +32,12 @@ func (pc *PlanController) PostPlansHandler(c *fiber.Ctx) error {
 	}
 	if err := validate.Struct(*plan); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	}
+	if !function.CheckDay(plan.DayOfWeek) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Day of week is not valid"})
+	}
+	if !function.CheckExerciseType(plan.TypeOfPlan) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of plan is not valid"})
 	}
 	createdPlan, err := pc.Service.CreatePlan(plan)
 	if err != nil {
