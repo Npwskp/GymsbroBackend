@@ -11,13 +11,13 @@ import (
 )
 
 type Nutrition struct {
-	ID        string    `json:"id,omitempty" bson:"_id,omitempty"`
-	UserID    string    `json:"userid" validate:"required" bson:"userid"`
-	Carb      string    `json:"carb" default:"0"`
-	Protein   string    `json:"protein" default:"0"`
-	Fat       string    `json:"fat" default:"0"`
-	Calories  string    `json:"calories" default:"0"`
-	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	ID        primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	UserID    string             `json:"userid" validate:"required" bson:"userid"`
+	Carb      float64            `json:"carb" default:"0"`
+	Protein   float64            `json:"protein" default:"0"`
+	Fat       float64            `json:"fat" default:"0"`
+	Calories  float64            `json:"calories" default:"0"`
+	CreatedAt time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
 type NutritionService struct {
@@ -35,13 +35,19 @@ type INutritionService interface {
 
 func (ns *NutritionService) CreateNutrition(nutrition *CreateNutritionDto) (*Nutrition, error) {
 	nutrition.CreatedAt = time.Now()
+	localLocation, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err
+	}
+	nutrition.CreatedAt = nutrition.CreatedAt.In(localLocation)
 	res, err := ns.GetNutritionByUser(nutrition.UserID)
 	if err != nil {
 		return nil, err
 	}
 	if len(res) > 0 {
 		for _, v := range res {
-			if v.CreatedAt.Format("2006-01-02") == nutrition.CreatedAt.Format("2006-01-02") {
+			tmp := v.CreatedAt.In(localLocation)
+			if tmp.Format("2006-01-02") == nutrition.CreatedAt.Format("2006-01-02") {
 				return nil, errors.New("Nutrition already exist, please update it")
 			}
 		}
