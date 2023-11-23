@@ -13,7 +13,7 @@ type PlanController struct {
 
 type CreatePlanDto struct {
 	UserID     string   `json:"userId" validate:"required"`
-	TypeOfPlan string   `json:"typeOfPlan" validate:"required"`
+	TypeOfPlan string   `json:"typeOfPlan" default:"Rest"`
 	DayOfWeek  string   `json:"dayOfWeek" validate:"required"`
 	Exercise   []string `json:"exercise" default:"[]"`
 }
