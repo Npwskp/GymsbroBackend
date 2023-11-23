@@ -12,15 +12,15 @@ type PlanController struct {
 }
 
 type CreatePlanDto struct {
-	UserID     string   `json:"userId" validate:"required"`
-	TypeOfPlan string   `json:"typeOfPlan" default:"Rest"`
-	DayOfWeek  string   `json:"dayOfWeek" validate:"required"`
+	UserID     string   `json:"userid" validate:"required"`
+	TypeOfPlan string   `json:"typeofplan" default:"Rest"`
+	DayOfWeek  string   `json:"dayofweek" validate:"required"`
 	Exercise   []string `json:"exercise" default:"[]"`
 }
 
 type UpdatePlanDto struct {
-	UserID     string   `json:"userId"`
-	TypeOfPlan string   `json:"typeOfPlan"`
+	UserID     string   `json:"userid"`
+	TypeOfPlan string   `json:"typeofplan"`
 	Exercise   []string `json:"exercise"`
 }
 

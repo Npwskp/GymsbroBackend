@@ -97,7 +97,7 @@ func (nc *NutritionController) UpdateNutritionHandler(c *fiber.Ctx) error {
 }
 
 func (nc *NutritionController) Handle() {
-	g := nc.Instance.Group("/nutrition")
+	g := nc.Instance.Group("/nutritions")
 	g.Post("/", nc.PostNutritionHandler)
 	g.Get("/", nc.GetNutritionsHandler)
 	g.Get("/:id", nc.GetNutritionHandler)

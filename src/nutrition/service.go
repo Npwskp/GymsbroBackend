@@ -39,7 +39,6 @@ func (ns *NutritionService) CreateNutrition(nutrition *CreateNutritionDto) (*Nut
 	if err != nil {
 		return nil, err
 	}
-	nutrition.CreatedAt = nutrition.CreatedAt.In(localLocation)
 	res, err := ns.GetNutritionByUser(nutrition.UserID)
 	if err != nil {
 		return nil, err
@@ -47,7 +46,7 @@ func (ns *NutritionService) CreateNutrition(nutrition *CreateNutritionDto) (*Nut
 	if len(res) > 0 {
 		for _, v := range res {
 			tmp := v.CreatedAt.In(localLocation)
-			if tmp.Format("2006-01-02") == nutrition.CreatedAt.Format("2006-01-02") {
+			if tmp.Format("2006-01-02") == nutrition.CreatedAt.In(localLocation).Format("2006-01-02") {
 				return nil, errors.New("Nutrition already exist, please update it")
 			}
 		}
