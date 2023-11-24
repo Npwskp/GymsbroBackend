@@ -25,6 +25,7 @@ type ExerciseService struct {
 
 type IExerciseService interface {
 	CreateExercise(exercise *CreateExerciseDto) (*Exercise, error)
+	CreateManyExercises(exercises *[]CreateExerciseDto) ([]*Exercise, error)
 	GetAllExercises() ([]*Exercise, error)
 	GetExercise(id string) (*Exercise, error)
 	GetExerciseByType(exerciseType string) ([]*Exercise, error)
@@ -47,6 +48,33 @@ func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto) (*Exercis
 		return nil, err
 	}
 	return createdExercise, nil
+}
+
+func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto) ([]*Exercise, error) {
+	var result []interface{}
+	for _, exercise := range *exercises {
+		if exercise.Type == nil {
+			exercise.Type = []string{}
+		}
+		if exercise.Muscle == nil {
+			exercise.Muscle = []string{}
+		}
+		result = append(result, exercise)
+	}
+	if _, err := es.DB.Collection("exercises").InsertMany(context.Background(), result); err != nil {
+		return nil, err
+	}
+	var createdExercises []*Exercise
+	for _, exercise := range *exercises {
+		filter := bson.D{{Key: "name", Value: exercise.Name}}
+		createdRecord := es.DB.Collection("exercises").FindOne(context.Background(), filter)
+		createdExercise := &Exercise{}
+		if err := createdRecord.Decode(createdExercise); err != nil {
+			return nil, err
+		}
+		createdExercises = append(createdExercises, createdExercise)
+	}
+	return createdExercises, nil
 }
 
 func (es *ExerciseService) GetAllExercises() ([]*Exercise, error) {

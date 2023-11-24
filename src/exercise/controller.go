@@ -53,6 +53,34 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(createdExercise)
 }
 
+func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
+	validate := validator.New()
+	exercises := new([]CreateExerciseDto)
+	if err := c.BodyParser(exercises); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	}
+	for _, exercise := range *exercises {
+		if err := validate.Struct(exercise); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+		}
+		for _, t := range exercise.Type {
+			if !function.CheckExerciseType(t) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
+			}
+		}
+		for _, m := range exercise.Muscle {
+			if !function.CheckMuscleGroup(m) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
+			}
+		}
+	}
+	createdExercises, err := ec.Service.CreateManyExercises(exercises)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.Status(fiber.StatusCreated).JSON(createdExercises)
+}
+
 func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 	exercises, err := ec.Service.GetAllExercises()
 	if err != nil {

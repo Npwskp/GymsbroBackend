@@ -8,7 +8,7 @@ var Day = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 
 var ExerciseType = []string{"Rest", "Push", "Pull", "Chest", "Back", "Legs", "Shoulders", "Arms", "Abs"}
 
-var MuscleGroup = []string{"Triceps", "Biceps", "Forearms", "Upper Chest", "Middle Chest", "Lower Chest", "Lat", "Trap", "Front Shoulders", "Side Shoulders", "Rear Shoulders", "Abs", "Side Abs", "Quads", "Hamstrings", "Calves", "Glutes"}
+var MuscleGroup = []string{"Triceps", "Biceps", "Forearms", "Upper Chest", "Middle Chest", "Lower Chest", "Latissimus", "Trapezius", "Lower Back", "Front Shoulders", "Side Shoulders", "Rear Shoulders", "Abs", "Side Abs", "Quads", "Hamstrings", "Calves", "Glutes"}
 
 func CheckDay(day string) bool {
 	checked := false
