@@ -145,6 +145,7 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 func (ec *ExerciseController) Handle() {
 	g := ec.Instance.Group("/exercises")
 	g.Post("/", ec.PostExerciseHandler)
+	g.Post("/many", ec.PostManyExerciseHandler)
 	g.Get("/", ec.GetExercisesHandler)
 	g.Get("/:id", ec.GetExerciseHandler)
 	g.Get("/type/:type", ec.GetExerciseByTypeHandler)
