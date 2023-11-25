@@ -1,4 +1,1002 @@
+basePath: /
+definitions:
+  exercise.CreateExerciseDto:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      muscle:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      type:
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - image
+    - muscle
+    - name
+    - type
+    type: object
+  exercise.Exercise:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      muscle:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      type:
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - image
+    - muscle
+    - name
+    - type
+    type: object
+  exercise.UpdateExerciseDto:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      muscle:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      type:
+        items:
+          type: string
+        type: array
+    type: object
+  nutrition.CreateNutritionDto:
+    properties:
+      calories:
+        default: 0
+        type: number
+      carb:
+        default: 0
+        type: number
+      created_at:
+        type: string
+      fat:
+        default: 0
+        type: number
+      protein:
+        default: 0
+        type: number
+      userid:
+        type: string
+    required:
+    - userid
+    type: object
+  nutrition.Nutrition:
+    properties:
+      calories:
+        default: 0
+        type: number
+      carb:
+        default: 0
+        type: number
+      created_at:
+        type: string
+      fat:
+        default: 0
+        type: number
+      id:
+        type: string
+      protein:
+        default: 0
+        type: number
+      userid:
+        type: string
+    required:
+    - userid
+    type: object
+  nutrition.UpdateNutritionDto:
+    properties:
+      calories:
+        type: number
+      carb:
+        type: number
+      fat:
+        type: number
+      protein:
+        type: number
+    type: object
+  plans.CreatePlanDto:
+    properties:
+      dayofweek:
+        type: string
+      exercise:
+        items:
+          type: string
+        type: array
+      typeofplan:
+        default: Rest
+        type: string
+      userid:
+        type: string
+    required:
+    - dayofweek
+    - userid
+    type: object
+  plans.Plan:
+    properties:
+      dayofweek:
+        type: string
+      exercise:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      typeofplan:
+        type: string
+      userid:
+        type: string
+    required:
+    - dayofweek
+    - typeofplan
+    - userid
+    type: object
+  plans.UpdatePlanDto:
+    properties:
+      exercise:
+        items:
+          type: string
+        type: array
+      typeofplan:
+        type: string
+      userid:
+        type: string
+    type: object
+  user.CreateUserDto:
+    properties:
+      activityLevel:
+        default: 0
+        description: default:"0" is not working
+        type: integer
+      age:
+        maximum: 120
+        minimum: 1
+        type: integer
+      created_at:
+        type: string
+      gender:
+        type: string
+      height:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      hip:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      neck:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      password:
+        type: string
+      username:
+        maxLength: 20
+        minLength: 3
+        type: string
+      waist:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      weight:
+        default: 0
+        description: default:"0" is not working
+        type: number
+    required:
+    - age
+    - gender
+    - password
+    - username
+    type: object
+  user.UpadateUsernamePasswordDto:
+    properties:
+      newPassword:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    type: object
+  user.UpdateBodyDto:
+    properties:
+      activityLevel:
+        type: integer
+      age:
+        type: integer
+      gender:
+        type: string
+      height:
+        type: number
+      hip:
+        type: number
+      neck:
+        type: number
+      waist:
+        type: number
+      weight:
+        type: number
+    type: object
+  user.User:
+    properties:
+      activitylevel:
+        default: 0
+        description: default:"0" is not working
+        type: integer
+      age:
+        maximum: 120
+        minimum: 1
+        type: integer
+      created_at:
+        type: string
+      gender:
+        type: string
+      height:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      hip:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      id:
+        type: string
+      neck:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      password:
+        type: string
+      username:
+        maxLength: 20
+        minLength: 3
+        type: string
+      waist:
+        default: 0
+        description: default:"0" is not working
+        type: number
+      weight:
+        default: 0
+        description: default:"0" is not working
+        type: number
+    required:
+    - age
+    - gender
+    - password
+    - username
+    type: object
+host: localhost:8080
 info:
   contact: {}
-paths: {}
+  description: This is a sample server for GymsBro API.
+  title: GymsBro API
+  version: "1.0"
+paths:
+  /exercises:
+    get:
+      consumes:
+      - application/json
+      description: Get all exercises
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all exercises
+      tags:
+      - exercises
+    post:
+      consumes:
+      - application/json
+      description: Create an exercise
+      parameters:
+      - description: Create Exercise
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/exercise.CreateExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create an exercise
+      tags:
+      - exercises
+  /exercises/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema: {}
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete an exercise
+      tags:
+      - exercises
+    get:
+      consumes:
+      - application/json
+      description: Get an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get an exercise
+      tags:
+      - exercises
+    put:
+      consumes:
+      - application/json
+      description: Update an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Exercise
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/exercise.UpdateExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update an exercise
+      tags:
+      - exercises
+  /exercises/many:
+    post:
+      consumes:
+      - application/json
+      description: Create many exercises
+      parameters:
+      - description: Create Exercises
+        in: body
+        name: exercises
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/exercise.CreateExerciseDto'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create many exercises
+      tags:
+      - exercises
+  /exercises/type/{type}:
+    get:
+      consumes:
+      - application/json
+      description: Get exercises by type
+      parameters:
+      - description: Exercise Type
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get exercises by type
+      tags:
+      - exercises
+  /nutritions:
+    get:
+      consumes:
+      - application/json
+      description: Get all nutritions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/nutrition.Nutrition'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all nutritions
+      tags:
+      - nutritions
+    post:
+      consumes:
+      - application/json
+      description: Create a nutrition
+      parameters:
+      - description: Create Nutrition
+        in: body
+        name: nutrition
+        required: true
+        schema:
+          $ref: '#/definitions/nutrition.CreateNutritionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/nutrition.Nutrition'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create a nutrition
+      tags:
+      - nutritions
+  /nutritions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a nutrition
+      parameters:
+      - description: Nutrition ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete a nutrition
+      tags:
+      - nutritions
+    get:
+      consumes:
+      - application/json
+      description: Get a nutrition
+      parameters:
+      - description: Nutrition ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/nutrition.Nutrition'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a nutrition
+      tags:
+      - nutritions
+    put:
+      consumes:
+      - application/json
+      description: Update a nutrition
+      parameters:
+      - description: Nutrition ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Nutrition
+        in: body
+        name: nutrition
+        required: true
+        schema:
+          $ref: '#/definitions/nutrition.UpdateNutritionDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/nutrition.Nutrition'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a nutrition
+      tags:
+      - nutritions
+  /nutritions/user/{userid}:
+    get:
+      consumes:
+      - application/json
+      description: Get nutritions by user
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/nutrition.Nutrition'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get nutritions by user
+      tags:
+      - nutritions
+  /plans:
+    get:
+      consumes:
+      - application/json
+      description: Get all plans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plans.Plan'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all plans
+      tags:
+      - plans
+    post:
+      consumes:
+      - application/json
+      description: Create a plan
+      parameters:
+      - description: Create Plan
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/plans.CreatePlanDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create a plan
+      tags:
+      - plans
+  /plans/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete a plan
+      tags:
+      - plans
+    get:
+      consumes:
+      - application/json
+      description: Get a plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a plan
+      tags:
+      - plans
+    put:
+      consumes:
+      - application/json
+      description: Update a plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Plan
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/plans.UpdatePlanDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a plan
+      tags:
+      - plans
+  /plans/user/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a plan by user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a plan by user
+      tags:
+      - plans
+  /plans/user/{user_id}/{day}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a plan by user and day
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Day of week
+        in: path
+        name: day
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete a plan by user and day
+      tags:
+      - plans
+    get:
+      consumes:
+      - application/json
+      description: Get a plan by user and day
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Day of week
+        in: path
+        name: day
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a plan by user and day
+      tags:
+      - plans
+    put:
+      consumes:
+      - application/json
+      description: Update a plan by user and day
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Day of week
+        in: path
+        name: day
+        required: true
+        type: string
+      - description: Update Plan
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/plans.UpdatePlanDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a plan by user and day
+      tags:
+      - plans
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a user
+      parameters:
+      - description: Create User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create a user
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a user
+      tags:
+      - users
+  /users/{id}/body:
+    patch:
+      consumes:
+      - application/json
+      description: Update a user body
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdateBody User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a user body
+      tags:
+      - users
+  /users/{id}/usepass:
+    patch:
+      consumes:
+      - application/json
+      description: Update a user username and password
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdateUsernamePassword User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpadateUsernamePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a user username and password
+      tags:
+      - users
+schemes:
+- http
+- https
 swagger: "2.0"

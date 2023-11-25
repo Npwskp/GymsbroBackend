@@ -14,17 +14,1475 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/exercises": {
+            "get": {
+                "description": "Get all exercises",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get all exercises",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exercise.Exercise"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Create an exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Create an exercise",
+                "parameters": [
+                    {
+                        "description": "Create Exercise",
+                        "name": "exercise",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/exercise.CreateExerciseDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/exercise.Exercise"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercises/many": {
+            "post": {
+                "description": "Create many exercises",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Create many exercises",
+                "parameters": [
+                    {
+                        "description": "Create Exercises",
+                        "name": "exercises",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exercise.CreateExerciseDto"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exercise.Exercise"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercises/type/{type}": {
+            "get": {
+                "description": "Get exercises by type",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get exercises by type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise Type",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exercise.Exercise"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercises/{id}": {
+            "get": {
+                "description": "Get an exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get an exercise",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/exercise.Exercise"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Update an exercise",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Exercise",
+                        "name": "exercise",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/exercise.UpdateExerciseDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/exercise.Exercise"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Delete an exercise",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/nutritions": {
+            "get": {
+                "description": "Get all nutritions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutritions"
+                ],
+                "summary": "Get all nutritions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/nutrition.Nutrition"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a nutrition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutritions"
+                ],
+                "summary": "Create a nutrition",
+                "parameters": [
+                    {
+                        "description": "Create Nutrition",
+                        "name": "nutrition",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nutrition.CreateNutritionDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/nutrition.Nutrition"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/nutritions/user/{userid}": {
+            "get": {
+                "description": "Get nutritions by user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutritions"
+                ],
+                "summary": "Get nutritions by user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/nutrition.Nutrition"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/nutritions/{id}": {
+            "get": {
+                "description": "Get a nutrition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutritions"
+                ],
+                "summary": "Get a nutrition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nutrition ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nutrition.Nutrition"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a nutrition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutritions"
+                ],
+                "summary": "Update a nutrition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nutrition ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Nutrition",
+                        "name": "nutrition",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nutrition.UpdateNutritionDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nutrition.Nutrition"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a nutrition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutritions"
+                ],
+                "summary": "Delete a nutrition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nutrition ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/plans": {
+            "get": {
+                "description": "Get all plans",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get all plans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plans.Plan"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Create a plan",
+                "parameters": [
+                    {
+                        "description": "Create Plan",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plans.CreatePlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/plans/user/{user_id}": {
+            "get": {
+                "description": "Get a plan by user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get a plan by user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/plans/user/{user_id}/{day}": {
+            "get": {
+                "description": "Get a plan by user and day",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get a plan by user and day",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Day of week",
+                        "name": "day",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a plan by user and day",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Update a plan by user and day",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Day of week",
+                        "name": "day",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Plan",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plans.UpdatePlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a plan by user and day",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Delete a plan by user and day",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Day of week",
+                        "name": "day",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/plans/{id}": {
+            "get": {
+                "description": "Get a plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get a plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Update a plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Plan",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plans.UpdatePlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Delete a plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Get all users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/user.User"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a user",
+                "parameters": [
+                    {
+                        "description": "Create User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.CreateUserDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Get a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users/{id}/body": {
+            "patch": {
+                "description": "Update a user body",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update a user body",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateBody User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateBodyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users/{id}/usepass": {
+            "patch": {
+                "description": "Update a user username and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update a user username and password",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "UpdateUsernamePassword User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpadateUsernamePasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "exercise.CreateExerciseDto": {
+            "type": "object",
+            "required": [
+                "description",
+                "image",
+                "muscle",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "muscle": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "exercise.Exercise": {
+            "type": "object",
+            "required": [
+                "description",
+                "image",
+                "muscle",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "muscle": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "exercise.UpdateExerciseDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "muscle": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "nutrition.CreateNutritionDto": {
+            "type": "object",
+            "required": [
+                "userid"
+            ],
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "default": 0
+                },
+                "carb": {
+                    "type": "number",
+                    "default": 0
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "fat": {
+                    "type": "number",
+                    "default": 0
+                },
+                "protein": {
+                    "type": "number",
+                    "default": 0
+                },
+                "userid": {
+                    "type": "string"
+                }
+            }
+        },
+        "nutrition.Nutrition": {
+            "type": "object",
+            "required": [
+                "userid"
+            ],
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "default": 0
+                },
+                "carb": {
+                    "type": "number",
+                    "default": 0
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "fat": {
+                    "type": "number",
+                    "default": 0
+                },
+                "id": {
+                    "type": "string"
+                },
+                "protein": {
+                    "type": "number",
+                    "default": 0
+                },
+                "userid": {
+                    "type": "string"
+                }
+            }
+        },
+        "nutrition.UpdateNutritionDto": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number"
+                },
+                "carb": {
+                    "type": "number"
+                },
+                "fat": {
+                    "type": "number"
+                },
+                "protein": {
+                    "type": "number"
+                }
+            }
+        },
+        "plans.CreatePlanDto": {
+            "type": "object",
+            "required": [
+                "dayofweek",
+                "userid"
+            ],
+            "properties": {
+                "dayofweek": {
+                    "type": "string"
+                },
+                "exercise": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "typeofplan": {
+                    "type": "string",
+                    "default": "Rest"
+                },
+                "userid": {
+                    "type": "string"
+                }
+            }
+        },
+        "plans.Plan": {
+            "type": "object",
+            "required": [
+                "dayofweek",
+                "typeofplan",
+                "userid"
+            ],
+            "properties": {
+                "dayofweek": {
+                    "type": "string"
+                },
+                "exercise": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "typeofplan": {
+                    "type": "string"
+                },
+                "userid": {
+                    "type": "string"
+                }
+            }
+        },
+        "plans.UpdatePlanDto": {
+            "type": "object",
+            "properties": {
+                "exercise": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "typeofplan": {
+                    "type": "string"
+                },
+                "userid": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.CreateUserDto": {
+            "type": "object",
+            "required": [
+                "age",
+                "gender",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "activityLevel": {
+                    "description": "default:\"0\" is not working",
+                    "type": "integer",
+                    "default": 0
+                },
+                "age": {
+                    "type": "integer",
+                    "maximum": 120,
+                    "minimum": 1
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "height": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "hip": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "neck": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
+                },
+                "waist": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "weight": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                }
+            }
+        },
+        "user.UpadateUsernamePasswordDto": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "newPassword": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UpdateBodyDto": {
+            "type": "object",
+            "properties": {
+                "activityLevel": {
+                    "type": "integer"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "hip": {
+                    "type": "number"
+                },
+                "neck": {
+                    "type": "number"
+                },
+                "waist": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "user.User": {
+            "type": "object",
+            "required": [
+                "age",
+                "gender",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "activitylevel": {
+                    "description": "default:\"0\" is not working",
+                    "type": "integer",
+                    "default": 0
+                },
+                "age": {
+                    "type": "integer",
+                    "maximum": 120,
+                    "minimum": 1
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "height": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "hip": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "id": {
+                    "type": "string"
+                },
+                "neck": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
+                },
+                "waist": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                },
+                "weight": {
+                    "description": "default:\"0\" is not working",
+                    "type": "number",
+                    "default": 0
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/",
+	Schemes:          []string{"http", "https"},
+	Title:            "GymsBro API",
+	Description:      "This is a sample server for GymsBro API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

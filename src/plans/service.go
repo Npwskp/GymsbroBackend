@@ -15,7 +15,7 @@ type Plan struct {
 	UserID     string             `json:"userid" validate:"required" bson:"userid"`
 	TypeOfPlan string             `json:"typeofplan" validate:"required"`
 	DayOfWeek  string             `json:"dayofweek" validate:"required"`
-	Exercise   []string           `json:"exercise" default:"[]"`
+	Exercise   []string           `json:"exercise"`
 }
 
 type PlanService struct {

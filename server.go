@@ -7,7 +7,11 @@ import (
 
 	"github.com/Npwskp/GymsbroBackend/src/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/swagger"
+
+	_ "github.com/Npwskp/GymsbroBackend/docs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -51,15 +55,25 @@ func disconnectDB() error {
 	return nil
 }
 
+// @title		GymsBro API
+// @description	This is a sample server for GymsBro API.
+// @BasePath	/
+// @schemes		http https
+// @host		localhost:8080
+// @version		1.0
 func main() {
 	app := fiber.New()
 
 	app.Use(logger.New())
+	app.Use(cors.New())
+	app.Static("/swagger", "./docs/swagger.json")
 
 	connectDB()
 	defer disconnectDB()
 
 	utils.InjectApp(app, mg.Db)
+
+	app.Get("/swagger/*", swagger.HandlerDefault) // default
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		fmt.Println(time.Now().Format("2006-01-02"))
