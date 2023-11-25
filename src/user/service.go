@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/src/function"
+	"github.com/Npwskp/GymsbroBackend/src/plans"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -47,6 +48,17 @@ func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	planService := plans.PlanService{DB: us.DB}
+	for _, day := range function.Day {
+		planCreate := plans.CreatePlanDto{
+			UserID:    result.InsertedID.(primitive.ObjectID).Hex(),
+			DayOfWeek: day,
+		}
+		_, err := planService.CreatePlan(&planCreate)
+		if err != nil {
+			return nil, err
+		}
+	}
 	filter := bson.D{{Key: "_id", Value: result.InsertedID}}
 	createdRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
 	createdUser := &User{}
@@ -85,6 +97,13 @@ func (us *UserService) DeleteUser(id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
+	}
+	planService := plans.PlanService{DB: us.DB}
+	for _, day := range function.Day {
+		err := planService.DeleteByUserDay(id, day)
+		if err != nil {
+			return err
+		}
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
 	if _, err := us.DB.Collection("users").DeleteOne(context.Background(), filter); err != nil {
