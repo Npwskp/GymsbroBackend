@@ -212,6 +212,7 @@ func (uc *UserController) Handle() {
 	g.Post("", uc.PostUsersHandler)
 	g.Get("", uc.GetAllUsersHandler)
 	g.Get("/:id", uc.GetUserHandler)
+	g.Delete("/:id", uc.DeleteUserHandler)
 	g.Patch("/:id/usepass", uc.UpdateUsernamePassword)
 	g.Patch("/:id/body", uc.UpdateBody)
 }
