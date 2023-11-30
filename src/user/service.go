@@ -17,6 +17,7 @@ import (
 type User struct {
 	ID            primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Username      string             `json:"username" validate:"required,min=3,max=20"`
+	Email         string             `json:"email" validate:"required"`
 	Password      string             `json:"password" validate:"required"`
 	Weight        float64            `json:"weight" default:"0"` // default:"0" is not working
 	Height        float64            `json:"height" default:"0"` // default:"0" is not working
@@ -44,6 +45,14 @@ type IUserService interface {
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 	user.CreatedAt = time.Now()
+	find := bson.D{{Key: "email", Value: user.Email}}
+	check, err := us.DB.Collection("users").CountDocuments(context.Background(), find)
+	if err != nil {
+		return nil, err
+	}
+	if check > 0 {
+		return nil, errors.New("email have been used")
+	}
 	result, err := us.DB.Collection("users").InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err
@@ -86,6 +95,15 @@ func (us *UserService) GetUser(id string) (*User, error) {
 		return nil, err
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
+	user := &User{}
+	if err := us.DB.Collection("users").FindOne(context.Background(), filter).Decode(user); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (us *UserService) GetUserByEmail(email string) (*User, error) {
+	filter := bson.D{{Key: "email", Value: email}}
 	user := &User{}
 	if err := us.DB.Collection("users").FindOne(context.Background(), filter).Decode(user); err != nil {
 		return nil, err

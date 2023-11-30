@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/Npwskp/GymsbroBackend/src/auth"
 	"github.com/Npwskp/GymsbroBackend/src/exercise"
 	"github.com/Npwskp/GymsbroBackend/src/nutrition"
 	"github.com/Npwskp/GymsbroBackend/src/plans"
@@ -25,4 +26,8 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	nutritionService := nutrition.NutritionService{DB: db}
 	nutritionController := nutrition.NutritionController{Instance: app, Service: &nutritionService}
 	nutritionController.Handle()
+
+	authService := auth.AuthService{DB: db}
+	authController := auth.AuthController{Instance: app, Service: &authService}
+	authController.Handle()
 }

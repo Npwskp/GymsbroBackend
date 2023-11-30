@@ -1,5 +1,45 @@
 basePath: /
 definitions:
+  auth.LoginDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.RegisterDto:
+    properties:
+      age:
+        maximum: 120
+        minimum: 1
+        type: integer
+      email:
+        type: string
+      gender:
+        type: string
+      password:
+        type: string
+      username:
+        maxLength: 20
+        minLength: 3
+        type: string
+    required:
+    - age
+    - email
+    - gender
+    - password
+    - username
+    type: object
+  auth.ReturnToken:
+    properties:
+      exp:
+        type: integer
+      token:
+        type: string
+    type: object
   exercise.CreateExerciseDto:
     properties:
       description:
@@ -179,6 +219,8 @@ definitions:
         type: integer
       created_at:
         type: string
+      email:
+        type: string
       gender:
         type: string
       height:
@@ -209,6 +251,7 @@ definitions:
         type: number
     required:
     - age
+    - email
     - gender
     - password
     - username
@@ -255,6 +298,8 @@ definitions:
         type: integer
       created_at:
         type: string
+      email:
+        type: string
       gender:
         type: string
       height:
@@ -287,6 +332,7 @@ definitions:
         type: number
     required:
     - age
+    - email
     - gender
     - password
     - username
@@ -298,6 +344,74 @@ info:
   title: GymsBro API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.ReturnToken'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Login
+      tags:
+      - auth
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Get me
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get me
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register
+      parameters:
+      - description: Register
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Register
+      tags:
+      - auth
   /exercises:
     get:
       consumes:
