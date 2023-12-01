@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
@@ -58,6 +59,12 @@ func (ac *AuthController) PostLoginHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(err)
 	}
+	timestamp := time.Unix(exp, 0)
+	cookie := new(fiber.Cookie)
+	cookie.Name = "jwt"
+	cookie.Value = token
+	cookie.Expires = timestamp
+	c.Cookie(cookie)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"token": token, "exp": exp})
 }
 
@@ -98,12 +105,28 @@ func (ac *AuthController) PostRegisterHandler(c *fiber.Ctx) error {
 // @Failure		400	{object} Error
 // @Router		/auth/me [get]
 func (ac *AuthController) GetMeHandler(c *fiber.Ctx) error {
-	id := c.Locals("user").(string)
-	user, err := ac.Service.Me(id)
+	tokenstr := c.Cookies("jwt")
+	user, err := ac.Service.Me(tokenstr)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(err)
 	}
 	return c.Status(fiber.StatusOK).JSON(user)
+}
+
+// @Summary		Logout
+// @Description	Logout
+// @Tags		auth
+// @Accept		json
+// @Produce		json
+// @Success		200	{object} string
+// @Failure		400	{object} Error
+// @Router		/auth/logout [post]
+func (ac *AuthController) PostLogoutHandler(c *fiber.Ctx) error {
+	cookie := new(fiber.Cookie)
+	cookie.Name = "jwt"
+	cookie.Value = ""
+	c.Cookie(cookie)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "logout success"})
 }
 
 func (ac *AuthController) Handle() {
@@ -111,4 +134,5 @@ func (ac *AuthController) Handle() {
 	g.Post("/login", ac.PostLoginHandler)
 	g.Post("/register", ac.PostRegisterHandler)
 	g.Get("/me", ac.GetMeHandler)
+	g.Post("/logout", ac.PostLogoutHandler)
 }
