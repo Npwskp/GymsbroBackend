@@ -17,7 +17,7 @@ import (
 type User struct {
 	ID            primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Username      string             `json:"username" validate:"required,min=3,max=20"`
-	Email         string             `json:"email" validate:"required"`
+	Email         string             `json:"email" validate:"required,email"`
 	Password      string             `json:"password" validate:"required"`
 	Weight        float64            `json:"weight" default:"0"` // default:"0" is not working
 	Height        float64            `json:"height" default:"0"` // default:"0" is not working
