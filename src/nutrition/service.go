@@ -29,6 +29,7 @@ type INutritionService interface {
 	GetAllNutritions() ([]*Nutrition, error)
 	GetNutrition(id string) (*Nutrition, error)
 	GetNutritionByUser(userid string) ([]*Nutrition, error)
+	GetNutritionByUserDate(userid string, start int, end int) ([]*Nutrition, error)
 	DeleteNutrition(id string) error
 	UpdateNutrition(doc *UpdateNutritionDto, id string) (*Nutrition, error)
 }
@@ -92,6 +93,21 @@ func (ns *NutritionService) GetNutrition(id string) (*Nutrition, error) {
 
 func (ns *NutritionService) GetNutritionByUser(userid string) ([]*Nutrition, error) {
 	filter := bson.M{"userid": bson.M{"$in": []string{userid}}}
+	cursor, err := ns.DB.Collection("nutrition").Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+	var nutritions []*Nutrition
+	if err := cursor.All(context.Background(), &nutritions); err != nil {
+		return nil, err
+	}
+	return nutritions, nil
+}
+
+func (ns *NutritionService) GetNutritionByUserDate(userid string, start int, end int) ([]*Nutrition, error) {
+	start_time := time.Unix(int64(start), 0).Format("2006-01-02T15:04:05Z")
+	end_time := time.Unix(int64(end), 0).Format("2006-01-02T15:04:05Z")
+	filter := bson.M{"userid": bson.M{"$in": []string{userid}}, "created_at": bson.M{"$gte": start_time, "$lte": end_time}}
 	cursor, err := ns.DB.Collection("nutrition").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err

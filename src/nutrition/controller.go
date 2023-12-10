@@ -107,6 +107,28 @@ func (nc *NutritionController) GetNutritionByUserHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(nutritions)
 }
 
+// @Summary		Get nutritions by user and date
+// @Description	Get nutritions by user and date
+// @Tags		nutritions
+// @Accept		json
+// @Produce		json
+// @Param		userid path string true "User ID"
+// @Param		start query int true "Start date"
+// @Param		end query int true "End date"
+// @Success		200	{object} []Nutrition
+// @Failure		400	{object} Error
+// @Router		/nutritions/userdate/{userid} [get]
+func (nc *NutritionController) GetNutritionByUserDateHandler(c *fiber.Ctx) error {
+	userid := c.Params("userid")
+	start := c.QueryInt("start")
+	end := c.QueryInt("end")
+	nutritions, err := nc.Service.GetNutritionByUserDate(userid, start, end)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(nutritions)
+}
+
 // @Summary		Delete a nutrition
 // @Description	Delete a nutrition
 // @Tags		nutritions
@@ -158,6 +180,7 @@ func (nc *NutritionController) Handle() {
 	g.Get("/", nc.GetNutritionsHandler)
 	g.Get("/:id", nc.GetNutritionHandler)
 	g.Get("/user/:userid", nc.GetNutritionByUserHandler)
+	g.Get("/userdate/:userid", nc.GetNutritionByUserDateHandler)
 	g.Delete("/:id", nc.DeleteNutritionHandler)
 	g.Put("/:id", nc.UpdateNutritionHandler)
 }
