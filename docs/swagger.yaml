@@ -204,8 +204,6 @@ definitions:
         type: array
       typeofplan:
         type: string
-      userid:
-        type: string
     type: object
   user.CreateUserDto:
     properties:
@@ -866,6 +864,41 @@ paths:
       summary: Update a plan
       tags:
       - plans
+  /plans/{user_id}/{day}:
+    put:
+      consumes:
+      - application/json
+      description: Update a plan by user and day
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Day of week
+        in: path
+        name: day
+        required: true
+        type: string
+      - description: Update Plan
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/plans.UpdatePlanDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plans.Plan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a plan by user and day
+      tags:
+      - plans
   /plans/user/{user_id}:
     get:
       consumes:
@@ -883,7 +916,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plans.Plan'
+            items:
+              $ref: '#/definitions/plans.Plan'
+            type: array
         "400":
           description: Bad Request
           schema: {}
@@ -943,40 +978,6 @@ paths:
           description: Bad Request
           schema: {}
       summary: Get a plan by user and day
-      tags:
-      - plans
-    put:
-      consumes:
-      - application/json
-      description: Update a plan by user and day
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - description: Day of week
-        in: path
-        name: day
-        required: true
-        type: string
-      - description: Update Plan
-        in: body
-        name: plan
-        required: true
-        schema:
-          $ref: '#/definitions/plans.UpdatePlanDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/plans.Plan'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update a plan by user and day
       tags:
       - plans
   /users:

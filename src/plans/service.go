@@ -130,10 +130,6 @@ func (ps *PlanService) UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error) 
 	if err != nil {
 		return nil, err
 	}
-	uid, err := primitive.ObjectIDFromHex(doc.UserID)
-	if err != nil {
-		return nil, err
-	}
 	filter := bson.D{{Key: "_id", Value: oid}}
 	plan, err := ps.GetPlan(id)
 	if err != nil {
@@ -141,7 +137,6 @@ func (ps *PlanService) UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error) 
 	}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "userid", Value: function.Coalesce(doc.UserID, uid)},
 			{Key: "typeofplan", Value: function.Coalesce(doc.TypeOfPlan, plan.TypeOfPlan)},
 			{Key: "exercise", Value: function.Coalesce(doc.Exercise, plan.Exercise)},
 		}},
@@ -158,10 +153,6 @@ func (ps *PlanService) UpdatePlan(doc *UpdatePlanDto, id string) (*Plan, error) 
 }
 
 func (ps *PlanService) UpdatePlanByUserDay(doc *UpdatePlanDto, userid string, day string) (*Plan, error) {
-	uid, err := primitive.ObjectIDFromHex(doc.UserID)
-	if err != nil {
-		return nil, err
-	}
 	filter := bson.D{{Key: "userid", Value: userid}, {Key: "dayofweek", Value: day}}
 	plan, err := ps.GetPlanByUserDay(userid, day)
 	if err != nil {
@@ -169,7 +160,6 @@ func (ps *PlanService) UpdatePlanByUserDay(doc *UpdatePlanDto, userid string, da
 	}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "userid", Value: function.Coalesce(doc.UserID, uid)},
 			{Key: "typeofplan", Value: function.Coalesce(doc.TypeOfPlan, plan.TypeOfPlan)},
 			{Key: "exercise", Value: function.Coalesce(doc.Exercise, plan.Exercise)},
 		}},

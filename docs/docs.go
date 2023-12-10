@@ -712,7 +712,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plans.Plan"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plans.Plan"
+                            }
                         }
                     },
                     "400": {
@@ -749,56 +752,6 @@ const docTemplate = `{
                         "name": "day",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/plans.Plan"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a plan by user and day",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plans"
-                ],
-                "summary": "Update a plan by user and day",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Day of week",
-                        "name": "day",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update Plan",
-                        "name": "plan",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/plans.UpdatePlanDto"
-                        }
                     }
                 ],
                 "responses": {
@@ -955,6 +908,58 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/plans/{user_id}/{day}": {
+            "put": {
+                "description": "Update a plan by user and day",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Update a plan by user and day",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Day of week",
+                        "name": "day",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Plan",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plans.UpdatePlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plans.Plan"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1483,9 +1488,6 @@ const docTemplate = `{
                     }
                 },
                 "typeofplan": {
-                    "type": "string"
-                },
-                "userid": {
                     "type": "string"
                 }
             }

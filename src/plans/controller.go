@@ -21,7 +21,6 @@ type CreatePlanDto struct {
 }
 
 type UpdatePlanDto struct {
-	UserID     string   `json:"userid"`
 	TypeOfPlan string   `json:"typeofplan"`
 	Exercise   []string `json:"exercise"`
 }
@@ -97,7 +96,7 @@ func (pc *PlanController) GetPlanHandler(c *fiber.Ctx) error {
 // @Accept		json
 // @Produce		json
 // @Param		user_id path	string true "User ID"
-// @Success		200	{object} Plan
+// @Success		200	{array} Plan
 // @Failure		400	{object} Error
 // @Router		/plans/user/{user_id} [get]
 func (pc *PlanController) GetPlanByUserHandler(c *fiber.Ctx) error {
@@ -185,6 +184,9 @@ func (pc *PlanController) UpdatePlanHandler(c *fiber.Ctx) error {
 	if err := validate.Struct(*doc); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
+	if !function.CheckExerciseType(doc.TypeOfPlan) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of plan is not valid"})
+	}
 	plan, err := pc.Service.UpdatePlan(doc, id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
@@ -202,7 +204,7 @@ func (pc *PlanController) UpdatePlanHandler(c *fiber.Ctx) error {
 // @Param		plan body UpdatePlanDto true "Update Plan"
 // @Success		200	{object} Plan
 // @Failure		400	{object} Error
-// @Router		/plans/user/{user_id}/{day} [put]
+// @Router		/plans/{user_id}/{day} [put]
 func (pc *PlanController) UpdatePlanByUserDayHandler(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
 	day := c.Params("day")
@@ -213,6 +215,12 @@ func (pc *PlanController) UpdatePlanByUserDayHandler(c *fiber.Ctx) error {
 	}
 	if err := validate.Struct(*doc); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	}
+	if !function.CheckDay(day) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Day of week is not valid"})
+	}
+	if !function.CheckExerciseType(doc.TypeOfPlan) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of plan is not valid"})
 	}
 	plan, err := pc.Service.UpdatePlanByUserDay(doc, user_id, day)
 	if err != nil {
