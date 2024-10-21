@@ -424,7 +424,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nutrition.Nutrition"
+                                "$ref": "#/definitions/meal.Nutrition"
                             }
                         }
                     },
@@ -453,7 +453,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/nutrition.CreateNutritionDto"
+                            "$ref": "#/definitions/meal.CreateNutritionDto"
                         }
                     }
                 ],
@@ -461,7 +461,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/nutrition.Nutrition"
+                            "$ref": "#/definitions/meal.Nutrition"
                         }
                     },
                     "400": {
@@ -499,7 +499,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nutrition.Nutrition"
+                                "$ref": "#/definitions/meal.Nutrition"
                             }
                         }
                     },
@@ -552,7 +552,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nutrition.Nutrition"
+                                "$ref": "#/definitions/meal.Nutrition"
                             }
                         }
                     },
@@ -589,7 +589,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nutrition.Nutrition"
+                            "$ref": "#/definitions/meal.Nutrition"
                         }
                     },
                     "400": {
@@ -624,7 +624,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/nutrition.UpdateNutritionDto"
+                            "$ref": "#/definitions/meal.UpdateNutritionDto"
                         }
                     }
                 ],
@@ -632,7 +632,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nutrition.Nutrition"
+                            "$ref": "#/definitions/meal.Nutrition"
                         }
                     },
                     "400": {
@@ -1398,7 +1398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "nutrition.CreateNutritionDto": {
+        "meal.CreateNutritionDto": {
             "type": "object",
             "required": [
                 "userid"
@@ -1413,7 +1413,8 @@ const docTemplate = `{
                     "default": 0
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "fat": {
                     "type": "number",
@@ -1428,7 +1429,7 @@ const docTemplate = `{
                 }
             }
         },
-        "nutrition.Nutrition": {
+        "meal.Nutrition": {
             "type": "object",
             "required": [
                 "userid"
@@ -1443,7 +1444,8 @@ const docTemplate = `{
                     "default": 0
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "fat": {
                     "type": "number",
@@ -1461,7 +1463,7 @@ const docTemplate = `{
                 }
             }
         },
-        "nutrition.UpdateNutritionDto": {
+        "meal.UpdateNutritionDto": {
             "type": "object",
             "properties": {
                 "calories": {
@@ -1566,7 +1568,8 @@ const docTemplate = `{
                     "minimum": 1
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "email": {
                     "type": "string"
@@ -1676,7 +1679,8 @@ const docTemplate = `{
                     "minimum": 1
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "email": {
                     "type": "string"

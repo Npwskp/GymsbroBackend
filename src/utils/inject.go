@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/Npwskp/GymsbroBackend/src/auth"
 	"github.com/Npwskp/GymsbroBackend/src/exercise"
-	"github.com/Npwskp/GymsbroBackend/src/nutrition"
+	"github.com/Npwskp/GymsbroBackend/src/meal"
 	"github.com/Npwskp/GymsbroBackend/src/plans"
 	"github.com/Npwskp/GymsbroBackend/src/user"
 	"github.com/gofiber/fiber/v2"
@@ -23,9 +23,9 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	exerciseController := exercise.ExerciseController{Instance: app, Service: &exerciseService}
 	exerciseController.Handle()
 
-	nutritionService := nutrition.NutritionService{DB: db}
-	nutritionController := nutrition.NutritionController{Instance: app, Service: &nutritionService}
-	nutritionController.Handle()
+	mealService := meal.MealService{DB: db}
+	mealController := meal.MealController{Instance: app, Service: &mealService}
+	mealController.Handle()
 
 	authService := auth.AuthService{DB: db}
 	authController := auth.AuthController{Instance: app, Service: &authService}

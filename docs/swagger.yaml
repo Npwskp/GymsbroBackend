@@ -105,7 +105,7 @@ definitions:
           type: string
         type: array
     type: object
-  nutrition.CreateNutritionDto:
+  meal.CreateNutritionDto:
     properties:
       calories:
         default: 0
@@ -114,6 +114,7 @@ definitions:
         default: 0
         type: number
       created_at:
+        default: "null"
         type: string
       fat:
         default: 0
@@ -126,7 +127,7 @@ definitions:
     required:
     - userid
     type: object
-  nutrition.Nutrition:
+  meal.Nutrition:
     properties:
       calories:
         default: 0
@@ -135,6 +136,7 @@ definitions:
         default: 0
         type: number
       created_at:
+        default: "null"
         type: string
       fat:
         default: 0
@@ -149,7 +151,7 @@ definitions:
     required:
     - userid
     type: object
-  nutrition.UpdateNutritionDto:
+  meal.UpdateNutritionDto:
     properties:
       calories:
         type: number
@@ -216,6 +218,7 @@ definitions:
         minimum: 1
         type: integer
       created_at:
+        default: "null"
         type: string
       email:
         type: string
@@ -295,6 +298,7 @@ definitions:
         minimum: 1
         type: integer
       created_at:
+        default: "null"
         type: string
       email:
         type: string
@@ -614,7 +618,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/nutrition.Nutrition'
+              $ref: '#/definitions/meal.Nutrition'
             type: array
         "400":
           description: Bad Request
@@ -632,14 +636,14 @@ paths:
         name: nutrition
         required: true
         schema:
-          $ref: '#/definitions/nutrition.CreateNutritionDto'
+          $ref: '#/definitions/meal.CreateNutritionDto'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/nutrition.Nutrition'
+            $ref: '#/definitions/meal.Nutrition'
         "400":
           description: Bad Request
           schema: {}
@@ -684,7 +688,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/nutrition.Nutrition'
+            $ref: '#/definitions/meal.Nutrition'
         "400":
           description: Bad Request
           schema: {}
@@ -706,14 +710,14 @@ paths:
         name: nutrition
         required: true
         schema:
-          $ref: '#/definitions/nutrition.UpdateNutritionDto'
+          $ref: '#/definitions/meal.UpdateNutritionDto'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/nutrition.Nutrition'
+            $ref: '#/definitions/meal.Nutrition'
         "400":
           description: Bad Request
           schema: {}
@@ -738,7 +742,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/nutrition.Nutrition'
+              $ref: '#/definitions/meal.Nutrition'
             type: array
         "400":
           description: Bad Request
@@ -774,7 +778,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/nutrition.Nutrition'
+              $ref: '#/definitions/meal.Nutrition'
             type: array
         "400":
           description: Bad Request

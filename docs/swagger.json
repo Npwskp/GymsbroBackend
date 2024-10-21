@@ -422,7 +422,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nutrition.Nutrition"
+                                "$ref": "#/definitions/meal.Nutrition"
                             }
                         }
                     },
@@ -451,7 +451,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/nutrition.CreateNutritionDto"
+                            "$ref": "#/definitions/meal.CreateNutritionDto"
                         }
                     }
                 ],
@@ -459,7 +459,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/nutrition.Nutrition"
+                            "$ref": "#/definitions/meal.Nutrition"
                         }
                     },
                     "400": {
@@ -497,7 +497,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nutrition.Nutrition"
+                                "$ref": "#/definitions/meal.Nutrition"
                             }
                         }
                     },
@@ -550,7 +550,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nutrition.Nutrition"
+                                "$ref": "#/definitions/meal.Nutrition"
                             }
                         }
                     },
@@ -587,7 +587,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nutrition.Nutrition"
+                            "$ref": "#/definitions/meal.Nutrition"
                         }
                     },
                     "400": {
@@ -622,7 +622,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/nutrition.UpdateNutritionDto"
+                            "$ref": "#/definitions/meal.UpdateNutritionDto"
                         }
                     }
                 ],
@@ -630,7 +630,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nutrition.Nutrition"
+                            "$ref": "#/definitions/meal.Nutrition"
                         }
                     },
                     "400": {
@@ -1396,7 +1396,7 @@
                 }
             }
         },
-        "nutrition.CreateNutritionDto": {
+        "meal.CreateNutritionDto": {
             "type": "object",
             "required": [
                 "userid"
@@ -1411,7 +1411,8 @@
                     "default": 0
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "fat": {
                     "type": "number",
@@ -1426,7 +1427,7 @@
                 }
             }
         },
-        "nutrition.Nutrition": {
+        "meal.Nutrition": {
             "type": "object",
             "required": [
                 "userid"
@@ -1441,7 +1442,8 @@
                     "default": 0
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "fat": {
                     "type": "number",
@@ -1459,7 +1461,7 @@
                 }
             }
         },
-        "nutrition.UpdateNutritionDto": {
+        "meal.UpdateNutritionDto": {
             "type": "object",
             "properties": {
                 "calories": {
@@ -1564,7 +1566,8 @@
                     "minimum": 1
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "email": {
                     "type": "string"
@@ -1674,7 +1677,8 @@
                     "minimum": 1
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "null"
                 },
                 "email": {
                     "type": "string"
