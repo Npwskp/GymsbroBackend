@@ -405,9 +405,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/nutritions": {
+        "/meals": {
             "get": {
-                "description": "Get all nutritions",
+                "description": "Get all meals",
                 "consumes": [
                     "application/json"
                 ],
@@ -415,16 +415,16 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Get all nutritions",
+                "summary": "Get all meals",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/meal.Nutrition"
+                                "$ref": "#/definitions/meal.Meal"
                             }
                         }
                     },
@@ -435,7 +435,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a nutrition",
+                "description": "Create a meal",
                 "consumes": [
                     "application/json"
                 ],
@@ -443,17 +443,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Create a nutrition",
+                "summary": "Create a meal",
                 "parameters": [
                     {
-                        "description": "Create Nutrition",
-                        "name": "nutrition",
+                        "description": "Create Meal",
+                        "name": "meal",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/meal.CreateNutritionDto"
+                            "$ref": "#/definitions/meal.CreateMealDto"
                         }
                     }
                 ],
@@ -461,7 +461,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/meal.Nutrition"
+                            "$ref": "#/definitions/meal.Meal"
                         }
                     },
                     "400": {
@@ -471,9 +471,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/nutritions/user/{userid}": {
+        "/meals/user/{userid}": {
             "get": {
-                "description": "Get nutritions by user",
+                "description": "Get meals by user",
                 "consumes": [
                     "application/json"
                 ],
@@ -481,9 +481,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Get nutritions by user",
+                "summary": "Get meals by user",
                 "parameters": [
                     {
                         "type": "string",
@@ -499,7 +499,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/meal.Nutrition"
+                                "$ref": "#/definitions/meal.Meal"
                             }
                         }
                     },
@@ -510,9 +510,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/nutritions/userdate/{userid}": {
+        "/meals/userdate/{userid}": {
             "get": {
-                "description": "Get nutritions by user and date",
+                "description": "Get meals by user and date",
                 "consumes": [
                     "application/json"
                 ],
@@ -520,9 +520,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Get nutritions by user and date",
+                "summary": "Get meals by user and date",
                 "parameters": [
                     {
                         "type": "string",
@@ -552,7 +552,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/meal.Nutrition"
+                                "$ref": "#/definitions/meal.Meal"
                             }
                         }
                     },
@@ -563,9 +563,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/nutritions/{id}": {
+        "/meals/{id}": {
             "get": {
-                "description": "Get a nutrition",
+                "description": "Get a meal",
                 "consumes": [
                     "application/json"
                 ],
@@ -573,13 +573,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Get a nutrition",
+                "summary": "Get a meal",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Nutrition ID",
+                        "description": "Meal ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -589,7 +589,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meal.Nutrition"
+                            "$ref": "#/definitions/meal.Meal"
                         }
                     },
                     "400": {
@@ -599,7 +599,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update a nutrition",
+                "description": "Update a meal",
                 "consumes": [
                     "application/json"
                 ],
@@ -607,24 +607,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Update a nutrition",
+                "summary": "Update a meal",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Nutrition ID",
+                        "description": "Meal ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Update Nutrition",
-                        "name": "nutrition",
+                        "description": "Update Meal",
+                        "name": "meal",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/meal.UpdateNutritionDto"
+                            "$ref": "#/definitions/meal.UpdateMealDto"
                         }
                     }
                 ],
@@ -632,7 +632,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meal.Nutrition"
+                            "$ref": "#/definitions/meal.Meal"
                         }
                     },
                     "400": {
@@ -642,7 +642,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete a nutrition",
+                "description": "Delete a meal",
                 "consumes": [
                     "application/json"
                 ],
@@ -650,13 +650,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nutritions"
+                    "meals"
                 ],
-                "summary": "Delete a nutrition",
+                "summary": "Delete a meal",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Nutrition ID",
+                        "description": "Meal ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1398,7 +1398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "meal.CreateNutritionDto": {
+        "meal.CreateMealDto": {
             "type": "object",
             "required": [
                 "userid"
@@ -1429,7 +1429,7 @@ const docTemplate = `{
                 }
             }
         },
-        "meal.Nutrition": {
+        "meal.Meal": {
             "type": "object",
             "required": [
                 "userid"
@@ -1463,7 +1463,7 @@ const docTemplate = `{
                 }
             }
         },
-        "meal.UpdateNutritionDto": {
+        "meal.UpdateMealDto": {
             "type": "object",
             "properties": {
                 "calories": {

@@ -105,7 +105,7 @@ definitions:
           type: string
         type: array
     type: object
-  meal.CreateNutritionDto:
+  meal.CreateMealDto:
     properties:
       calories:
         default: 0
@@ -127,7 +127,7 @@ definitions:
     required:
     - userid
     type: object
-  meal.Nutrition:
+  meal.Meal:
     properties:
       calories:
         default: 0
@@ -151,7 +151,7 @@ definitions:
     required:
     - userid
     type: object
-  meal.UpdateNutritionDto:
+  meal.UpdateMealDto:
     properties:
       calories:
         type: number
@@ -606,11 +606,11 @@ paths:
       summary: Get exercises by type
       tags:
       - exercises
-  /nutritions:
+  /meals:
     get:
       consumes:
       - application/json
-      description: Get all nutritions
+      description: Get all meals
       produces:
       - application/json
       responses:
@@ -618,45 +618,45 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/meal.Nutrition'
+              $ref: '#/definitions/meal.Meal'
             type: array
         "400":
           description: Bad Request
           schema: {}
-      summary: Get all nutritions
+      summary: Get all meals
       tags:
-      - nutritions
+      - meals
     post:
       consumes:
       - application/json
-      description: Create a nutrition
+      description: Create a meal
       parameters:
-      - description: Create Nutrition
+      - description: Create Meal
         in: body
-        name: nutrition
+        name: meal
         required: true
         schema:
-          $ref: '#/definitions/meal.CreateNutritionDto'
+          $ref: '#/definitions/meal.CreateMealDto'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/meal.Nutrition'
+            $ref: '#/definitions/meal.Meal'
         "400":
           description: Bad Request
           schema: {}
-      summary: Create a nutrition
+      summary: Create a meal
       tags:
-      - nutritions
-  /nutritions/{id}:
+      - meals
+  /meals/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete a nutrition
+      description: Delete a meal
       parameters:
-      - description: Nutrition ID
+      - description: Meal ID
         in: path
         name: id
         required: true
@@ -669,15 +669,15 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      summary: Delete a nutrition
+      summary: Delete a meal
       tags:
-      - nutritions
+      - meals
     get:
       consumes:
       - application/json
-      description: Get a nutrition
+      description: Get a meal
       parameters:
-      - description: Nutrition ID
+      - description: Meal ID
         in: path
         name: id
         required: true
@@ -688,47 +688,47 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meal.Nutrition'
+            $ref: '#/definitions/meal.Meal'
         "400":
           description: Bad Request
           schema: {}
-      summary: Get a nutrition
+      summary: Get a meal
       tags:
-      - nutritions
+      - meals
     put:
       consumes:
       - application/json
-      description: Update a nutrition
+      description: Update a meal
       parameters:
-      - description: Nutrition ID
+      - description: Meal ID
         in: path
         name: id
         required: true
         type: string
-      - description: Update Nutrition
+      - description: Update Meal
         in: body
-        name: nutrition
+        name: meal
         required: true
         schema:
-          $ref: '#/definitions/meal.UpdateNutritionDto'
+          $ref: '#/definitions/meal.UpdateMealDto'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meal.Nutrition'
+            $ref: '#/definitions/meal.Meal'
         "400":
           description: Bad Request
           schema: {}
-      summary: Update a nutrition
+      summary: Update a meal
       tags:
-      - nutritions
-  /nutritions/user/{userid}:
+      - meals
+  /meals/user/{userid}:
     get:
       consumes:
       - application/json
-      description: Get nutritions by user
+      description: Get meals by user
       parameters:
       - description: User ID
         in: path
@@ -742,19 +742,19 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/meal.Nutrition'
+              $ref: '#/definitions/meal.Meal'
             type: array
         "400":
           description: Bad Request
           schema: {}
-      summary: Get nutritions by user
+      summary: Get meals by user
       tags:
-      - nutritions
-  /nutritions/userdate/{userid}:
+      - meals
+  /meals/userdate/{userid}:
     get:
       consumes:
       - application/json
-      description: Get nutritions by user and date
+      description: Get meals by user and date
       parameters:
       - description: User ID
         in: path
@@ -778,14 +778,14 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/meal.Nutrition'
+              $ref: '#/definitions/meal.Meal'
             type: array
         "400":
           description: Bad Request
           schema: {}
-      summary: Get nutritions by user and date
+      summary: Get meals by user and date
       tags:
-      - nutritions
+      - meals
   /plans:
     get:
       consumes:

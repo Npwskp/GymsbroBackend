@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/Npwskp/GymsbroBackend/src/auth"
 	"github.com/Npwskp/GymsbroBackend/src/exercise"
-	"github.com/Npwskp/GymsbroBackend/src/meal"
+	"github.com/Npwskp/GymsbroBackend/src/nutrition/meal"
 	"github.com/Npwskp/GymsbroBackend/src/plans"
 	"github.com/Npwskp/GymsbroBackend/src/user"
 	"github.com/gofiber/fiber/v2"
