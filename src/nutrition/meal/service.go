@@ -2,8 +2,9 @@ package meal
 
 import (
 	"context"
-	"errors"
 	"time"
+
+	"github.com/Npwskp/GymsbroBackend/src/nutrition/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,14 +12,15 @@ import (
 )
 
 type Meal struct {
-	ID        primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Name      string             `json:"name" validate:"required" bson:"name"`
-	UserID    string             `json:"userid" validate:"required" bson:"userid"`
-	Image     string             `json:"image" default:"null"`
-	Calories  float64            `json:"calories" default:"0"`
-	Nutrients []Nutrient         `json:"nutrients" default:"null"`
-	LogTime   time.Time          `json:"logtime" default:"null"`
-	CreatedAt time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
+	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name        string             `json:"name" validate:"required" bson:"name"`
+	UserID      string             `json:"userid" validate:"required" bson:"userid"`
+	Image       string             `json:"image" default:"null"`
+	Calories    float64            `json:"calories" default:"0"`
+	Nutrients   []types.Nutrient   `json:"nutrients,omitempty"`
+	Ingredients []types.Ingredient `json:"ingredients,omitempty"`
+	LogTime     time.Time          `json:"logtime" default:"null"`
+	CreatedAt   time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
 }
 
 type MealService struct {
@@ -37,22 +39,6 @@ type IMealService interface {
 
 func (ns *MealService) CreateMeal(meal *CreateMealDto) (*Meal, error) {
 	meal.CreatedAt = time.Now()
-	localLocation, err := time.LoadLocation("Asia/Bangkok")
-	if err != nil {
-		return nil, err
-	}
-	res, err := ns.GetMealByUser(meal.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if len(res) > 0 {
-		for _, v := range res {
-			tmp := v.CreatedAt.In(localLocation)
-			if tmp.Format("2006-01-02") == meal.CreatedAt.In(localLocation).Format("2006-01-02") {
-				return nil, errors.New("Meal already exist, please update instead")
-			}
-		}
-	}
 
 	result, err := ns.DB.Collection("meal").InsertOne(context.Background(), meal)
 	if err != nil {

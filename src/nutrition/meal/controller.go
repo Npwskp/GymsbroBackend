@@ -39,7 +39,7 @@ type UpdateMealDto struct {
 // @Success		201	{object} Meal
 // @Failure		400	{object} Error
 // @Router		/meals [post]
-func (nc *MealController) PostMealHandler(c *fiber.Ctx) error {
+func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 	meal := new(CreateMealDto)
 	validate := validator.New()
 	if err := c.BodyParser(meal); err != nil {
@@ -176,7 +176,7 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 
 func (nc *MealController) Handle() {
 	g := nc.Instance.Group("/meals")
-	g.Post("/", nc.PostMealHandler)
+	g.Post("/", nc.CreateMealHandler)
 	g.Get("/", nc.GetMealsHandler)
 	g.Get("/:id", nc.GetMealHandler)
 	g.Get("/user/:userid", nc.GetMealByUserHandler)

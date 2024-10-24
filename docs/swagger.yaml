@@ -132,23 +132,31 @@ definitions:
       calories:
         default: 0
         type: number
-      carb:
-        default: 0
-        type: number
       created_at:
         default: "null"
         type: string
-      fat:
-        default: 0
-        type: number
       id:
         type: string
-      protein:
-        default: 0
-        type: number
+      image:
+        default: "null"
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/types.Ingredient'
+        type: array
+      logtime:
+        default: "null"
+        type: string
+      name:
+        type: string
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
       userid:
         type: string
     required:
+    - name
     - userid
     type: object
   meal.UpdateMealDto:
@@ -206,6 +214,40 @@ definitions:
         type: array
       typeofplan:
         type: string
+    type: object
+  types.Ingredient:
+    properties:
+      ingredientid:
+        type: string
+      numofservings:
+        type: number
+      unit:
+        type: string
+      value:
+        type: number
+    required:
+    - ingredientid
+    - numofservings
+    - unit
+    - value
+    type: object
+  types.Nutrient:
+    properties:
+      category:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+      unit:
+        type: string
+      value:
+        type: number
+    required:
+    - name
+    - type
+    - unit
+    - value
     type: object
   user.CreateUserDto:
     properties:

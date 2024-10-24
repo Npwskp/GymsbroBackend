@@ -1432,6 +1432,7 @@ const docTemplate = `{
         "meal.Meal": {
             "type": "object",
             "required": [
+                "name",
                 "userid"
             ],
             "properties": {
@@ -1439,24 +1440,35 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
-                "carb": {
-                    "type": "number",
-                    "default": 0
-                },
                 "created_at": {
                     "type": "string",
                     "default": "null"
                 },
-                "fat": {
-                    "type": "number",
-                    "default": 0
-                },
                 "id": {
                     "type": "string"
                 },
-                "protein": {
-                    "type": "number",
-                    "default": 0
+                "image": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "ingredients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Ingredient"
+                    }
+                },
+                "logtime": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Nutrient"
+                    }
                 },
                 "userid": {
                     "type": "string"
@@ -1544,6 +1556,55 @@ const docTemplate = `{
                 },
                 "typeofplan": {
                     "type": "string"
+                }
+            }
+        },
+        "types.Ingredient": {
+            "type": "object",
+            "required": [
+                "ingredientid",
+                "numofservings",
+                "unit",
+                "value"
+            ],
+            "properties": {
+                "ingredientid": {
+                    "type": "string"
+                },
+                "numofservings": {
+                    "type": "number"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "types.Nutrient": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "unit",
+                "value"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
                 }
             }
         },
