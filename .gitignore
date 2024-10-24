@@ -1,0 +1,32 @@
+# Build artifacts
+/bin/
+/obj/
+*.exe
+*.out
+
+# Go modules
+/vendor/
+
+# Environment files
+.env
+
+# IDE and editor files
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/
+
+# Test cache
+*.test
+
+# Go cache
+/pkg/
+go.sum
+
+# Temporary files
+*~
+*.swp
+.DS_Store
+
+#tmp files for automate build
+/tmp/
