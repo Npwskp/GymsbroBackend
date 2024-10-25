@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/src/utils"
+	"github.com/Npwskp/GymsbroBackend/api/v1/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"

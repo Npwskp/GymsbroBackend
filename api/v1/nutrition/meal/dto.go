@@ -1,6 +1,6 @@
 package meal
 
-import "github.com/Npwskp/GymsbroBackend/src/nutrition/types"
+import "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
 
 type CreateMealDto struct {
 	Name        string             `json:"name" validate:"required"`

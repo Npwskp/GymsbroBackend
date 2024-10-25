@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/src/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"

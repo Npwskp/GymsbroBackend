@@ -3,7 +3,7 @@ package meal
 import (
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/src/nutrition/types"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

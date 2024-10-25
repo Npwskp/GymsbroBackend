@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/src/function"
-	"github.com/Npwskp/GymsbroBackend/src/nutrition/types"
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

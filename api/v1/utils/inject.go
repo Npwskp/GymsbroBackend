@@ -1,13 +1,13 @@
 package utils
 
 import (
-	"github.com/Npwskp/GymsbroBackend/src/auth"
-	"github.com/Npwskp/GymsbroBackend/src/exercise"
-	foodlog "github.com/Npwskp/GymsbroBackend/src/nutrition/foodLog"
-	"github.com/Npwskp/GymsbroBackend/src/nutrition/ingredient"
-	"github.com/Npwskp/GymsbroBackend/src/nutrition/meal"
-	"github.com/Npwskp/GymsbroBackend/src/plans"
-	"github.com/Npwskp/GymsbroBackend/src/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/auth"
+	"github.com/Npwskp/GymsbroBackend/api/v1/exercise"
+	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
+	"github.com/Npwskp/GymsbroBackend/api/v1/plans"
+	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 )

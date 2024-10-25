@@ -1,7 +1,7 @@
 package plans
 
 import (
-	"github.com/Npwskp/GymsbroBackend/src/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )

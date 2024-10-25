@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/src/function"
-	"github.com/Npwskp/GymsbroBackend/src/plans"
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/plans"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
