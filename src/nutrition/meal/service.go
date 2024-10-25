@@ -4,24 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/src/nutrition/types"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-type Meal struct {
-	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Name        string             `json:"name" validate:"required" bson:"name"`
-	UserID      string             `json:"userid" validate:"required" bson:"userid"`
-	Image       string             `json:"image" default:"null"`
-	Calories    float64            `json:"calories" default:"0"`
-	Nutrients   []types.Nutrient   `json:"nutrients,omitempty"`
-	Ingredients []types.Ingredient `json:"ingredients,omitempty"`
-	LogTime     time.Time          `json:"logtime" default:"null"`
-	CreatedAt   time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
-}
 
 type MealService struct {
 	DB *mongo.Database
@@ -38,9 +24,9 @@ type IMealService interface {
 }
 
 func (ns *MealService) CreateMeal(meal *CreateMealDto) (*Meal, error) {
-	meal.CreatedAt = time.Now()
+	mealModel := CreateMealModel(meal)
 
-	result, err := ns.DB.Collection("meal").InsertOne(context.Background(), meal)
+	result, err := ns.DB.Collection("meal").InsertOne(context.Background(), mealModel)
 	if err != nil {
 		return nil, err
 	}

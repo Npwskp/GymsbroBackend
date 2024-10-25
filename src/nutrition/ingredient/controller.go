@@ -87,3 +87,13 @@ func (ic *IngredientController) UpdateIngredient(c *fiber.Ctx) error {
 	}
 	return c.JSON(ingredient)
 }
+
+func (ic *IngredientController) Handle() {
+	g := ic.Instance.Group("/ingredient")
+	g.Post("/", ic.CreateIngredient)
+	g.Get("/", ic.GetAllIngredients)
+	g.Get("/:id", ic.GetIngredient)
+	g.Get("/user/:userid", ic.GetIngredientByUser)
+	g.Delete("/:id", ic.DeleteIngredient)
+	g.Put("/:id", ic.UpdateIngredient)
+}

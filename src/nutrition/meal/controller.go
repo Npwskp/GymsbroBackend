@@ -1,8 +1,6 @@
 package meal
 
 import (
-	"time"
-
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,22 +10,6 @@ type Error error
 type MealController struct {
 	Instance *fiber.App
 	Service  IMealService
-}
-
-type CreateMealDto struct {
-	UserID    string    `json:"userid" validate:"required"`
-	Carb      float64   `json:"carb" default:"0"`
-	Protein   float64   `json:"protein" default:"0"`
-	Fat       float64   `json:"fat" default:"0"`
-	Calories  float64   `json:"calories" default:"0"`
-	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
-}
-
-type UpdateMealDto struct {
-	Carb     float64 `json:"carb"`
-	Protein  float64 `json:"protein"`
-	Fat      float64 `json:"fat"`
-	Calories float64 `json:"calories"`
 }
 
 // @Summary		Create a meal
