@@ -10,6 +10,7 @@ require (
 	github.com/swaggo/swag v1.16.2
 	go.mongodb.org/mongo-driver v1.13.0
 	golang.org/x/crypto v0.15.0
+	github.com/joho/godotenv v1.5.1
 )
 
 require (
@@ -24,7 +25,6 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.4.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.3 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
