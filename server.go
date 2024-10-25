@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/src/utils"
@@ -10,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
+	"github.com/joho/godotenv"
 
 	_ "github.com/Npwskp/GymsbroBackend/docs"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,8 +26,8 @@ type MongoInstance struct {
 
 var mg *MongoInstance
 
-const dbname = "GymsBro"
-const mongoURI = "mongodb+srv://npwskp:YV57BjDS6DwFzmxT@npwskp.l9cg7pi.mongodb.net/"
+var mongoURI string
+var dbname string
 
 func connectDB() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -67,6 +70,16 @@ func main() {
 	app.Use(logger.New())
 	app.Use(cors.New())
 	app.Static("/swagger", "./docs/swagger.json")
+
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	// Get environment variables
+	dbname = os.Getenv("DB_NAME")
+	mongoURI = os.Getenv("MONGO_URI")
 
 	connectDB()
 	defer disconnectDB()
