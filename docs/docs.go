@@ -1401,28 +1401,29 @@ const docTemplate = `{
         "meal.CreateMealDto": {
             "type": "object",
             "required": [
-                "userid"
+                "name"
             ],
             "properties": {
                 "calories": {
-                    "type": "number",
-                    "default": 0
+                    "type": "number"
                 },
-                "carb": {
-                    "type": "number",
-                    "default": 0
+                "image": {
+                    "type": "string"
                 },
-                "created_at": {
-                    "type": "string",
-                    "default": "null"
+                "ingredients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Ingredient"
+                    }
                 },
-                "fat": {
-                    "type": "number",
-                    "default": 0
+                "name": {
+                    "type": "string"
                 },
-                "protein": {
-                    "type": "number",
-                    "default": 0
+                "nutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Nutrient"
+                    }
                 },
                 "userid": {
                     "type": "string"
@@ -1432,8 +1433,7 @@ const docTemplate = `{
         "meal.Meal": {
             "type": "object",
             "required": [
-                "name",
-                "userid"
+                "name"
             ],
             "properties": {
                 "calories": {
@@ -1457,10 +1457,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/types.Ingredient"
                     }
                 },
-                "logtime": {
-                    "type": "string",
-                    "default": "null"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -1469,6 +1465,10 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
+                },
+                "updated_at": {
+                    "type": "string",
+                    "default": "null"
                 },
                 "userid": {
                     "type": "string"
@@ -1794,7 +1794,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/",
+	BasePath:         "/api/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "GymsBro API",
 	Description:      "This is a sample server for GymsBro API.",

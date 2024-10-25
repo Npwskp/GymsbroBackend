@@ -8,7 +8,7 @@ import (
 type Error error
 
 type MealController struct {
-	Instance *fiber.App
+	Instance fiber.Router
 	Service  IMealService
 }
 

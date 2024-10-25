@@ -9,7 +9,7 @@ import (
 type Error error
 
 type PlanController struct {
-	Instance *fiber.App
+	Instance fiber.Router
 	Service  IPlanService
 }
 

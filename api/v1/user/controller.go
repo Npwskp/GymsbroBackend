@@ -8,7 +8,7 @@ import (
 )
 
 type UserController struct {
-	Instance *fiber.App
+	Instance fiber.Router
 	Service  IUserService
 }
 

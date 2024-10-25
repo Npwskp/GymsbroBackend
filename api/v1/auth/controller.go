@@ -9,7 +9,7 @@ import (
 )
 
 type AuthController struct {
-	Instance *fiber.App
+	Instance fiber.Router
 	Service  IAuthService
 }
 

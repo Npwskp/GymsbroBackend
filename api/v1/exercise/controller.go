@@ -9,7 +9,7 @@ import (
 type Error error
 
 type ExerciseController struct {
-	Instance *fiber.App
+	Instance fiber.Router
 	Service  IExerciseService
 }
 

@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api/v1
 definitions:
   auth.LoginDto:
     properties:
@@ -108,24 +108,23 @@ definitions:
   meal.CreateMealDto:
     properties:
       calories:
-        default: 0
         type: number
-      carb:
-        default: 0
-        type: number
-      created_at:
-        default: "null"
+      image:
         type: string
-      fat:
-        default: 0
-        type: number
-      protein:
-        default: 0
-        type: number
+      ingredients:
+        items:
+          $ref: '#/definitions/types.Ingredient'
+        type: array
+      name:
+        type: string
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
       userid:
         type: string
     required:
-    - userid
+    - name
     type: object
   meal.Meal:
     properties:
@@ -144,20 +143,19 @@ definitions:
         items:
           $ref: '#/definitions/types.Ingredient'
         type: array
-      logtime:
-        default: "null"
-        type: string
       name:
         type: string
       nutrients:
         items:
           $ref: '#/definitions/types.Nutrient'
         type: array
+      updated_at:
+        default: "null"
+        type: string
       userid:
         type: string
     required:
     - name
-    - userid
     type: object
   meal.UpdateMealDto:
     properties:

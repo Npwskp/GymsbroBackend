@@ -9,7 +9,7 @@ import (
 type Error error
 
 type FoodLogController struct {
-	Instance *fiber.App
+	Instance fiber.Router
 	Service  IFoodLogService
 }
 
