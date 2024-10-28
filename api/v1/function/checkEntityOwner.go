@@ -25,11 +25,9 @@ func CheckOwnership(db *mongo.Database, id string, userid string, collection str
 	}
 
 	value := reflect.ValueOf(data)
-
-	if value.Kind() == reflect.Ptr {
-		value = value.Elem()
-	}
-	if value.Kind() != reflect.Struct {
+	value = getConcreteValue(value)
+	check := value.Kind()
+	if check != reflect.Struct {
 		return false, fmt.Errorf("expected a struct, but got %s", value.Kind())
 	}
 
@@ -47,4 +45,12 @@ func CheckOwnership(db *mongo.Database, id string, userid string, collection str
 	} else {
 		return false, errors.New("field is not a string")
 	}
+}
+
+func getConcreteValue(v reflect.Value) reflect.Value {
+	kind := v.Kind()
+	for kind == reflect.Ptr || kind == reflect.Interface {
+		v = v.Elem()
+	}
+	return v
 }

@@ -29,3 +29,16 @@ func CreateIngredientModel(dto *CreateIngredientDto) *Ingredient {
 		UpdateAt:  time.Now(),
 	}
 }
+
+func GetMockIngredient() *Ingredient {
+	return &Ingredient{
+		ID:        primitive.NewObjectID(),
+		UserID:    "mockuserid",
+		Name:      "mockname",
+		Image:     "mockimage",
+		Calories:  100,
+		Nutrients: nil,
+		CreatedAt: time.Now(),
+		UpdateAt:  time.Now(),
+	}
+}
