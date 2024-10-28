@@ -11,17 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CheckOwnership(db *mongo.Database, id string, userid string, collection string, objType interface{}) (primitive.ObjectID, error) {
+func CheckOwnership(db *mongo.Database, id string, userid string, collection string, objType interface{}) (bool, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return primitive.ObjectID{}, err
+		return false, err
 	}
 
 	filter := bson.D{{Key: "_id", Value: objectID}}
 	record := db.Collection("ingredient").FindOne(context.Background(), filter)
 	data := &objType
 	if err := record.Decode(data); err != nil {
-		return primitive.ObjectID{}, err
+		return false, err
 	}
 
 	value := reflect.ValueOf(data)
@@ -30,21 +30,21 @@ func CheckOwnership(db *mongo.Database, id string, userid string, collection str
 		value = value.Elem()
 	}
 	if value.Kind() != reflect.Struct {
-		return primitive.ObjectID{}, fmt.Errorf("expected a struct, but got %s", value.Kind())
+		return false, fmt.Errorf("expected a struct, but got %s", value.Kind())
 	}
 
 	fieldvalue := value.FieldByName("UserID")
 	if !fieldvalue.IsValid() {
-		return primitive.ObjectID{}, fmt.Errorf("no such field: UserID in obj")
+		return false, fmt.Errorf("no such field: UserID in obj")
 	}
 
 	if str, ok := fieldvalue.Interface().(string); ok {
 		if str == userid {
-			return value.FieldByName("ID").Interface().(primitive.ObjectID), nil
+			return true, nil
 		} else {
-			return primitive.ObjectID{}, errors.New("update failed: user does not own this entity")
+			return false, errors.New("update failed: user does not own this entity")
 		}
 	} else {
-		return primitive.ObjectID{}, errors.New("field is not a string")
+		return false, errors.New("field is not a string")
 	}
 }

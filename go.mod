@@ -7,10 +7,10 @@ require (
 	github.com/gofiber/fiber/v2 v2.51.0
 	github.com/gofiber/swagger v0.1.14
 	github.com/golang-jwt/jwt/v5 v5.1.0
-	github.com/swaggo/swag v1.16.2
+	github.com/joho/godotenv v1.5.1
+	github.com/swaggo/swag v1.16.4
 	go.mongodb.org/mongo-driver v1.13.0
 	golang.org/x/crypto v0.15.0
-	github.com/joho/godotenv v1.5.1
 )
 
 require (
@@ -44,7 +44,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.15.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

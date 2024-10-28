@@ -105,6 +105,71 @@ definitions:
           type: string
         type: array
     type: object
+  ingredient.CreateIngredientDto:
+    properties:
+      calories:
+        default: 0
+        type: number
+      image:
+        default: "null"
+        type: string
+      name:
+        type: string
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
+      userid:
+        type: string
+    required:
+    - name
+    - userid
+    type: object
+  ingredient.Ingredient:
+    properties:
+      calories:
+        default: 0
+        type: number
+      created_at:
+        default: "null"
+        type: string
+      id:
+        type: string
+      image:
+        default: "null"
+        type: string
+      name:
+        type: string
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
+      updated_at:
+        default: "null"
+        type: string
+      userid:
+        type: string
+    required:
+    - name
+    - userid
+    type: object
+  ingredient.UpdateIngredientDto:
+    properties:
+      calories:
+        type: number
+      image:
+        type: string
+      name:
+        type: string
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
+      userid:
+        type: string
+    required:
+    - userid
+    type: object
   meal.CreateMealDto:
     properties:
       calories:
@@ -646,6 +711,150 @@ paths:
       summary: Get exercises by type
       tags:
       - exercises
+  /ingredient:
+    get:
+      consumes:
+      - application/json
+      description: Get all ingredients
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ingredient.Ingredient'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all ingredients
+      tags:
+      - ingredient
+    post:
+      consumes:
+      - application/json
+      description: Create new ingredient
+      parameters:
+      - description: Ingredient object that needs to be created
+        in: body
+        name: ingredient
+        required: true
+        schema:
+          $ref: '#/definitions/ingredient.CreateIngredientDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ingredient.Ingredient'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create new ingredient
+      tags:
+      - ingredient
+  /ingredient/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an ingredient
+      parameters:
+      - description: Ingredient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete an ingredient
+      tags:
+      - ingredient
+    get:
+      consumes:
+      - application/json
+      description: Get an ingredient
+      parameters:
+      - description: Ingredient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ingredient.Ingredient'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get an ingredient
+      tags:
+      - ingredient
+    put:
+      consumes:
+      - application/json
+      description: Update an ingredient
+      parameters:
+      - description: Ingredient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Ingredient object that needs to be updated
+        in: body
+        name: ingredient
+        required: true
+        schema:
+          $ref: '#/definitions/ingredient.UpdateIngredientDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ingredient.Ingredient'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update an ingredient
+      tags:
+      - ingredient
+  /ingredient/user/{userid}:
+    get:
+      consumes:
+      - application/json
+      description: Get ingredients by user
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ingredient.Ingredient'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get ingredients by user
+      tags:
+      - ingredient
   /meals:
     get:
       consumes:

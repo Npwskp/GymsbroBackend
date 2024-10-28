@@ -2,7 +2,7 @@ package ingredient
 
 import (
 	"context"
-	"time"
+	"errors"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 
@@ -25,8 +25,8 @@ type IIngredientService interface {
 }
 
 func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto) (*Ingredient, error) {
-	ingredient.CreatedAt = time.Now()
-	result, err := is.DB.Collection("ingredient").InsertOne(context.Background(), ingredient)
+	ingredientModel := CreateIngredientModel(ingredient)
+	result, err := is.DB.Collection("ingredient").InsertOne(context.Background(), ingredientModel)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (is *IngredientService) GetIngredientByUser(userid string) ([]*Ingredient, 
 }
 
 func (is *IngredientService) DeleteIngredient(id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := is.CheckOwnershipAndGetObjectId(id, "1") // TODO: Use userId from token
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (is *IngredientService) DeleteIngredient(id string) error {
 }
 
 func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id string) (*Ingredient, error) {
-	objectID, err := function.CheckOwnership(is.DB, id, doc.UserID, "ingredient", Ingredient{}) // TODO: Use userId from token
+	objectID, err := is.CheckOwnershipAndGetObjectId(id, doc.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,4 +108,22 @@ func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id strin
 		return nil, err
 	}
 	return ingredient, nil
+}
+
+func (is *IngredientService) CheckOwnershipAndGetObjectId(id string, userid string) (primitive.ObjectID, error) {
+	isEntityOwner, err := function.CheckOwnership(is.DB, id, userid, "ingredient", Ingredient{}) // TODO: Use userId from token
+	var objectID primitive.ObjectID
+	if err != nil {
+		return objectID, err
+	}
+
+	if !isEntityOwner {
+		return objectID, errors.New("update failed: user does not own this entity")
+	} else {
+		objectID, err = primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return objectID, err
+		}
+	}
+	return objectID, nil
 }

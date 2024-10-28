@@ -13,6 +13,19 @@ type Ingredient struct {
 	Name      string             `json:"name" validate:"required" bson:"name"`
 	Image     string             `json:"image" default:"null"`
 	Calories  float64            `json:"calories" default:"0"`
-	Nutrients []types.Nutrient   `json:"nutrients" default:"null"`
+	Nutrients *[]types.Nutrient  `json:"nutrients,omitempty"`
 	CreatedAt time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
+	UpdateAt  time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
+}
+
+func CreateIngredientModel(dto *CreateIngredientDto) *Ingredient {
+	return &Ingredient{
+		UserID:    dto.UserID,
+		Name:      dto.Name,
+		Image:     dto.Image,
+		Calories:  dto.Calories,
+		Nutrients: dto.Nutrients,
+		CreatedAt: time.Now(),
+		UpdateAt:  time.Now(),
+	}
 }
