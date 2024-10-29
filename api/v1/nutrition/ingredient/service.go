@@ -111,7 +111,7 @@ func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id strin
 }
 
 func (is *IngredientService) CheckOwnershipAndGetObjectId(id string, userid string) (primitive.ObjectID, error) {
-	isEntityOwner, err := function.CheckOwnership(is.DB, id, userid, "ingredient", GetMockIngredient()) // TODO: Use userId from token
+	isEntityOwner, err := function.CheckOwnership(is.DB, id, userid, "ingredient", &Ingredient{}) // TODO: Use userId from token
 	var objectID primitive.ObjectID
 	if err != nil {
 		return objectID, err
