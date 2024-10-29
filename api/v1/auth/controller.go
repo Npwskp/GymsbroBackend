@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/config"
+	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -93,11 +94,20 @@ func (ac *AuthController) PostRegisterHandler(c *fiber.Ctx) error {
 // @Failure		400	{object} Error
 // @Router		/auth/me [get]
 func (ac *AuthController) GetMeHandler(c *fiber.Ctx) error {
-	tokenstr := c.Cookies("jwt")
-	user, err := ac.Service.Me(tokenstr)
+	userClaims, err := middleware.GetCurrentUser(c)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(err)
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
 	}
+
+	user, err := ac.Service.Me(userClaims.UserID.Hex())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 

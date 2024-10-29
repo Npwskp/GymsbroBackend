@@ -1,7 +1,6 @@
 package foodlog
 
 import (
-	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -84,7 +83,6 @@ func (fc *FoodLogController) UpdateFoodLog(c *fiber.Ctx) error {
 
 func (fc *FoodLogController) Handle() {
 	g := fc.Instance.Group("/foodlog")
-	g.Use(middleware.AuthMiddleware())
 
 	g.Post("/", fc.CreateFoodLog)
 	g.Get("/", fc.GetAllFoodLogs)

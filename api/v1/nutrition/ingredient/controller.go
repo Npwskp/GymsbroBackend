@@ -1,7 +1,6 @@
 package ingredient
 
 import (
-	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -128,7 +127,6 @@ func (ic *IngredientController) UpdateIngredient(c *fiber.Ctx) error {
 
 func (ic *IngredientController) Handle() {
 	g := ic.Instance.Group("/ingredient")
-	g.Use(middleware.AuthMiddleware())
 
 	g.Post("/", ic.CreateIngredient)
 	g.Get("/", ic.GetAllIngredients)

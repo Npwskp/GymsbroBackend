@@ -1,7 +1,6 @@
 package meal
 
 import (
-	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -159,7 +158,6 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 
 func (nc *MealController) Handle() {
 	g := nc.Instance.Group("/meals")
-	g.Use(middleware.AuthMiddleware())
 
 	g.Post("/", nc.CreateMealHandler)
 	g.Get("/", nc.GetMealsHandler)

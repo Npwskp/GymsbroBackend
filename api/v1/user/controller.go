@@ -1,7 +1,6 @@
 package user
 
 import (
-	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -177,7 +176,6 @@ func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 
 func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/users")
-	g.Use(middleware.AuthMiddleware())
 
 	g.Post("", uc.PostUsersHandler)
 	g.Get("", uc.GetAllUsersHandler)
