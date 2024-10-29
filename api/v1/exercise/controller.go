@@ -2,6 +2,7 @@ package exercise
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -193,6 +194,8 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 
 func (ec *ExerciseController) Handle() {
 	g := ec.Instance.Group("/exercises")
+	g.Use(middleware.AuthMiddleware())
+
 	g.Post("/", ec.PostExerciseHandler)
 	g.Post("/many", ec.PostManyExerciseHandler)
 	g.Get("/", ec.GetExercisesHandler)

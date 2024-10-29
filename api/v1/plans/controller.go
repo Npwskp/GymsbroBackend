@@ -2,6 +2,7 @@ package plans
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -219,6 +220,8 @@ func (pc *PlanController) UpdatePlanByUserDayHandler(c *fiber.Ctx) error {
 
 func (pc *PlanController) Handle() {
 	g := pc.Instance.Group("/plans")
+	g.Use(middleware.AuthMiddleware())
+
 	g.Post("/", pc.PostPlansHandler)
 	g.Get("/", pc.GetPlansHandler)
 	g.Get("/:id", pc.GetPlanHandler)

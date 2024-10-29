@@ -96,14 +96,14 @@ func (as *AuthService) Register(register *RegisterDto) (*user.User, error) {
 
 func (as *AuthService) Me(token string) (*user.User, error) {
 	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.GetJWTSecret()), nil
 	})
 	if err != nil {
 		return nil, err
 	}
 	userService := user.UserService{DB: as.DB}
-	user, err := userService.GetUser(claims["id"].(string))
+	user, err := userService.GetUser(claims["sub"].(string))
 	if err != nil {
 		return nil, err
 	}
@@ -117,13 +117,10 @@ func createJWTToken(user *user.User) (string, int64, error) {
 	now := time.Now()
 	exp := now.Add(config.JWTExpirationTime).Unix()
 
-	// Only include necessary claims
-	claims["sub"] = user.ID.Hex()       // Subject (user ID)
-	claims["iat"] = now.Unix()          // Issued At
-	claims["exp"] = exp                 // Expiration
-	claims["jti"] = uuid.New().String() // Unique token ID
-
-	// Optional claims for user info (avoid sensitive data)
+	claims["sub"] = user.ID.Hex()
+	claims["iat"] = now.Unix()
+	claims["exp"] = exp
+	claims["jti"] = uuid.New().String()
 	claims["username"] = user.Username
 	claims["email"] = user.Email
 
