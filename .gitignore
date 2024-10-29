@@ -30,3 +30,7 @@ go.sum
 
 #tmp files for automate build
 /tmp/
+
+# Build artifacts
+*.exe
+*.out
