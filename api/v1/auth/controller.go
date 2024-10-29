@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Npwskp/GymsbroBackend/api/v1/config"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,15 +36,24 @@ func (ac *AuthController) PostLoginHandler(c *fiber.Ctx) error {
 	}
 	token, exp, err := ac.Service.Login(login)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(err)
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid credentials",
+		})
 	}
-	timestamp := time.Unix(exp, 0)
-	cookie := new(fiber.Cookie)
-	cookie.Name = "jwt"
-	cookie.Value = token
-	cookie.Expires = timestamp
+	cookie := &fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Unix(exp, 0),
+		Secure:   config.CookieSecure,
+		HTTPOnly: config.CookieHTTPOnly,
+		SameSite: config.CookieSameSite,
+		Path:     "/",
+	}
 	c.Cookie(cookie)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"token": token, "exp": exp})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Login successful",
+		"exp":     exp,
+	})
 }
 
 // @Summary		Register

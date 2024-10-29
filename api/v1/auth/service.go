@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"unicode"
 
+	"github.com/Npwskp/GymsbroBackend/api/v1/config"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,10 +58,21 @@ func (as *AuthService) Register(register *RegisterDto) (*user.User, error) {
 		return nil, errors.New("email have been used")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
-	if err != nil {
+	// Validate password strength
+	if err := validatePasswordStrength(register.Password); err != nil {
 		return nil, err
 	}
+
+	// Hash password with higher cost
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(register.Password),
+		config.BcryptCost,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error hashing password: %w", err)
+	}
+
+	// Clear plain text password immediately
 	register.Password = string(hashedPassword)
 
 	user := user.CreateUserDto{
@@ -99,15 +113,56 @@ func (as *AuthService) Me(token string) (*user.User, error) {
 func createJWTToken(user *user.User) (string, int64, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	exp := time.Now().Add(time.Hour * 72).Unix()
-	claims["id"] = user.ID.Hex()
+
+	now := time.Now()
+	exp := now.Add(config.JWTExpirationTime).Unix()
+
+	// Only include necessary claims
+	claims["sub"] = user.ID.Hex()       // Subject (user ID)
+	claims["iat"] = now.Unix()          // Issued At
+	claims["exp"] = exp                 // Expiration
+	claims["jti"] = uuid.New().String() // Unique token ID
+
+	// Optional claims for user info (avoid sensitive data)
 	claims["username"] = user.Username
 	claims["email"] = user.Email
-	claims["password"] = user.Password
-	claims["exp"] = exp
-	tokenString, err := token.SignedString([]byte("secret"))
+
+	tokenString, err := token.SignedString([]byte(config.GetJWTSecret()))
 	if err != nil {
 		return "", 0, err
 	}
+
 	return tokenString, exp, nil
+}
+
+func validatePasswordStrength(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters")
+	}
+
+	var (
+		hasUpper   bool
+		hasLower   bool
+		hasNumber  bool
+		hasSpecial bool
+	)
+
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsNumber(char):
+			hasNumber = true
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			hasSpecial = true
+		}
+	}
+
+	if !hasUpper || !hasLower || !hasNumber || !hasSpecial {
+		return errors.New("password must contain at least one uppercase letter, lowercase letter, number, and special character")
+	}
+
+	return nil
 }
