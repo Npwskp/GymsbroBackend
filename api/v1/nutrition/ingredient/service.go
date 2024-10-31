@@ -38,7 +38,13 @@ func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto, u
 }
 
 func (is *IngredientService) GetAllIngredients(userId string) ([]*Ingredient, error) {
-	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), bson.D{})
+	filter := bson.D{
+		{Key: "$or", Value: []bson.D{
+			{{Key: "userid", Value: ""}},
+			{{Key: "userid", Value: userId}},
+		}},
+	}
+	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}

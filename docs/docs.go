@@ -471,7 +471,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/ingredient/user/{userid}": {
+        "/ingredient/user": {
             "get": {
                 "description": "Get ingredients by user",
                 "consumes": [
@@ -1616,8 +1616,7 @@ const docTemplate = `{
         "ingredient.CreateIngredientDto": {
             "type": "object",
             "required": [
-                "name",
-                "userid"
+                "name"
             ],
             "properties": {
                 "calories": {
@@ -1636,9 +1635,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },
@@ -1684,9 +1680,6 @@ const docTemplate = `{
         },
         "ingredient.UpdateIngredientDto": {
             "type": "object",
-            "required": [
-                "userid"
-            ],
             "properties": {
                 "calories": {
                     "type": "number"
@@ -1702,9 +1695,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },

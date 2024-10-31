@@ -469,7 +469,7 @@
                 }
             }
         },
-        "/ingredient/user/{userid}": {
+        "/ingredient/user": {
             "get": {
                 "description": "Get ingredients by user",
                 "consumes": [
@@ -1614,8 +1614,7 @@
         "ingredient.CreateIngredientDto": {
             "type": "object",
             "required": [
-                "name",
-                "userid"
+                "name"
             ],
             "properties": {
                 "calories": {
@@ -1634,9 +1633,6 @@
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },
@@ -1682,9 +1678,6 @@
         },
         "ingredient.UpdateIngredientDto": {
             "type": "object",
-            "required": [
-                "userid"
-            ],
             "properties": {
                 "calories": {
                     "type": "number"
@@ -1700,9 +1693,6 @@
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },

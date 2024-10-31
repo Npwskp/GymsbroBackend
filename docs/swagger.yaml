@@ -119,11 +119,8 @@ definitions:
         items:
           $ref: '#/definitions/types.Nutrient'
         type: array
-      userid:
-        type: string
     required:
     - name
-    - userid
     type: object
   ingredient.Ingredient:
     properties:
@@ -165,10 +162,6 @@ definitions:
         items:
           $ref: '#/definitions/types.Nutrient'
         type: array
-      userid:
-        type: string
-    required:
-    - userid
     type: object
   meal.CreateMealDto:
     properties:
@@ -829,7 +822,7 @@ paths:
       summary: Update an ingredient
       tags:
       - ingredient
-  /ingredient/user/{userid}:
+  /ingredient/user:
     get:
       consumes:
       - application/json
