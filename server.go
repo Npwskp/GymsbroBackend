@@ -63,7 +63,19 @@ func disconnectDB() error {
 // @BasePath	/api/v1
 // @schemes		http https
 // @host		localhost:8080
-// @version		1.0
+// @version					1.0
+
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
+// @description Enter your bearer token in the format: Bearer {token}
+
+// @SecurityDefinition.apiKey cookieAuth
+// @in cookie
+// @name jwt
+
+// @Security Bearer
+// @Security cookieAuth
 func main() {
 	app := fiber.New()
 
@@ -86,7 +98,9 @@ func main() {
 
 	utils.InjectApp(app, mg.Db)
 
-	app.Get("/swagger/*", swagger.HandlerDefault) // default
+	app.Get("/swagger/*", swagger.New(swagger.Config{
+		Title: "GymsBro API",
+	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		fmt.Println(time.Now().Format("2006-01-02"))

@@ -8,7 +8,7 @@ import (
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/config"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
@@ -53,15 +53,14 @@ func (as *AuthService) Register(register *RegisterDto) (*user.User, error) {
 	}
 	userService := user.UserService{DB: as.DB}
 	check, err := userService.GetUserByEmail(register.Email)
-	fmt.Println("hello2")
 	if check != nil && err == nil {
 		return nil, errors.New("email have been used")
 	}
 
-	// Validate password strength
-	if err := validatePasswordStrength(register.Password); err != nil {
-		return nil, err
-	}
+	// Validate password strength TODO: Do this later
+	// if err := validatePasswordStrength(register.Password); err != nil {
+	// 	return nil, err
+	// }
 
 	// Hash password with higher cost
 	hashedPassword, err := bcrypt.GenerateFromPassword(
@@ -83,14 +82,11 @@ func (as *AuthService) Register(register *RegisterDto) (*user.User, error) {
 		Gender:   register.Gender,
 	}
 
-	fmt.Println(user)
 	result, err := userService.CreateUser(&user)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-	fmt.Println("hello3")
-	fmt.Println(result)
 	return result, nil
 }
 

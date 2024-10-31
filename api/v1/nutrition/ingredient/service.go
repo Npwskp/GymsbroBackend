@@ -2,10 +2,8 @@ package ingredient
 
 import (
 	"context"
-	"errors"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,15 +14,15 @@ type IngredientService struct {
 }
 
 type IIngredientService interface {
-	CreateIngredient(ingredient *CreateIngredientDto) (*Ingredient, error)
-	GetAllIngredients() ([]*Ingredient, error)
-	GetIngredient(id string) (*Ingredient, error)
-	GetIngredientByUser(userid string) ([]*Ingredient, error)
-	DeleteIngredient(id string) error
-	UpdateIngredient(doc *UpdateIngredientDto, id string) (*Ingredient, error)
+	CreateIngredient(ingredient *CreateIngredientDto, userId string) (*Ingredient, error)
+	GetAllIngredients(userId string) ([]*Ingredient, error)
+	GetIngredient(id string, userId string) (*Ingredient, error)
+	GetIngredientByUser(userId string) ([]*Ingredient, error)
+	DeleteIngredient(id string, userId string) error
+	UpdateIngredient(doc *UpdateIngredientDto, id string, userId string) (*Ingredient, error)
 }
 
-func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto) (*Ingredient, error) {
+func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto, userId string) (*Ingredient, error) {
 	ingredientModel := CreateIngredientModel(ingredient)
 	result, err := is.DB.Collection("ingredient").InsertOne(context.Background(), ingredientModel)
 	if err != nil {
@@ -39,7 +37,7 @@ func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto) (
 	return createdIngredient, nil
 }
 
-func (is *IngredientService) GetAllIngredients() ([]*Ingredient, error) {
+func (is *IngredientService) GetAllIngredients(userId string) ([]*Ingredient, error) {
 	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), bson.D{})
 	if err != nil {
 		return nil, err
@@ -51,7 +49,12 @@ func (is *IngredientService) GetAllIngredients() ([]*Ingredient, error) {
 	return ingredients, nil
 }
 
-func (is *IngredientService) GetIngredient(id string) (*Ingredient, error) {
+func (is *IngredientService) GetIngredient(id string, userId string) (*Ingredient, error) {
+	err := function.CheckOwnership(is.DB, id, userId, "ingredient", &Ingredient{})
+	if err != nil {
+		return nil, err
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -65,8 +68,8 @@ func (is *IngredientService) GetIngredient(id string) (*Ingredient, error) {
 	return ingredient, nil
 }
 
-func (is *IngredientService) GetIngredientByUser(userid string) ([]*Ingredient, error) {
-	filter := bson.D{{Key: "userid", Value: userid}}
+func (is *IngredientService) GetIngredientByUser(userId string) ([]*Ingredient, error) {
+	filter := bson.D{{Key: "userid", Value: userId}}
 	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
@@ -78,8 +81,13 @@ func (is *IngredientService) GetIngredientByUser(userid string) ([]*Ingredient, 
 	return ingredients, nil
 }
 
-func (is *IngredientService) DeleteIngredient(id string) error {
-	objectID, err := is.CheckOwnershipAndGetObjectId(id, "1") // TODO: Use userId from token
+func (is *IngredientService) DeleteIngredient(id string, userId string) error {
+	err := function.CheckOwnership(is.DB, id, userId, "ingredient", &Ingredient{})
+	if err != nil {
+		return err
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -91,8 +99,8 @@ func (is *IngredientService) DeleteIngredient(id string) error {
 	return nil
 }
 
-func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id string) (*Ingredient, error) {
-	objectID, err := is.CheckOwnershipAndGetObjectId(id, doc.UserID)
+func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id string, userId string) (*Ingredient, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
@@ -103,27 +111,9 @@ func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id strin
 	if err != nil {
 		return nil, err
 	}
-	ingredient, err := is.GetIngredient(id)
+	ingredient, err := is.GetIngredient(id, userId)
 	if err != nil {
 		return nil, err
 	}
 	return ingredient, nil
-}
-
-func (is *IngredientService) CheckOwnershipAndGetObjectId(id string, userid string) (primitive.ObjectID, error) {
-	isEntityOwner, err := function.CheckOwnership(is.DB, id, userid, "ingredient", &Ingredient{}) // TODO: Use userId from token
-	var objectID primitive.ObjectID
-	if err != nil {
-		return objectID, err
-	}
-
-	if !isEntityOwner {
-		return objectID, errors.New("update failed: user does not own this entity")
-	} else {
-		objectID, err = primitive.ObjectIDFromHex(id)
-		if err != nil {
-			return objectID, err
-		}
-	}
-	return objectID, nil
 }

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/config"
@@ -53,6 +52,7 @@ func (ac *AuthController) PostLoginHandler(c *fiber.Ctx) error {
 	c.Cookie(cookie)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Login successful",
+		"token":   token,
 		"exp":     exp,
 	})
 }
@@ -69,11 +69,9 @@ func (ac *AuthController) PostLoginHandler(c *fiber.Ctx) error {
 func (ac *AuthController) PostRegisterHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	register := new(RegisterDto)
-	fmt.Println("Hello")
 	if err := c.BodyParser(register); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(err)
 	}
-	fmt.Println(register)
 	if err := validate.Struct(register); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(err)
 	}
@@ -81,7 +79,6 @@ func (ac *AuthController) PostRegisterHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(err)
 	}
-	fmt.Println(user, err)
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 

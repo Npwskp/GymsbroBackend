@@ -1,6 +1,7 @@
 package ingredient
 
 import (
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,10 +23,11 @@ type IngredientController struct {
 // @Router /ingredient [post]
 func (ic *IngredientController) CreateIngredient(c *fiber.Ctx) error {
 	dto := new(CreateIngredientDto)
+	userId := function.GetUserIDFromContext(c)
 	if err := c.BodyParser(dto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	ingredient, err := ic.Service.CreateIngredient(dto)
+	ingredient, err := ic.Service.CreateIngredient(dto, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -41,7 +43,8 @@ func (ic *IngredientController) CreateIngredient(c *fiber.Ctx) error {
 // @Failure 400 {object} Error
 // @Router /ingredient [get]
 func (ic *IngredientController) GetAllIngredients(c *fiber.Ctx) error {
-	ingredients, err := ic.Service.GetAllIngredients()
+	userId := function.GetUserIDFromContext(c)
+	ingredients, err := ic.Service.GetAllIngredients(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -59,7 +62,8 @@ func (ic *IngredientController) GetAllIngredients(c *fiber.Ctx) error {
 // @Router /ingredient/{id} [get]
 func (ic *IngredientController) GetIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
-	ingredient, err := ic.Service.GetIngredient(id)
+	userId := function.GetUserIDFromContext(c)
+	ingredient, err := ic.Service.GetIngredient(id, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -74,10 +78,10 @@ func (ic *IngredientController) GetIngredient(c *fiber.Ctx) error {
 // @Param userid path string true "User ID"
 // @Success 200 {object} []Ingredient
 // @Failure 400 {object} Error
-// @Router /ingredient/user/{userid} [get]
+// @Router /ingredient/user [get]
 func (ic *IngredientController) GetIngredientByUser(c *fiber.Ctx) error {
-	userid := c.Params("userid")
-	ingredients, err := ic.Service.GetIngredientByUser(userid)
+	userId := function.GetUserIDFromContext(c)
+	ingredients, err := ic.Service.GetIngredientByUser(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -95,7 +99,9 @@ func (ic *IngredientController) GetIngredientByUser(c *fiber.Ctx) error {
 // @Router /ingredient/{id} [delete]
 func (ic *IngredientController) DeleteIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
-	err := ic.Service.DeleteIngredient(id)
+	userId := function.GetUserIDFromContext(c)
+
+	err := ic.Service.DeleteIngredient(id, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -114,11 +120,15 @@ func (ic *IngredientController) DeleteIngredient(c *fiber.Ctx) error {
 // @Router /ingredient/{id} [put]
 func (ic *IngredientController) UpdateIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
-	dto := new(UpdateIngredientDto)
-	if err := c.BodyParser(dto); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	user := c.Locals("user").(map[string]interface{})
+	userId := user["id"].(string)
+
+	var doc UpdateIngredientDto
+	if err := c.BodyParser(&doc); err != nil {
+		return err
 	}
-	ingredient, err := ic.Service.UpdateIngredient(dto, id)
+
+	ingredient, err := ic.Service.UpdateIngredient(&doc, id, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

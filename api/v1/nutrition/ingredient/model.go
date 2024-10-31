@@ -20,7 +20,7 @@ type Ingredient struct {
 
 func CreateIngredientModel(dto *CreateIngredientDto) *Ingredient {
 	return &Ingredient{
-		UserID:    dto.UserID,
+		UserID:    "",
 		Name:      dto.Name,
 		Image:     dto.Image,
 		Calories:  dto.Calories,

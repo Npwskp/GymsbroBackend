@@ -5,7 +5,6 @@ import (
 )
 
 type CreateIngredientDto struct {
-	UserID    string            `json:"userid" validate:"required"`
 	Name      string            `json:"name" validate:"required"`
 	Image     string            `json:"image" default:"null"`
 	Calories  float64           `json:"calories" default:"0"`
@@ -13,7 +12,6 @@ type CreateIngredientDto struct {
 }
 
 type UpdateIngredientDto struct {
-	UserID    string            `json:"userid" validate:"required"`
 	Name      string            `json:"name"`
 	Image     string            `json:"image"`
 	Calories  float64           `json:"calories"`

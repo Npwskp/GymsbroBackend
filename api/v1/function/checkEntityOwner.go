@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,10 +20,16 @@ func getConcreteValue(v reflect.Value) reflect.Value {
 	return v
 }
 
-func CheckOwnership(db *mongo.Database, id string, userid string, collection string, objType interface{}) (bool, error) {
+func CheckOwnership(
+	db *mongo.Database,
+	id string,
+	userid string,
+	collection string,
+	objType interface{},
+) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	filter := bson.D{{Key: "_id", Value: objectID}}
@@ -36,7 +43,7 @@ func CheckOwnership(db *mongo.Database, id string, userid string, collection str
 	value := reflect.New(t).Interface()
 
 	if err := record.Decode(value); err != nil {
-		return false, err
+		return err
 	}
 
 	// Get the concrete value
@@ -54,12 +61,23 @@ func CheckOwnership(db *mongo.Database, id string, userid string, collection str
 	}
 
 	if !userIDField.IsValid() {
-		return false, fmt.Errorf("no such field: UserID in obj")
+		return fmt.Errorf("no such field: userId in obj")
 	}
 
 	if str, ok := userIDField.Interface().(string); ok {
-		return str == userid, nil
+		if str == userid {
+			return nil
+		} else {
+			return errors.New("user does not own this entity")
+		}
 	}
 
-	return false, errors.New("UserID field is not a string")
+	return errors.New("userId field is not a string")
+}
+
+func GetUserIDFromContext(c *fiber.Ctx) string {
+	user := c.Locals("user").(map[string]interface{})
+	userId := user["id"].(string)
+
+	return userId
 }
