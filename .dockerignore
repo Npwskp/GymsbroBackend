@@ -1,0 +1,48 @@
+# Build artifacts
+/bin/
+/obj/
+*.exe
+*.out
+
+# Go modules
+/vendor/
+
+# Environment files
+.env
+
+# IDE and editor files
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/
+
+# Test cache
+*.test
+
+# Go cache
+/pkg/
+go.sum
+
+# Temporary files
+*~
+*.swp
+.DS_Store
+
+# tmp files for automate build
+/tmp/
+
+# Git files
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+docker-compose.yml
+
+# Documentation
+README.md
+LICENSE
+
+# Swagger docs (will be generated)
+/docs/swagger.json
+/docs/swagger.yaml
