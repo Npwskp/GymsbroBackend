@@ -20,3 +20,12 @@ type UpdateMealDto struct {
 	Fat         float64 `json:"fat"`
 	Calories    float64 `json:"calories"`
 }
+
+type SearchFilters struct {
+	Query       string `json:"q"` // Search query
+	Category    string `json:"category"`
+	MinCalories int    `json:"minCalories"`
+	MaxCalories int    `json:"maxCalories"`
+	Nutrients   string `json:"nutrients"`
+	UserID      string `json:"userid"`
+}

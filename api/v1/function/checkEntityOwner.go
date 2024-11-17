@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -76,8 +77,8 @@ func CheckOwnership(
 }
 
 func GetUserIDFromContext(c *fiber.Ctx) string {
-	user := c.Locals("user").(map[string]interface{})
-	userId := user["id"].(string)
-
+	token := c.Locals("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userId := claims["sub"].(string)
 	return userId
 }

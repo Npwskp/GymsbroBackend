@@ -110,6 +110,10 @@ definitions:
       calories:
         default: 0
         type: number
+      category:
+        type: string
+      description:
+        type: string
       image:
         default: "null"
         type: string
@@ -127,8 +131,11 @@ definitions:
       calories:
         default: 0
         type: number
+      category:
+        type: string
       created_at:
-        default: "null"
+        type: string
+      description:
         type: string
       id:
         type: string
@@ -142,7 +149,6 @@ definitions:
           $ref: '#/definitions/types.Nutrient'
         type: array
       updated_at:
-        default: "null"
         type: string
       userid:
         type: string
@@ -154,6 +160,10 @@ definitions:
     properties:
       calories:
         type: number
+      category:
+        type: string
+      description:
+        type: string
       image:
         type: string
       name:
@@ -167,6 +177,10 @@ definitions:
     properties:
       calories:
         type: number
+      category:
+        type: string
+      description:
+        type: string
       image:
         type: string
       ingredients:
@@ -186,11 +200,19 @@ definitions:
     type: object
   meal.Meal:
     properties:
+      brandName:
+        type: string
+      brandOwner:
+        type: string
       calories:
         default: 0
         type: number
+      category:
+        type: string
       created_at:
         default: "null"
+        type: string
+      description:
         type: string
       id:
         type: string
@@ -207,6 +229,10 @@ definitions:
         items:
           $ref: '#/definitions/types.Nutrient'
         type: array
+      servingSize:
+        type: number
+      servingSizeUnit:
+        type: string
       updated_at:
         default: "null"
         type: string
@@ -221,6 +247,8 @@ definitions:
         type: number
       carb:
         type: number
+      description:
+        type: string
       fat:
         type: number
       protein:
@@ -275,6 +303,8 @@ definitions:
     properties:
       ingredientid:
         type: string
+      name:
+        type: string
       numofservings:
         type: number
       unit:
@@ -283,27 +313,23 @@ definitions:
         type: number
     required:
     - ingredientid
+    - name
     - numofservings
     - unit
     - value
     type: object
   types.Nutrient:
     properties:
-      category:
-        type: string
+      amount:
+        type: number
       name:
-        type: string
-      type:
         type: string
       unit:
         type: string
-      value:
-        type: number
     required:
+    - amount
     - name
-    - type
     - unit
-    - value
     type: object
   user.CreateUserDto:
     properties:
@@ -822,6 +848,32 @@ paths:
       summary: Update an ingredient
       tags:
       - ingredient
+  /ingredient/search:
+    get:
+      consumes:
+      - application/json
+      description: Search ingredients with fuzzy matching
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ingredient.Ingredient'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Search ingredients
+      tags:
+      - ingredient
   /ingredient/user:
     get:
       consumes:
@@ -964,6 +1016,32 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update a meal
+      tags:
+      - meals
+  /meals/search:
+    get:
+      consumes:
+      - application/json
+      description: Search meals with fuzzy matching
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/meal.Meal'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Search meals
       tags:
       - meals
   /meals/user/{userid}:

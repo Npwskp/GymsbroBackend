@@ -1,6 +1,7 @@
 package meal
 
 import (
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -156,11 +157,45 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(meal)
 }
 
+// @Summary Search and filter meals
+// @Description Search meals with optional filters
+// @Tags meals
+// @Accept json
+// @Produce json
+// @Param q query string false "Search query"
+// @Param category query string false "Category filter"
+// @Param minCalories query number false "Minimum calories"
+// @Param maxCalories query number false "Maximum calories"
+// @Param nutrients query string false "Nutrients filter (comma-separated)"
+// @Success 200 {array} Meal
+// @Failure 400 {object} Error
+// @Router /meals/search [get]
+func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
+	filters := SearchFilters{
+		Query:       c.Query("q"),
+		Category:    c.Query("category"),
+		MinCalories: c.QueryInt("minCalories", 0),
+		MaxCalories: c.QueryInt("maxCalories", 0),
+		Nutrients:   c.Query("nutrients"),
+		UserID:      function.GetUserIDFromContext(c),
+	}
+
+	meals, err := mc.Service.SearchFilteredMeals(filters)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(meals)
+}
+
 func (nc *MealController) Handle() {
 	g := nc.Instance.Group("/meals")
 
 	g.Post("/", nc.CreateMealHandler)
 	g.Get("/", nc.GetMealsHandler)
+	g.Get("/search", nc.SearchFilteredMealsHandler)
 	g.Get("/:id", nc.GetMealHandler)
 	g.Get("/user/:userid", nc.GetMealByUserHandler)
 	g.Get("/userdate/:userid", nc.GetMealByUserDateHandler)

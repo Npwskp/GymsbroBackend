@@ -2,6 +2,7 @@ package ingredient
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -43,10 +44,18 @@ func (ic *IngredientController) CreateIngredient(c *fiber.Ctx) error {
 // @Failure 400 {object} Error
 // @Router /ingredient [get]
 func (ic *IngredientController) GetAllIngredients(c *fiber.Ctx) error {
-	userId := function.GetUserIDFromContext(c)
-	ingredients, err := ic.Service.GetAllIngredients(userId)
+	userID, err := middleware.GetUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	ingredients, err := ic.Service.GetAllIngredients(userID.Hex())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 	return c.JSON(ingredients)
 }
@@ -135,11 +144,45 @@ func (ic *IngredientController) UpdateIngredient(c *fiber.Ctx) error {
 	return c.JSON(ingredient)
 }
 
+// @Summary Search and filter ingredients
+// @Description Search ingredients with optional filters
+// @Tags ingredient
+// @Accept json
+// @Produce json
+// @Param q query string false "Search query"
+// @Param category query string false "Category filter"
+// @Param minCalories query number false "Minimum calories"
+// @Param maxCalories query number false "Maximum calories"
+// @Param nutrients query string false "Nutrients filter (comma-separated)"
+// @Success 200 {array} Ingredient
+// @Failure 400 {object} Error
+// @Router /ingredient/search [get]
+func (ic *IngredientController) SearchFilteredIngredients(c *fiber.Ctx) error {
+	filters := SearchFilters{
+		Query:       c.Query("q"),
+		Category:    c.Query("category"),
+		MinCalories: c.QueryFloat("minCalories"),
+		MaxCalories: c.QueryFloat("maxCalories"),
+		Nutrients:   c.Query("nutrients"),
+		UserID:      function.GetUserIDFromContext(c),
+	}
+
+	ingredients, err := ic.Service.SearchFilteredIngredients(filters)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(ingredients)
+}
+
 func (ic *IngredientController) Handle() {
 	g := ic.Instance.Group("/ingredient")
 
 	g.Post("/", ic.CreateIngredient)
 	g.Get("/", ic.GetAllIngredients)
+	g.Get("/search", ic.SearchFilteredIngredients)
 	g.Get("/:id", ic.GetIngredient)
 	g.Get("/user/:userid", ic.GetIngredientByUser)
 	g.Delete("/:id", ic.DeleteIngredient)

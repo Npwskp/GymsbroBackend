@@ -471,6 +471,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/ingredient/search": {
+            "get": {
+                "description": "Search ingredients with fuzzy matching",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredient"
+                ],
+                "summary": "Search ingredients",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "q",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ingredient.Ingredient"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/ingredient/user": {
             "get": {
                 "description": "Get ingredients by user",
@@ -677,6 +716,45 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/meal.Meal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/meals/search": {
+            "get": {
+                "description": "Search meals with fuzzy matching",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meals"
+                ],
+                "summary": "Search meals",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "q",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/meal.Meal"
+                            }
                         }
                     },
                     "400": {
@@ -1623,6 +1701,12 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string",
                     "default": "null"
@@ -1649,9 +1733,14 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
+                "category": {
+                    "type": "string"
+                },
                 "created_at": {
-                    "type": "string",
-                    "default": "null"
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -1670,8 +1759,7 @@ const docTemplate = `{
                     }
                 },
                 "updated_at": {
-                    "type": "string",
-                    "default": "null"
+                    "type": "string"
                 },
                 "userid": {
                     "type": "string"
@@ -1683,6 +1771,12 @@ const docTemplate = `{
             "properties": {
                 "calories": {
                     "type": "number"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -1706,6 +1800,12 @@ const docTemplate = `{
             "properties": {
                 "calories": {
                     "type": "number"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -1736,13 +1836,25 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "brandName": {
+                    "type": "string"
+                },
+                "brandOwner": {
+                    "type": "string"
+                },
                 "calories": {
                     "type": "number",
                     "default": 0
                 },
+                "category": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string",
                     "default": "null"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -1766,6 +1878,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/types.Nutrient"
                     }
                 },
+                "servingSize": {
+                    "type": "number"
+                },
+                "servingSizeUnit": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string",
                     "default": "null"
@@ -1783,6 +1901,9 @@ const docTemplate = `{
                 },
                 "carb": {
                     "type": "number"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "fat": {
                     "type": "number"
@@ -1863,12 +1984,16 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "ingredientid",
+                "name",
                 "numofservings",
                 "unit",
                 "value"
             ],
             "properties": {
                 "ingredientid": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "numofservings": {
@@ -1885,26 +2010,19 @@ const docTemplate = `{
         "types.Nutrient": {
             "type": "object",
             "required": [
+                "amount",
                 "name",
-                "type",
-                "unit",
-                "value"
+                "unit"
             ],
             "properties": {
-                "category": {
-                    "type": "string"
+                "amount": {
+                    "type": "number"
                 },
                 "name": {
                     "type": "string"
                 },
-                "type": {
-                    "type": "string"
-                },
                 "unit": {
                     "type": "string"
-                },
-                "value": {
-                    "type": "number"
                 }
             }
         },

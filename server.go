@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	dbmongo "github.com/Npwskp/GymsbroBackend/api/v1/db"
 	"github.com/Npwskp/GymsbroBackend/api/v1/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -95,6 +96,10 @@ func main() {
 
 	connectDB()
 	defer disconnectDB()
+
+	if err := dbmongo.CreateIndexes(mg.Db); err != nil {
+		log.Fatalf("Error creating indexes: %v", err)
+	}
 
 	utils.InjectApp(app, mg.Db)
 

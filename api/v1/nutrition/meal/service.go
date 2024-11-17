@@ -2,11 +2,14 @@ package meal
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MealService struct {
@@ -21,6 +24,7 @@ type IMealService interface {
 	GetMealByUserDate(userid string, start int, end int) ([]*Meal, error)
 	DeleteMeal(id string) error
 	UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error)
+	SearchFilteredMeals(filters SearchFilters) ([]*Meal, error)
 }
 
 func (ns *MealService) CreateMeal(meal *CreateMealDto) (*Meal, error) {
@@ -122,4 +126,90 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error) 
 		return nil, err
 	}
 	return ns.GetMeal(id)
+}
+
+func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, error) {
+	filterQuery := bson.D{}
+	andConditions := []bson.D{}
+
+	// Add name search if query is provided
+	if filters.Query != "" {
+		andConditions = append(andConditions, bson.D{
+			{Key: "name", Value: bson.D{{Key: "$regex", Value: primitive.Regex{Pattern: filters.Query, Options: "i"}}}},
+		})
+	}
+
+	// Add user filter
+	if filters.UserID != "" {
+		andConditions = append(andConditions, bson.D{
+			{Key: "$or", Value: []bson.D{
+				{{Key: "userid", Value: ""}},
+				{{Key: "userid", Value: filters.UserID}},
+				{{Key: "userid", Value: primitive.Null{}}},
+			}},
+		})
+	}
+
+	// Add category filter
+	if filters.Category != "" {
+		andConditions = append(andConditions, bson.D{
+			{Key: "category", Value: filters.Category},
+		})
+	}
+
+	// Add calories range filter
+	if filters.MinCalories > 0 || filters.MaxCalories > 0 {
+		caloriesFilter := bson.D{}
+		if filters.MinCalories > 0 {
+			caloriesFilter = append(caloriesFilter, bson.E{Key: "$gte", Value: filters.MinCalories})
+		}
+		if filters.MaxCalories > 0 {
+			caloriesFilter = append(caloriesFilter, bson.E{Key: "$lte", Value: filters.MaxCalories})
+		}
+		andConditions = append(andConditions, bson.D{
+			{Key: "calories", Value: caloriesFilter},
+		})
+	}
+
+	// Add nutrients filter
+	if filters.Nutrients != "" {
+		nutrients := strings.Split(filters.Nutrients, ",")
+		nutrientFilters := bson.A{}
+		for _, nutrient := range nutrients {
+			nutrient = strings.TrimSpace(nutrient)
+			if nutrient != "" {
+				nutrientFilters = append(nutrientFilters, bson.M{
+					"nutrients.name": bson.M{
+						"$regex":   nutrient,
+						"$options": "i",
+					},
+				})
+			}
+		}
+		if len(nutrientFilters) > 0 {
+			andConditions = append(andConditions, bson.D{
+				{Key: "$or", Value: nutrientFilters},
+			})
+		}
+	}
+
+	// Combine all conditions
+	if len(andConditions) > 0 {
+		filterQuery = bson.D{{Key: "$and", Value: andConditions}}
+	}
+
+	// Execute query with limit
+	opts := options.Find().SetLimit(20)
+	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filterQuery, opts)
+	if err != nil {
+		return nil, fmt.Errorf("error searching meals: %w", err)
+	}
+	defer cursor.Close(context.Background())
+
+	var meals []*Meal
+	if err := cursor.All(context.Background(), &meals); err != nil {
+		return nil, fmt.Errorf("error decoding meals: %w", err)
+	}
+
+	return meals, nil
 }

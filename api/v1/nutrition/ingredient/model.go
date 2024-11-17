@@ -16,8 +16,8 @@ type Ingredient struct {
 	Image       string             `json:"image" default:"null"`
 	Calories    float64            `json:"calories" default:"0"`
 	Nutrients   *[]types.Nutrient  `json:"nutrients,omitempty"`
-	CreatedAt   time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
-	UpdateAt    time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
+	CreatedAt   time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdateAt    time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 }
 
 func CreateIngredientModel(dto *CreateIngredientDto) *Ingredient {

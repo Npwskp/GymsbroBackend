@@ -21,3 +21,12 @@ type UpdateIngredientDto struct {
 	Calories    float64           `json:"calories"`
 	Nutrients   *[]types.Nutrient `json:"nutrients,omitempty"`
 }
+
+type SearchFilters struct {
+	Query       string  `json:"q"` // Search query
+	Category    string  `json:"category"`
+	MinCalories float64 `json:"minCalories"`
+	MaxCalories float64 `json:"maxCalories"`
+	Nutrients   string  `json:"nutrients"`
+	UserID      string  `json:"userid"`
+}
