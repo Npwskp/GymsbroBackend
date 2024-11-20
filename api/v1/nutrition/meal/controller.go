@@ -51,6 +51,12 @@ func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
+
+	// Initialize empty slice if meals is nil
+	if meals == nil {
+		meals = []*Meal{}
+	}
+
 	return c.Status(fiber.StatusOK).JSON(meals)
 }
 
@@ -185,6 +191,11 @@ func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
+	}
+
+	// Initialize empty slice if meals is nil
+	if meals == nil {
+		meals = []*Meal{}
 	}
 
 	return c.JSON(meals)
