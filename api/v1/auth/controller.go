@@ -7,6 +7,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type AuthController struct {
@@ -26,6 +27,13 @@ type Error error
 // @Failure		400	{object} Error
 // @Router		/auth/login [post]
 func (ac *AuthController) PostLoginHandler(c *fiber.Ctx) error {
+	// Check if there's an existing JWT cookie
+	if existingJWT := c.Cookies("jwt"); existingJWT != "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "another session is already active, please logout first",
+		})
+	}
+
 	validate := validator.New()
 	login := new(LoginDto)
 	if err := c.BodyParser(login); err != nil {
@@ -37,23 +45,21 @@ func (ac *AuthController) PostLoginHandler(c *fiber.Ctx) error {
 	token, exp, err := ac.Service.Login(login)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid credentials",
+			"error": err.Error(),
 		})
 	}
 	cookie := &fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
 		Expires:  time.Unix(exp, 0),
+		HTTPOnly: true,
 		Secure:   config.CookieSecure,
-		HTTPOnly: config.CookieHTTPOnly,
 		SameSite: config.CookieSameSite,
-		Path:     "/",
 	}
 	c.Cookie(cookie)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Login successful",
-		"token":   token,
-		"exp":     exp,
+	return c.Status(fiber.StatusOK).JSON(ReturnToken{
+		Token: token,
+		Exp:   exp,
 	})
 }
 
@@ -117,17 +123,52 @@ func (ac *AuthController) GetMeHandler(c *fiber.Ctx) error {
 // @Failure		400	{object} Error
 // @Router		/auth/logout [post]
 func (ac *AuthController) PostLogoutHandler(c *fiber.Ctx) error {
-	cookie := new(fiber.Cookie)
-	cookie.Name = "jwt"
-	cookie.Value = ""
-	c.Cookie(cookie)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "logout success"})
+	// Get JWT from cookie
+	jwtCookie := c.Cookies("jwt")
+	if jwtCookie == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "no active session",
+		})
+	}
+
+	// Parse the token to get user claims
+	token, err := jwt.Parse(jwtCookie, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.GetJWTSecret()), nil
+	})
+	if err != nil || !token.Valid {
+		// Clear invalid cookie anyway
+		c.Cookie(&fiber.Cookie{
+			Name:     "jwt",
+			Value:    "",
+			Expires:  time.Now().Add(-time.Hour),
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+		})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+
+	// Clear cookie
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Strict",
+	})
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Successfully logged out",
+	})
 }
 
 func (ac *AuthController) Handle() {
 	g := ac.Instance.Group("/auth")
-	g.Post("/login", ac.PostLoginHandler)
-	g.Post("/register", ac.PostRegisterHandler)
-	g.Get("/me", ac.GetMeHandler)
-	g.Post("/logout", ac.PostLogoutHandler)
+	g.Post("/login", middleware.CheckNotLoggedIn(), ac.PostLoginHandler)
+	g.Post("/register", middleware.CheckNotLoggedIn(), ac.PostRegisterHandler)
+	g.Get("/me", middleware.AuthMiddleware(), ac.GetMeHandler)
+	g.Post("/logout", middleware.AuthMiddleware(), ac.PostLogoutHandler)
 }

@@ -34,3 +34,14 @@ func ExtractUserContext() fiber.Handler {
 		return c.Next()
 	}
 }
+
+func CheckNotLoggedIn() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		if c.Cookies("jwt") != "" {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "already logged in, please logout first",
+			})
+		}
+		return c.Next()
+	}
+}

@@ -26,7 +26,7 @@ type IAuthService interface {
 
 func (as *AuthService) Login(login *LoginDto) (string, int64, error) {
 	if login.Email == "" || login.Password == "" {
-		return "", 0, errors.New("plese enter your email and password")
+		return "", 0, errors.New("please enter your email and password")
 	}
 	userService := user.UserService{DB: as.DB}
 	user, err := userService.GetUserByEmail(login.Email)
