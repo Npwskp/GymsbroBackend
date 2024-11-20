@@ -473,7 +473,7 @@ const docTemplate = `{
         },
         "/ingredient/search": {
             "get": {
-                "description": "Search ingredients with fuzzy matching",
+                "description": "Search ingredients with optional filters",
                 "consumes": [
                     "application/json"
                 ],
@@ -483,14 +483,37 @@ const docTemplate = `{
                 "tags": [
                     "ingredient"
                 ],
-                "summary": "Search ingredients",
+                "summary": "Search and filter ingredients",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Search query",
                         "name": "q",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category filter",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum calories",
+                        "name": "minCalories",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum calories",
+                        "name": "maxCalories",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nutrients filter (comma-separated)",
+                        "name": "nutrients",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -727,7 +750,7 @@ const docTemplate = `{
         },
         "/meals/search": {
             "get": {
-                "description": "Search meals with fuzzy matching",
+                "description": "Search meals with optional filters",
                 "consumes": [
                     "application/json"
                 ],
@@ -737,14 +760,37 @@ const docTemplate = `{
                 "tags": [
                     "meals"
                 ],
-                "summary": "Search meals",
+                "summary": "Search and filter meals",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Search query",
                         "name": "q",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category filter",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum calories",
+                        "name": "minCalories",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum calories",
+                        "name": "maxCalories",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nutrients filter (comma-separated)",
+                        "name": "nutrients",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1575,7 +1621,16 @@ const docTemplate = `{
                 "gender": {
                     "type": "string"
                 },
+                "oauth_id": {
+                    "type": "string"
+                },
+                "oauth_provider": {
+                    "type": "string"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "picture": {
                     "type": "string"
                 },
                 "username": {
@@ -2071,7 +2126,16 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
+                "oauth_id": {
+                    "type": "string"
+                },
+                "oauth_provider": {
+                    "type": "string"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "picture": {
                     "type": "string"
                 },
                 "username": {
@@ -2185,7 +2249,16 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
+                "oauth_id": {
+                    "type": "string"
+                },
+                "oauth_provider": {
+                    "type": "string"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "picture": {
                     "type": "string"
                 },
                 "username": {

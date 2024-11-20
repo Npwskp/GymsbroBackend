@@ -25,18 +25,23 @@ type IAuthService interface {
 }
 
 func (as *AuthService) Login(login *LoginDto) (string, int64, error) {
-	if login.Email == "" || login.Password == "" {
-		return "", 0, errors.New("please enter your email and password")
-	}
 	userService := user.UserService{DB: as.DB}
 	user, err := userService.GetUserByEmail(login.Email)
 	if err != nil {
 		return "", 0, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
-	if err != nil {
-		return "", 0, err
+	// If user is OAuth-only (no password set), prevent regular login
+	if user.OAuthProvider != "" && user.Password == "" {
+		return "", 0, errors.New("please use Google sign-in for this account")
+	}
+
+	// For regular users, verify password
+	if user.Password != "" {
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+		if err != nil {
+			return "", 0, err
+		}
 	}
 
 	token, exp, err := createJWTToken(user)

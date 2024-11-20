@@ -15,6 +15,9 @@ type CreateUserDto struct {
 	Hip           float64   `json:"hip" default:"0"`           // default:"0" is not working
 	ActivityLevel int       `json:"activityLevel" default:"0"` // default:"0" is not working
 	CreatedAt     time.Time `json:"created_at,omitempty" bson:"created_at,omitempty" set:"omitempty" default:"null"`
+	OAuthProvider string    `json:"oauth_provider,omitempty"`
+	OAuthID       string    `json:"oauth_id,omitempty"`
+	Picture       string    `json:"picture,omitempty"`
 }
 
 type UpadateUsernamePasswordDto struct {

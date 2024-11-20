@@ -171,4 +171,8 @@ func (ac *AuthController) Handle() {
 	g.Post("/register", middleware.CheckNotLoggedIn(), ac.PostRegisterHandler)
 	g.Get("/me", middleware.AuthMiddleware(), ac.GetMeHandler)
 	g.Post("/logout", middleware.AuthMiddleware(), ac.PostLogoutHandler)
+
+	// Add Google OAuth routes
+	g.Get("/google/login", ac.GoogleLogin)
+	g.Get("/google/callback", ac.GoogleCallback)
 }

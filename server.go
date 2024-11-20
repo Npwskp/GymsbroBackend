@@ -18,6 +18,8 @@ import (
 	_ "github.com/Npwskp/GymsbroBackend/docs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/Npwskp/GymsbroBackend/api/v1/auth"
 )
 
 type MongoInstance struct {
@@ -116,6 +118,8 @@ func main() {
 		fmt.Println(time.Now().Format("2006-01-02"))
 		return c.SendString("Hello, World 👋!")
 	})
+
+	auth.InitGoogleOAuth()
 
 	app.Listen(":8080")
 }

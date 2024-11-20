@@ -20,7 +20,13 @@ definitions:
         type: string
       gender:
         type: string
+      oauth_id:
+        type: string
+      oauth_provider:
+        type: string
       password:
+        type: string
+      picture:
         type: string
       username:
         maxLength: 20
@@ -360,7 +366,13 @@ definitions:
         default: 0
         description: default:"0" is not working
         type: number
+      oauth_id:
+        type: string
+      oauth_provider:
+        type: string
       password:
+        type: string
+      picture:
         type: string
       username:
         maxLength: 20
@@ -442,7 +454,13 @@ definitions:
         default: 0
         description: default:"0" is not working
         type: number
+      oauth_id:
+        type: string
+      oauth_provider:
+        type: string
       password:
+        type: string
+      picture:
         type: string
       username:
         maxLength: 20
@@ -852,12 +870,27 @@ paths:
     get:
       consumes:
       - application/json
-      description: Search ingredients with fuzzy matching
+      description: Search ingredients with optional filters
       parameters:
       - description: Search query
         in: query
         name: q
-        required: true
+        type: string
+      - description: Category filter
+        in: query
+        name: category
+        type: string
+      - description: Minimum calories
+        in: query
+        name: minCalories
+        type: number
+      - description: Maximum calories
+        in: query
+        name: maxCalories
+        type: number
+      - description: Nutrients filter (comma-separated)
+        in: query
+        name: nutrients
         type: string
       produces:
       - application/json
@@ -871,7 +904,7 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      summary: Search ingredients
+      summary: Search and filter ingredients
       tags:
       - ingredient
   /ingredient/user:
@@ -1022,12 +1055,27 @@ paths:
     get:
       consumes:
       - application/json
-      description: Search meals with fuzzy matching
+      description: Search meals with optional filters
       parameters:
       - description: Search query
         in: query
         name: q
-        required: true
+        type: string
+      - description: Category filter
+        in: query
+        name: category
+        type: string
+      - description: Minimum calories
+        in: query
+        name: minCalories
+        type: number
+      - description: Maximum calories
+        in: query
+        name: maxCalories
+        type: number
+      - description: Nutrients filter (comma-separated)
+        in: query
+        name: nutrients
         type: string
       produces:
       - application/json
@@ -1041,7 +1089,7 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      summary: Search meals
+      summary: Search and filter meals
       tags:
       - meals
   /meals/user/{userid}:

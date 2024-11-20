@@ -20,4 +20,7 @@ type User struct {
 	Hip           float64            `json:"hip" default:"0"`           // default:"0" is not working
 	ActivityLevel int                `json:"activitylevel" default:"0"` // default:"0" is not working
 	CreatedAt     time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
+	OAuthProvider string             `json:"oauth_provider,omitempty" bson:"oauth_provider,omitempty"`
+	OAuthID       string             `json:"oauth_id,omitempty" bson:"oauth_id,omitempty"`
+	Picture       string             `json:"picture,omitempty" bson:"picture,omitempty"`
 }
