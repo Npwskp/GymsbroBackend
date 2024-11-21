@@ -21,7 +21,7 @@ type MealController struct {
 // @Param		meal body CreateMealDto true "Create Meal"
 // @Success		201	{object} Meal
 // @Failure		400	{object} Error
-// @Router		/meals [post]
+// @Router		/meal [post]
 func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 	meal := new(CreateMealDto)
 	validate := validator.New()
@@ -45,7 +45,7 @@ func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Success		200	{object} []Meal
 // @Failure		400	{object} Error
-// @Router		/meals [get]
+// @Router		/meal [get]
 func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
 	meals, err := nc.Service.GetAllMeals()
 	if err != nil {
@@ -68,7 +68,7 @@ func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Meal ID"
 // @Success		200	{object} Meal
 // @Failure		400	{object} Error
-// @Router		/meals/{id} [get]
+// @Router		/meal/{id} [get]
 func (nc *MealController) GetMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	meal, err := nc.Service.GetMeal(id)
@@ -86,7 +86,7 @@ func (nc *MealController) GetMealHandler(c *fiber.Ctx) error {
 // @Param		userid path string true "User ID"
 // @Success		200	{object} []Meal
 // @Failure		400	{object} Error
-// @Router		/meals/user/{userid} [get]
+// @Router		/meal/user/{userid} [get]
 func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 	userid := c.Params("userid")
 	meals, err := nc.Service.GetMealByUser(userid)
@@ -106,7 +106,7 @@ func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 // @Param		end query int true "End date"
 // @Success		200	{object} []Meal
 // @Failure		400	{object} Error
-// @Router		/meals/userdate/{userid} [get]
+// @Router		/meal/userdate/{userid} [get]
 func (nc *MealController) GetMealByUserDateHandler(c *fiber.Ctx) error {
 	userid := c.Params("userid")
 	start := c.QueryInt("start")
@@ -126,7 +126,7 @@ func (nc *MealController) GetMealByUserDateHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Meal ID"
 // @Success		204
 // @Failure		400	{object} Error
-// @Router		/meals/{id} [delete]
+// @Router		/meal/{id} [delete]
 func (nc *MealController) DeleteMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	err := nc.Service.DeleteMeal(id)
@@ -145,7 +145,7 @@ func (nc *MealController) DeleteMealHandler(c *fiber.Ctx) error {
 // @Param		meal body UpdateMealDto true "Update Meal"
 // @Success		200	{object} Meal
 // @Failure		400	{object} Error
-// @Router		/meals/{id} [put]
+// @Router		/meal/{id} [put]
 func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	validate := validator.New()
@@ -175,7 +175,7 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 // @Param nutrients query string false "Nutrients filter (comma-separated)"
 // @Success 200 {array} Meal
 // @Failure 400 {object} Error
-// @Router /meals/search [get]
+// @Router /meal/search [get]
 func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 	filters := SearchFilters{
 		Query:       c.Query("q"),
@@ -202,7 +202,7 @@ func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 }
 
 func (nc *MealController) Handle() {
-	g := nc.Instance.Group("/meals")
+	g := nc.Instance.Group("/meal")
 
 	g.Post("/", nc.CreateMealHandler)
 	g.Get("/", nc.GetMealsHandler)

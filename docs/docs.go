@@ -80,33 +80,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/me": {
-            "get": {
-                "description": "Get me",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Get me",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/auth/register": {
             "post": {
                 "description": "Register",
@@ -890,6 +863,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/me": {
+            "get": {
+                "description": "Get a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/meals": {
             "get": {
                 "description": "Get all meals",
@@ -1634,74 +1643,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
-            "get": {
-                "description": "Get a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get a user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Delete a user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/users/{id}/body": {
+        "/users/body": {
             "patch": {
                 "description": "Update a user body",
                 "consumes": [
@@ -1746,7 +1688,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/plan": {
+        "/users/energyplan": {
             "get": {
                 "description": "Get a user energy consume plan",
                 "consumes": [
@@ -1782,7 +1724,40 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/usepass": {
+        "/users/me": {
+            "delete": {
+                "description": "Delete a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users/usepass": {
             "patch": {
                 "description": "Update a user username and password",
                 "consumes": [

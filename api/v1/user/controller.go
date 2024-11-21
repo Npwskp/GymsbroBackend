@@ -21,7 +21,7 @@ type Error error
 // @Param		user body CreateUserDto true "Create User"
 // @Success		201	{object} User
 // @Failure		400	{object} Error
-// @Router		/users [post]
+// @Router		/user [post]
 func (uc *UserController) PostUsersHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	user := new(CreateUserDto)
@@ -54,7 +54,7 @@ func (uc *UserController) PostUsersHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Success		200	{array}	User
 // @Failure		400	{object} Error
-// @Router		/users [get]
+// @Router		/user [get]
 func (uc *UserController) GetAllUsersHandler(c *fiber.Ctx) error {
 	users, err := uc.Service.GetAllUsers()
 	if err != nil {
@@ -93,7 +93,7 @@ func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "User ID"
 // @Success		200	{object} function.EnergyConsumptionPlan
 // @Failure		400	{object} Error
-// @Router		/users/energyplan [get]
+// @Router		/user/energyplan [get]
 func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	plan, err := uc.Service.GetUserEnergyConsumePlan(id)
@@ -113,7 +113,7 @@ func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "User ID"
 // @Success		204
 // @Failure		400	{object} Error
-// @Router		/users/me [delete]
+// @Router		/user/me [delete]
 func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	err := uc.Service.DeleteUser(id)
@@ -134,7 +134,7 @@ func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
 // @Param		user body UpadateUsernamePasswordDto true "UpdateUsernamePassword User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
-// @Router		/users/usepass [patch]
+// @Router		/user/usepass [patch]
 func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	validate := validator.New()
@@ -169,7 +169,7 @@ func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 // @Param		user body UpdateBodyDto true "UpdateBody User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
-// @Router		/users/body [patch]
+// @Router		/user/body [patch]
 func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	validate := validator.New()
@@ -196,7 +196,7 @@ func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) Handle() {
-	g := uc.Instance.Group("/users")
+	g := uc.Instance.Group("/user")
 
 	g.Post("", uc.PostUsersHandler)
 	g.Get("", uc.GetAllUsersHandler)

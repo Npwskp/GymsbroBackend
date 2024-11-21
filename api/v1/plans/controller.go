@@ -21,7 +21,7 @@ type PlanController struct {
 // @Param		plan body CreatePlanDto true "Create Plan"
 // @Success		201	{object} Plan
 // @Failure		400	{object} Error
-// @Router		/plans [post]
+// @Router		/plan [post]
 func (pc *PlanController) PostPlansHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	plan := new(CreatePlanDto)
@@ -51,7 +51,7 @@ func (pc *PlanController) PostPlansHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Success		200	{array}	Plan
 // @Failure		400	{object} Error
-// @Router		/plans [get]
+// @Router		/plan [get]
 func (pc *PlanController) GetPlansHandler(c *fiber.Ctx) error {
 	plans, err := pc.Service.GetAllPlans()
 	if err != nil {
@@ -68,7 +68,7 @@ func (pc *PlanController) GetPlansHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "Plan ID"
 // @Success		200	{object} Plan
 // @Failure		400	{object} Error
-// @Router		/plans/{id} [get]
+// @Router		/plan/{id} [get]
 func (pc *PlanController) GetPlanHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	plan, err := pc.Service.GetPlan(id)
@@ -86,7 +86,7 @@ func (pc *PlanController) GetPlanHandler(c *fiber.Ctx) error {
 // @Param		user_id path	string true "User ID"
 // @Success		200	{array} Plan
 // @Failure		400	{object} Error
-// @Router		/plans/user/{user_id} [get]
+// @Router		/plan/user/{user_id} [get]
 func (pc *PlanController) GetPlanByUserHandler(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
 	plans, err := pc.Service.GetAllPlanByUser(user_id)
@@ -105,7 +105,7 @@ func (pc *PlanController) GetPlanByUserHandler(c *fiber.Ctx) error {
 // @Param		day path	string true "Day of week"
 // @Success		200	{object} Plan
 // @Failure		400	{object} Error
-// @Router		/plans/user/{user_id}/{day} [get]
+// @Router		/plan/user/{user_id}/{day} [get]
 func (pc *PlanController) GetPlanByUserDayHandler(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
 	day := c.Params("day")
@@ -124,7 +124,7 @@ func (pc *PlanController) GetPlanByUserDayHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "Plan ID"
 // @Success		204
 // @Failure		400	{object} Error
-// @Router		/plans/{id} [delete]
+// @Router		/plan/{id} [delete]
 func (pc *PlanController) DeletePlanHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if err := pc.Service.DeletePlan(id); err != nil {
@@ -142,7 +142,7 @@ func (pc *PlanController) DeletePlanHandler(c *fiber.Ctx) error {
 // @Param		day path	string true "Day of week"
 // @Success		204
 // @Failure		400	{object} Error
-// @Router		/plans/user/{user_id}/{day} [delete]
+// @Router		/plan/user/{user_id}/{day} [delete]
 func (pc *PlanController) DeletePlanByUserDayHandler(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
 	day := c.Params("day")
@@ -161,7 +161,7 @@ func (pc *PlanController) DeletePlanByUserDayHandler(c *fiber.Ctx) error {
 // @Param		plan body UpdatePlanDto true "Update Plan"
 // @Success		200	{object} Plan
 // @Failure		400	{object} Error
-// @Router		/plans/{id} [put]
+// @Router		/plan/{id} [put]
 func (pc *PlanController) UpdatePlanHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	validate := validator.New()
@@ -192,7 +192,7 @@ func (pc *PlanController) UpdatePlanHandler(c *fiber.Ctx) error {
 // @Param		plan body UpdatePlanDto true "Update Plan"
 // @Success		200	{object} Plan
 // @Failure		400	{object} Error
-// @Router		/plans/{user_id}/{day} [put]
+// @Router		/plan/{user_id}/{day} [put]
 func (pc *PlanController) UpdatePlanByUserDayHandler(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
 	day := c.Params("day")
@@ -218,7 +218,7 @@ func (pc *PlanController) UpdatePlanByUserDayHandler(c *fiber.Ctx) error {
 }
 
 func (pc *PlanController) Handle() {
-	g := pc.Instance.Group("/plans")
+	g := pc.Instance.Group("/plan")
 
 	g.Post("/", pc.PostPlansHandler)
 	g.Get("/", pc.GetPlansHandler)

@@ -602,24 +602,6 @@ paths:
       summary: Logout
       tags:
       - auth
-  /auth/me:
-    get:
-      consumes:
-      - application/json
-      description: Get me
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/user.User'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get me
-      tags:
-      - auth
   /auth/register:
     post:
       consumes:
@@ -1143,6 +1125,30 @@ paths:
       summary: Get ingredients by user
       tags:
       - ingredient
+  /me:
+    get:
+      consumes:
+      - application/json
+      description: Get a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a user
+      tags:
+      - users
   /meals:
     get:
       consumes:
@@ -1642,52 +1648,7 @@ paths:
       summary: Create a user
       tags:
       - users
-  /users/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete a user
-      tags:
-      - users
-    get:
-      consumes:
-      - application/json
-      description: Get a user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/user.User'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get a user
-      tags:
-      - users
-  /users/{id}/body:
+  /users/body:
     patch:
       consumes:
       - application/json
@@ -1717,7 +1678,7 @@ paths:
       summary: Update a user body
       tags:
       - users
-  /users/{id}/plan:
+  /users/energyplan:
     get:
       consumes:
       - application/json
@@ -1741,7 +1702,29 @@ paths:
       summary: Get a user energy consume plan
       tags:
       - users
-  /users/{id}/usepass:
+  /users/me:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete a user
+      tags:
+      - users
+  /users/usepass:
     patch:
       consumes:
       - application/json
