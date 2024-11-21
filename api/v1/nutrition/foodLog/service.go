@@ -15,7 +15,6 @@ type FoodLogService struct {
 
 type IFoodLogService interface {
 	CreateFoodLog(foodlog *CreateFoodLogDto) (*FoodLog, error)
-	GetAllFoodLogs() ([]*FoodLog, error)
 	GetFoodLog(id string) (*FoodLog, error)
 	GetFoodLogByUser(userid string) ([]*FoodLog, error)
 	GetFoodLogByUserDate(userid string, date string) (*FoodLog, error)
@@ -36,18 +35,6 @@ func (fs *FoodLogService) CreateFoodLog(foodlog *CreateFoodLogDto) (*FoodLog, er
 		return nil, err
 	}
 	return createdFoodLog, nil
-}
-
-func (fs *FoodLogService) GetAllFoodLogs() ([]*FoodLog, error) {
-	cursor, err := fs.DB.Collection("foodlog").Find(context.Background(), bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	var foodlogs []*FoodLog
-	if err := cursor.All(context.Background(), &foodlogs); err != nil {
-		return nil, err
-	}
-	return foodlogs, nil
 }
 
 func (fs *FoodLogService) GetFoodLog(id string) (*FoodLog, error) {

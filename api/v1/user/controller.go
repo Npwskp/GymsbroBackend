@@ -84,6 +84,26 @@ func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
+// @Summary		Get a user energy consume plan
+// @Description	Get a user energy consume plan
+// @Tags		users
+// @Accept		json
+// @Produce		json
+// @Param		id path	string true "User ID"
+// @Success		200	{object} function.EnergyConsumptionPlan
+// @Failure		400	{object} Error
+// @Router		/users/{id}/plan [get]
+func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	plan, err := uc.Service.GetUserEnergyConsumePlan(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(plan)
+}
+
 // @Summary		Delete a user
 // @Description	Delete a user
 // @Tags		users

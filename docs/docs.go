@@ -1538,6 +1538,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{id}/plan": {
+            "get": {
+                "description": "Get a user energy consume plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a user energy consume plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/function.EnergyConsumptionPlan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/users/{id}/usepass": {
             "patch": {
                 "description": "Update a user username and password",
@@ -1743,6 +1779,63 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "function.CalPerActivity": {
+            "type": "object",
+            "properties": {
+                "activityName": {
+                    "type": "string"
+                },
+                "calories": {
+                    "type": "number"
+                }
+            }
+        },
+        "function.EnergyConsumptionPlan": {
+            "type": "object",
+            "properties": {
+                "activityLevel": {
+                    "type": "string"
+                },
+                "allActivityCaloriesPerDay": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/function.CalPerActivity"
+                    }
+                },
+                "bmr": {
+                    "type": "number"
+                },
+                "macronutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/function.Macronutrients"
+                    }
+                }
+            }
+        },
+        "function.Macronutrients": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number"
+                },
+                "carbPreference": {
+                    "type": "string"
+                },
+                "carbs": {
+                    "type": "number"
+                },
+                "fat": {
+                    "type": "number"
+                },
+                "goal": {
+                    "type": "string"
+                },
+                "protein": {
+                    "type": "number"
                 }
             }
         },
@@ -2231,6 +2324,10 @@ const docTemplate = `{
                 "gender": {
                     "type": "string"
                 },
+                "goal": {
+                    "type": "string",
+                    "default": "maintain"
+                },
                 "height": {
                     "description": "default:\"0\" is not working",
                     "type": "number",
@@ -2260,6 +2357,10 @@ const docTemplate = `{
                 },
                 "picture": {
                     "type": "string"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "default": "null"
                 },
                 "username": {
                     "type": "string",

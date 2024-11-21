@@ -19,8 +19,10 @@ type User struct {
 	Waist         float64            `json:"waist" default:"0"`         // default:"0" is not working
 	Hip           float64            `json:"hip" default:"0"`           // default:"0" is not working
 	ActivityLevel int                `json:"activitylevel" default:"0"` // default:"0" is not working
-	CreatedAt     time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
+	Goal          string             `json:"goal" default:"maintain"`
 	OAuthProvider string             `json:"oauth_provider,omitempty" bson:"oauth_provider,omitempty"`
 	OAuthID       string             `json:"oauth_id,omitempty" bson:"oauth_id,omitempty"`
 	Picture       string             `json:"picture,omitempty" bson:"picture,omitempty"`
+	CreatedAt     time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
+	UpdatedAt     time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
 }

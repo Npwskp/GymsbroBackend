@@ -111,6 +111,43 @@ definitions:
           type: string
         type: array
     type: object
+  function.CalPerActivity:
+    properties:
+      activityName:
+        type: string
+      calories:
+        type: number
+    type: object
+  function.EnergyConsumptionPlan:
+    properties:
+      activityLevel:
+        type: string
+      allActivityCaloriesPerDay:
+        items:
+          $ref: '#/definitions/function.CalPerActivity'
+        type: array
+      bmr:
+        type: number
+      macronutrients:
+        items:
+          $ref: '#/definitions/function.Macronutrients'
+        type: array
+    type: object
+  function.Macronutrients:
+    properties:
+      calories:
+        type: number
+      carbPreference:
+        type: string
+      carbs:
+        type: number
+      fat:
+        type: number
+      goal:
+        type: string
+      protein:
+        type: number
+    type: object
   ingredient.CreateIngredientDto:
     properties:
       calories:
@@ -440,6 +477,9 @@ definitions:
         type: string
       gender:
         type: string
+      goal:
+        default: maintain
+        type: string
       height:
         default: 0
         description: default:"0" is not working
@@ -461,6 +501,9 @@ definitions:
       password:
         type: string
       picture:
+        type: string
+      updated_at:
+        default: "null"
         type: string
       username:
         maxLength: 20
@@ -1505,6 +1548,30 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update a user body
+      tags:
+      - users
+  /users/{id}/plan:
+    get:
+      consumes:
+      - application/json
+      description: Get a user energy consume plan
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/function.EnergyConsumptionPlan'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a user energy consume plan
       tags:
       - users
   /users/{id}/usepass:

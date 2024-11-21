@@ -23,14 +23,6 @@ func (fc *FoodLogController) CreateFoodLog(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(foodlog)
 }
 
-func (fc *FoodLogController) GetAllFoodLogs(c *fiber.Ctx) error {
-	foodlogs, err := fc.Service.GetAllFoodLogs()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	return c.JSON(foodlogs)
-}
-
 func (fc *FoodLogController) GetFoodLog(c *fiber.Ctx) error {
 	id := c.Params("id")
 	foodlog, err := fc.Service.GetFoodLog(id)
@@ -85,7 +77,6 @@ func (fc *FoodLogController) Handle() {
 	g := fc.Instance.Group("/foodlog")
 
 	g.Post("/", fc.CreateFoodLog)
-	g.Get("/", fc.GetAllFoodLogs)
 	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user/:userid", fc.GetFoodLogByUser)
 	g.Get("/userdate/:userid", fc.GetFoodLogByUserDate)

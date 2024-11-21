@@ -22,6 +22,9 @@ type IUserService interface {
 	CreateUser(user *CreateUserDto) (*User, error)
 	GetAllUsers() ([]*User, error)
 	GetUser(id string) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	GetUserByOAuthID(oauthid string) (*User, error)
+	GetUserEnergyConsumePlan(id string) (*function.EnergyConsumptionPlan, error)
 	DeleteUser(id string) error
 	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
@@ -93,6 +96,28 @@ func (us *UserService) GetUserByEmail(email string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (us *UserService) GetUserByOAuthID(oauthid string) (*User, error) {
+	filter := bson.D{{Key: "oauth_id", Value: oauthid}}
+	user := &User{}
+	if err := us.DB.Collection("users").FindOne(context.Background(), filter).Decode(user); err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (us *UserService) GetUserEnergyConsumePlan(id string) (*function.EnergyConsumptionPlan, error) {
+	user, err := us.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Weight == 0 || user.Height == 0 || user.Age == 0 || user.Gender == "" || user.ActivityLevel == 0 || user.Goal == "" {
+		return nil, errors.New("data is not enough to calculate energy consume plan")
+	}
+
+	return function.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
 }
 
 func (us *UserService) DeleteUser(id string) error {
