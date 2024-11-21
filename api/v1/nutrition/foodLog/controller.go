@@ -1,6 +1,7 @@
 package foodlog
 
 import (
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,10 +23,11 @@ type FoodLogController struct {
 // @Router		/foodlog [post]
 func (fc *FoodLogController) CreateFoodLog(c *fiber.Ctx) error {
 	dto := new(CreateFoodLogDto)
+	userid := function.GetUserIDFromContext(c)
 	if err := c.BodyParser(dto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	foodlog, err := fc.Service.CreateFoodLog(dto)
+	foodlog, err := fc.Service.CreateFoodLog(dto, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -43,7 +45,8 @@ func (fc *FoodLogController) CreateFoodLog(c *fiber.Ctx) error {
 // @Router		/foodlog/{id} [get]
 func (fc *FoodLogController) GetFoodLog(c *fiber.Ctx) error {
 	id := c.Params("id")
-	foodlog, err := fc.Service.GetFoodLog(id)
+	userid := function.GetUserIDFromContext(c)
+	foodlog, err := fc.Service.GetFoodLog(id, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -55,12 +58,11 @@ func (fc *FoodLogController) GetFoodLog(c *fiber.Ctx) error {
 // @Tags		foodlog
 // @Accept		json
 // @Produce		json
-// @Param		userid path	string true "User ID"
 // @Success		200	{object} []FoodLog
 // @Failure		400	{object} Error
-// @Router		/foodlog/user/{userid} [get]
+// @Router		/foodlog/user [get]
 func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
-	userid := c.Params("userid")
+	userid := function.GetUserIDFromContext(c)
 	foodlogs, err := fc.Service.GetFoodLogByUser(userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -73,13 +75,12 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 // @Tags		foodlog
 // @Accept		json
 // @Produce		json
-// @Param		userid path	string true "User ID"
 // @Param		date path	string true "Date"
 // @Success		200	{object} []FoodLog
 // @Failure		400	{object} Error
-// @Router		/foodlog/userdate/{userid}/{date} [get]
+// @Router		/foodlog/date/{date} [get]
 func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
-	userid := c.Params("userid")
+	userid := function.GetUserIDFromContext(c)
 	date := c.Params("date")
 	foodlog, err := fc.Service.GetFoodLogByUserDate(userid, date)
 	if err != nil {
@@ -99,7 +100,8 @@ func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
 // @Router		/foodlog/{id} [delete]
 func (fc *FoodLogController) DeleteFoodLog(c *fiber.Ctx) error {
 	id := c.Params("id")
-	err := fc.Service.DeleteFoodLog(id)
+	userid := function.GetUserIDFromContext(c)
+	err := fc.Service.DeleteFoodLog(id, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -117,11 +119,12 @@ func (fc *FoodLogController) DeleteFoodLog(c *fiber.Ctx) error {
 // @Router		/foodlog/{id} [put]
 func (fc *FoodLogController) UpdateFoodLog(c *fiber.Ctx) error {
 	id := c.Params("id")
+	userid := function.GetUserIDFromContext(c)
 	dto := new(UpdateFoodLogDto)
 	if err := c.BodyParser(dto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	foodlog, err := fc.Service.UpdateFoodLog(dto, id)
+	foodlog, err := fc.Service.UpdateFoodLog(dto, id, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -133,8 +136,8 @@ func (fc *FoodLogController) Handle() {
 
 	g.Post("/", fc.CreateFoodLog)
 	g.Get("/:id", fc.GetFoodLog)
-	g.Get("/user/:userid", fc.GetFoodLogByUser)
-	g.Get("/userdate/:userid", fc.GetFoodLogByUserDate)
+	g.Get("/user", fc.GetFoodLogByUser)
+	g.Get("/date/:date", fc.GetFoodLogByUserDate)
 	g.Delete("/:id", fc.DeleteFoodLog)
 	g.Put("/:id", fc.UpdateFoodLog)
 }
