@@ -90,7 +90,6 @@ func (ic *IngredientController) GetIngredient(c *fiber.Ctx) error {
 // @Tags ingredient
 // @Accept json
 // @Produce json
-// @Param userid path string true "User ID"
 // @Success 200 {object} []Ingredient
 // @Failure 400 {object} Error
 // @Router /ingredient/user [get]
@@ -100,6 +99,12 @@ func (ic *IngredientController) GetIngredientByUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
+
+	// Initialize empty slice if ingredients is nil
+	if ingredients == nil {
+		ingredients = []*Ingredient{}
+	}
+
 	return c.JSON(ingredients)
 }
 
@@ -194,8 +199,8 @@ func (ic *IngredientController) Handle() {
 	g.Post("/", ic.CreateIngredient)
 	g.Get("/", ic.GetAllIngredients)
 	g.Get("/search", ic.SearchFilteredIngredients)
+	g.Get("/user", ic.GetIngredientByUser)
 	g.Get("/:id", ic.GetIngredient)
-	g.Get("/user/:userid", ic.GetIngredientByUser)
 	g.Delete("/:id", ic.DeleteIngredient)
 	g.Put("/:id", ic.UpdateIngredient)
 }

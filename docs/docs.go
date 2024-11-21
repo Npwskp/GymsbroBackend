@@ -727,15 +727,6 @@ const docTemplate = `{
                     "ingredient"
                 ],
                 "summary": "Get ingredients by user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2267,20 +2258,20 @@ const docTemplate = `{
         "types.Ingredient": {
             "type": "object",
             "required": [
-                "ingredientid",
+                "ingredientId",
                 "name",
-                "numofservings",
+                "numOfServings",
                 "unit",
                 "value"
             ],
             "properties": {
-                "ingredientid": {
+                "ingredientId": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "numofservings": {
+                "numOfServings": {
                     "type": "number"
                 },
                 "unit": {

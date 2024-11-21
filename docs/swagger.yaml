@@ -375,20 +375,20 @@ definitions:
     type: object
   types.Ingredient:
     properties:
-      ingredientid:
+      ingredientId:
         type: string
       name:
         type: string
-      numofservings:
+      numOfServings:
         type: number
       unit:
         type: string
       value:
         type: number
     required:
-    - ingredientid
+    - ingredientId
     - name
-    - numofservings
+    - numOfServings
     - unit
     - value
     type: object
@@ -1104,12 +1104,6 @@ paths:
       consumes:
       - application/json
       description: Get ingredients by user
-      parameters:
-      - description: User ID
-        in: path
-        name: userid
-        required: true
-        type: string
       produces:
       - application/json
       responses:
