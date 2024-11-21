@@ -88,32 +88,6 @@ func (ac *AuthController) PostRegisterHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
-// @Summary		Get me
-// @Description	Get me
-// @Tags		auth
-// @Accept		json
-// @Produce		json
-// @Success		200	{object} user.User
-// @Failure		400	{object} Error
-// @Router		/auth/me [get]
-func (ac *AuthController) GetMeHandler(c *fiber.Ctx) error {
-	userClaims, err := middleware.GetCurrentUser(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "unauthorized",
-		})
-	}
-
-	user, err := ac.Service.Me(userClaims.UserID.Hex())
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(user)
-}
-
 // @Summary		Logout
 // @Description	Logout
 // @Tags		auth
@@ -169,7 +143,6 @@ func (ac *AuthController) Handle() {
 	g := ac.Instance.Group("/auth")
 	g.Post("/login", middleware.CheckNotLoggedIn(), ac.PostLoginHandler)
 	g.Post("/register", middleware.CheckNotLoggedIn(), ac.PostRegisterHandler)
-	g.Get("/me", middleware.AuthMiddleware(), ac.GetMeHandler)
 	g.Post("/logout", middleware.AuthMiddleware(), ac.PostLogoutHandler)
 
 	// Add Google OAuth routes

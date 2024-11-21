@@ -21,7 +21,6 @@ type AuthService struct {
 type IAuthService interface {
 	Login(login *LoginDto) (string, int64, error)
 	Register(register *RegisterDto) (*user.User, error)
-	Me(token string) (*user.User, error)
 }
 
 func (as *AuthService) Login(login *LoginDto) (string, int64, error) {
@@ -93,22 +92,6 @@ func (as *AuthService) Register(register *RegisterDto) (*user.User, error) {
 		return nil, err
 	}
 	return result, nil
-}
-
-func (as *AuthService) Me(token string) (*user.User, error) {
-	claims := jwt.MapClaims{}
-	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.GetJWTSecret()), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	userService := user.UserService{DB: as.DB}
-	user, err := userService.GetUser(claims["sub"].(string))
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
 }
 
 func createJWTToken(user *user.User) (string, int64, error) {

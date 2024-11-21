@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -72,9 +73,9 @@ func (uc *UserController) GetAllUsersHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "User ID"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
-// @Router		/users/{id} [get]
+// @Router		/me [get]
 func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := function.GetUserIDFromContext(c)
 	user, err := uc.Service.GetUser(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -92,9 +93,9 @@ func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "User ID"
 // @Success		200	{object} function.EnergyConsumptionPlan
 // @Failure		400	{object} Error
-// @Router		/users/{id}/plan [get]
+// @Router		/users/energyplan [get]
 func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := function.GetUserIDFromContext(c)
 	plan, err := uc.Service.GetUserEnergyConsumePlan(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -112,9 +113,9 @@ func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
 // @Param		id path	string true "User ID"
 // @Success		204
 // @Failure		400	{object} Error
-// @Router		/users/{id} [delete]
+// @Router		/users/me [delete]
 func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := function.GetUserIDFromContext(c)
 	err := uc.Service.DeleteUser(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -133,9 +134,9 @@ func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
 // @Param		user body UpadateUsernamePasswordDto true "UpdateUsernamePassword User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
-// @Router		/users/{id}/usepass [patch]
+// @Router		/users/usepass [patch]
 func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := function.GetUserIDFromContext(c)
 	validate := validator.New()
 	doc := new(UpadateUsernamePasswordDto)
 	if err := c.BodyParser(&doc); err != nil {
@@ -168,9 +169,9 @@ func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 // @Param		user body UpdateBodyDto true "UpdateBody User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
-// @Router		/users/{id}/body [patch]
+// @Router		/users/body [patch]
 func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := function.GetUserIDFromContext(c)
 	validate := validator.New()
 	doc := new(UpdateBodyDto)
 	if err := c.BodyParser(&doc); err != nil {
@@ -199,8 +200,9 @@ func (uc *UserController) Handle() {
 
 	g.Post("", uc.PostUsersHandler)
 	g.Get("", uc.GetAllUsersHandler)
-	g.Get("/:id", uc.GetUserHandler)
-	g.Delete("/:id", uc.DeleteUserHandler)
-	g.Put("/:id/usepass", uc.UpdateUsernamePassword)
-	g.Put("/:id/body", uc.UpdateBody)
+	g.Get("/me", uc.GetUserHandler)
+	g.Get("/energyplan", uc.GetUserEnergyConsumePlanHandler)
+	g.Delete("/me", uc.DeleteUserHandler)
+	g.Put("/usepass", uc.UpdateUsernamePassword)
+	g.Put("/body", uc.UpdateBody)
 }
