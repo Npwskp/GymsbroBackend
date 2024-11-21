@@ -11,9 +11,9 @@ type RegisterDto struct {
 	Password      string `json:"password" validate:"required"`
 	Age           int    `json:"age" validate:"required,min=1,max=120"`
 	Gender        string `json:"gender" validate:"required"`
-	OAuthProvider string `json:"oauth_provider,omitempty"`
-	OAuthID       string `json:"oauth_id,omitempty"`
-	Picture       string `json:"picture,omitempty"`
+	OAuthProvider string `json:"oauth_provider,omitempty" default:""`
+	OAuthID       string `json:"oauth_id,omitempty" default:""`
+	Picture       string `json:"picture,omitempty" default:""`
 }
 
 type ReturnToken struct {

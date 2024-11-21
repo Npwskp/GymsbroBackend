@@ -443,9 +443,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/foodlog/user/{userid}": {
+        "/foodlog/date/{date}": {
             "get": {
-                "description": "Get a food log by user",
+                "description": "Get a food log by user and date",
                 "consumes": [
                     "application/json"
                 ],
@@ -455,12 +455,12 @@ const docTemplate = `{
                 "tags": [
                     "foodlog"
                 ],
-                "summary": "Get a food log by user",
+                "summary": "Get a food log by user and date",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID",
-                        "name": "userid",
+                        "description": "Date",
+                        "name": "date",
                         "in": "path",
                         "required": true
                     }
@@ -482,9 +482,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/foodlog/userdate/{userid}/{date}": {
+        "/foodlog/user": {
             "get": {
-                "description": "Get a food log by user and date",
+                "description": "Get a food log by user",
                 "consumes": [
                     "application/json"
                 ],
@@ -494,23 +494,7 @@ const docTemplate = `{
                 "tags": [
                     "foodlog"
                 ],
-                "summary": "Get a food log by user and date",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Date",
-                        "name": "date",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get a food log by user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2009,13 +1993,9 @@ const docTemplate = `{
         "foodlog.CreateFoodLogDto": {
             "type": "object",
             "required": [
-                "date",
-                "userid"
+                "date"
             ],
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "date": {
                     "type": "string"
                 },
@@ -2024,23 +2004,20 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },
         "foodlog.FoodLog": {
             "type": "object",
             "required": [
-                "date",
+                "datetime",
                 "userid"
             ],
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
-                "date": {
+                "datetime": {
                     "type": "string"
                 },
                 "id": {
@@ -2051,6 +2028,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "updated_at": {
+                    "type": "string"
                 },
                 "userid": {
                     "type": "string"
@@ -2468,10 +2448,6 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 120,
                     "minimum": 1
-                },
-                "created_at": {
-                    "type": "string",
-                    "default": "null"
                 },
                 "email": {
                     "type": "string"

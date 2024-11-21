@@ -26,3 +26,20 @@ type User struct {
 	CreatedAt     time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
 	UpdatedAt     time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
 }
+
+func CreateUserModel(user *CreateUserDto) *User {
+	return &User{
+		Username:      user.Username,
+		Email:         user.Email,
+		Password:      user.Password,
+		Weight:        user.Weight,
+		Height:        user.Height,
+		Age:           user.Age,
+		Gender:        user.Gender,
+		Neck:          user.Neck,
+		Waist:         user.Waist,
+		Hip:           user.Hip,
+		ActivityLevel: user.ActivityLevel,
+		CreatedAt:     time.Now(),
+	}
+}

@@ -31,7 +31,7 @@ type IUserService interface {
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
-	user.CreatedAt = time.Now()
+	model := CreateUserModel(user)
 	find := bson.D{{Key: "email", Value: user.Email}}
 	check, err := us.DB.Collection("users").CountDocuments(context.Background(), find)
 	if err != nil {
@@ -40,20 +40,9 @@ func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 	if check > 0 {
 		return nil, errors.New("email have been used")
 	}
-	result, err := us.DB.Collection("users").InsertOne(context.Background(), user)
+	result, err := us.DB.Collection("users").InsertOne(context.Background(), model)
 	if err != nil {
 		return nil, err
-	}
-	planService := plans.PlanService{DB: us.DB}
-	for _, day := range function.Day {
-		planCreate := plans.CreatePlanDto{
-			UserID:    result.InsertedID.(primitive.ObjectID).Hex(),
-			DayOfWeek: day,
-		}
-		_, err := planService.CreatePlan(&planCreate)
-		if err != nil {
-			return nil, err
-		}
 	}
 	filter := bson.D{{Key: "_id", Value: result.InsertedID}}
 	createdRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
