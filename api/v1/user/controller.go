@@ -70,7 +70,6 @@ func (uc *UserController) GetAllUsersHandler(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Param		id path	string true "User ID"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
 // @Router		/me [get]
@@ -90,7 +89,6 @@ func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Param		id path	string true "User ID"
 // @Success		200	{object} function.EnergyConsumptionPlan
 // @Failure		400	{object} Error
 // @Router		/user/energyplan [get]
@@ -110,7 +108,6 @@ func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Param		id path	string true "User ID"
 // @Success		204
 // @Failure		400	{object} Error
 // @Router		/user/me [delete]
@@ -130,7 +127,6 @@ func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "User ID"
 // @Param		user body UpadateUsernamePasswordDto true "UpdateUsernamePassword User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
@@ -165,7 +161,6 @@ func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "User ID"
 // @Param		user body UpdateBodyDto true "UpdateBody User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error

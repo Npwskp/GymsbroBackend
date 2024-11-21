@@ -876,15 +876,6 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get a user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1605,13 +1596,6 @@ const docTemplate = `{
                 "summary": "Update a user body",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "UpdateBody User",
                         "name": "user",
                         "in": "body",
@@ -1648,15 +1632,6 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get a user energy consume plan",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1684,15 +1659,6 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Delete a user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -1718,13 +1684,6 @@ const docTemplate = `{
                 ],
                 "summary": "Update a user username and password",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "UpdateUsernamePassword User",
                         "name": "user",

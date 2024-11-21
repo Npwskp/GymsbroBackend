@@ -1130,12 +1130,6 @@ paths:
       consumes:
       - application/json
       description: Get a user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1618,11 +1612,6 @@ paths:
       - application/json
       description: Update a user body
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       - description: UpdateBody User
         in: body
         name: user
@@ -1647,12 +1636,6 @@ paths:
       consumes:
       - application/json
       description: Get a user energy consume plan
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1671,12 +1654,6 @@ paths:
       consumes:
       - application/json
       description: Delete a user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1694,11 +1671,6 @@ paths:
       - application/json
       description: Update a user username and password
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       - description: UpdateUsernamePassword User
         in: body
         name: user
