@@ -78,7 +78,7 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 // @Param		date path	string true "Date"
 // @Success		200	{object} []FoodLog
 // @Failure		400	{object} Error
-// @Router		/foodlog/date/{date} [get]
+// @Router		/foodlog/user/{date} [get]
 func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
 	userid := function.GetUserIDFromContext(c)
 	date := c.Params("date")
@@ -137,7 +137,7 @@ func (fc *FoodLogController) Handle() {
 	g.Post("/", fc.CreateFoodLog)
 	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user", fc.GetFoodLogByUser)
-	g.Get("/date/:date", fc.GetFoodLogByUserDate)
+	g.Get("/user/:date", fc.GetFoodLogByUserDate)
 	g.Delete("/:id", fc.DeleteFoodLog)
 	g.Put("/:id", fc.UpdateFoodLog)
 }

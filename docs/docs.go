@@ -118,7 +118,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercises": {
+        "/exercise": {
             "get": {
                 "description": "Get all exercises",
                 "consumes": [
@@ -184,7 +184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercises/many": {
+        "/exercise/many": {
             "post": {
                 "description": "Create many exercises",
                 "consumes": [
@@ -228,7 +228,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercises/type/{type}": {
+        "/exercise/type/{type}": {
             "get": {
                 "description": "Get exercises by type",
                 "consumes": [
@@ -267,7 +267,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercises/{id}": {
+        "/exercise/{id}": {
             "get": {
                 "description": "Get an exercise",
                 "consumes": [
@@ -416,7 +416,37 @@ const docTemplate = `{
                 }
             }
         },
-        "/foodlog/date/{date}": {
+        "/foodlog/user": {
+            "get": {
+                "description": "Get a food log by user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Get a food log by user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/foodlog.FoodLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/foodlog/user/{date}": {
             "get": {
                 "description": "Get a food log by user and date",
                 "consumes": [
@@ -438,36 +468,6 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/foodlog.FoodLog"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/foodlog/user": {
-            "get": {
-                "description": "Get a food log by user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "foodlog"
-                ],
-                "summary": "Get a food log by user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -899,7 +899,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/meals": {
+        "/meal": {
             "get": {
                 "description": "Get all meals",
                 "consumes": [
@@ -965,7 +965,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/meals/search": {
+        "/meal/search": {
             "get": {
                 "description": "Search meals with optional filters",
                 "consumes": [
@@ -1027,7 +1027,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/meals/user/{userid}": {
+        "/meal/user/{userid}": {
             "get": {
                 "description": "Get meals by user",
                 "consumes": [
@@ -1066,7 +1066,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/meals/userdate/{userid}": {
+        "/meal/userdate/{userid}": {
             "get": {
                 "description": "Get meals by user and date",
                 "consumes": [
@@ -1119,7 +1119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/meals/{id}": {
+        "/meal/{id}": {
             "get": {
                 "description": "Get a meal",
                 "consumes": [
@@ -1229,7 +1229,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans": {
+        "/plan": {
             "get": {
                 "description": "Get all plans",
                 "consumes": [
@@ -1295,7 +1295,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans/user/{user_id}": {
+        "/plan/user/{user_id}": {
             "get": {
                 "description": "Get a plan by user",
                 "consumes": [
@@ -1334,7 +1334,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans/user/{user_id}/{day}": {
+        "/plan/user/{user_id}/{day}": {
             "get": {
                 "description": "Get a plan by user and day",
                 "consumes": [
@@ -1415,7 +1415,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans/{id}": {
+        "/plan/{id}": {
             "get": {
                 "description": "Get a plan",
                 "consumes": [
@@ -1525,7 +1525,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans/{user_id}/{day}": {
+        "/plan/{user_id}/{day}": {
             "put": {
                 "description": "Update a plan by user and day",
                 "consumes": [
@@ -1577,7 +1577,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
+        "/user": {
             "get": {
                 "description": "Get all users",
                 "consumes": [
@@ -1643,7 +1643,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/body": {
+        "/user/body": {
             "patch": {
                 "description": "Update a user body",
                 "consumes": [
@@ -1688,7 +1688,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/energyplan": {
+        "/user/energyplan": {
             "get": {
                 "description": "Get a user energy consume plan",
                 "consumes": [
@@ -1724,7 +1724,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/me": {
+        "/user/me": {
             "delete": {
                 "description": "Delete a user",
                 "consumes": [
@@ -1757,7 +1757,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/usepass": {
+        "/user/usepass": {
             "patch": {
                 "description": "Update a user username and password",
                 "consumes": [

@@ -18,7 +18,7 @@ type IFoodLogService interface {
 	CreateFoodLog(foodlog *CreateFoodLogDto, userid string) (*FoodLog, error)
 	GetFoodLog(id string, userid string) (*FoodLog, error)
 	GetFoodLogByUser(userid string) ([]*FoodLog, error)
-	GetFoodLogByUserDate(userid string, date string) (*FoodLog, error)
+	GetFoodLogByUserDate(userid string, date string) ([]*FoodLog, error)
 	DeleteFoodLog(id string, userid string) error
 	UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid string) (*FoodLog, error)
 }
@@ -65,14 +65,35 @@ func (fs *FoodLogService) GetFoodLogByUser(userid string) ([]*FoodLog, error) {
 	return foodlogs, nil
 }
 
-func (fs *FoodLogService) GetFoodLogByUserDate(userid string, date string) (*FoodLog, error) {
-	filter := bson.D{{Key: "userid", Value: userid}, {Key: "datetime", Value: date}}
-	foodlog := &FoodLog{}
-	err := fs.DB.Collection("foodlog").FindOne(context.Background(), filter).Decode(foodlog)
+func (fs *FoodLogService) GetFoodLogByUserDate(userid string, date string) ([]*FoodLog, error) {
+	// Create a pipeline for aggregation
+	pipeline := mongo.Pipeline{
+		// Match documents for the user
+		{{Key: "$match", Value: bson.D{
+			{Key: "userid", Value: userid},
+			{Key: "datetime", Value: bson.D{
+				{Key: "$regex", Value: primitive.Regex{Pattern: "^" + date}},
+			}},
+		}}},
+		// Sort by datetime
+		{{Key: "$sort", Value: bson.D{
+			{Key: "datetime", Value: 1}, // 1 for ascending, -1 for descending
+		}}},
+	}
+
+	// Execute the aggregation
+	cursor, err := fs.DB.Collection("foodlog").Aggregate(context.Background(), pipeline)
 	if err != nil {
 		return nil, err
 	}
-	return foodlog, nil
+
+	// Decode the results
+	var foodlogs []*FoodLog
+	if err := cursor.All(context.Background(), &foodlogs); err != nil {
+		return nil, err
+	}
+
+	return foodlogs, nil
 }
 
 func (fs *FoodLogService) DeleteFoodLog(id string, userid string) error {
