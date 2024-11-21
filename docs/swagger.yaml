@@ -111,6 +111,40 @@ definitions:
           type: string
         type: array
     type: object
+  foodlog.CreateFoodLogDto:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      meals:
+        items:
+          type: string
+        type: array
+      userid:
+        type: string
+    required:
+    - date
+    - userid
+    type: object
+  foodlog.FoodLog:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      meals:
+        items:
+          type: string
+        type: array
+      userid:
+        type: string
+    required:
+    - date
+    - userid
+    type: object
   function.CalPerActivity:
     properties:
       activityName:
@@ -791,6 +825,156 @@ paths:
       summary: Get exercises by type
       tags:
       - exercises
+  /foodlog:
+    post:
+      consumes:
+      - application/json
+      description: Create a food log
+      parameters:
+      - description: Food log object that needs to be created
+        in: body
+        name: foodlog
+        required: true
+        schema:
+          $ref: '#/definitions/foodlog.CreateFoodLogDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/foodlog.FoodLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create a food log
+      tags:
+      - foodlog
+  /foodlog/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a food log
+      parameters:
+      - description: Food log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete a food log
+      tags:
+      - foodlog
+    get:
+      consumes:
+      - application/json
+      description: Get a food log
+      parameters:
+      - description: Food log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/foodlog.FoodLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a food log
+      tags:
+      - foodlog
+    put:
+      consumes:
+      - application/json
+      description: Update a food log
+      parameters:
+      - description: Food log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/foodlog.FoodLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update a food log
+      tags:
+      - foodlog
+  /foodlog/user/{userid}:
+    get:
+      consumes:
+      - application/json
+      description: Get a food log by user
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/foodlog.FoodLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a food log by user
+      tags:
+      - foodlog
+  /foodlog/userdate/{userid}/{date}:
+    get:
+      consumes:
+      - application/json
+      description: Get a food log by user and date
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: string
+      - description: Date
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/foodlog.FoodLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get a food log by user and date
+      tags:
+      - foodlog
   /ingredient:
     get:
       consumes:

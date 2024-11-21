@@ -405,6 +405,230 @@ const docTemplate = `{
                 }
             }
         },
+        "/foodlog": {
+            "post": {
+                "description": "Create a food log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Create a food log",
+                "parameters": [
+                    {
+                        "description": "Food log object that needs to be created",
+                        "name": "foodlog",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/foodlog.CreateFoodLogDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/foodlog.FoodLog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/foodlog/user/{userid}": {
+            "get": {
+                "description": "Get a food log by user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Get a food log by user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/foodlog.FoodLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/foodlog/userdate/{userid}/{date}": {
+            "get": {
+                "description": "Get a food log by user and date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Get a food log by user and date",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Date",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/foodlog.FoodLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/foodlog/{id}": {
+            "get": {
+                "description": "Get a food log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Get a food log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Food log ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/foodlog.FoodLog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a food log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Update a food log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Food log ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/foodlog.FoodLog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a food log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Delete a food log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Food log ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/ingredient": {
             "get": {
                 "description": "Get all ingredients",
@@ -1779,6 +2003,57 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "foodlog.CreateFoodLogDto": {
+            "type": "object",
+            "required": [
+                "date",
+                "userid"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "meals": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userid": {
+                    "type": "string"
+                }
+            }
+        },
+        "foodlog.FoodLog": {
+            "type": "object",
+            "required": [
+                "date",
+                "userid"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "meals": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userid": {
+                    "type": "string"
                 }
             }
         },
