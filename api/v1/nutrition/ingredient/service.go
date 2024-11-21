@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"go.mongodb.org/mongo-driver/bson"
@@ -120,7 +121,15 @@ func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id strin
 	}
 
 	filter := bson.D{{Key: "_id", Value: objectID}}
-	update := bson.D{{Key: "$set", Value: doc}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "name", Value: doc.Name},
+			{Key: "category", Value: doc.Category},
+			{Key: "calories", Value: doc.Calories},
+			{Key: "nutrients", Value: doc.Nutrients},
+			{Key: "updated_at", Value: time.Now()},
+		}},
+	}
 	_, err = is.DB.Collection("ingredient").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return nil, err

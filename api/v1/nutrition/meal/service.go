@@ -120,6 +120,7 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error) 
 			{Key: "protein", Value: doc.Protein},
 			{Key: "fat", Value: doc.Fat},
 			{Key: "calories", Value: doc.Calories},
+			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
 	if _, err := ns.DB.Collection("meal").UpdateOne(context.Background(), filter, update); err != nil {

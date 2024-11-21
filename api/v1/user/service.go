@@ -156,6 +156,7 @@ func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, i
 		{Key: "$set", Value: bson.D{
 			{Key: "username", Value: function.Coalesce(doc.Username, user.Username)},
 			{Key: "password", Value: function.Coalesce(doc.NewPassword, user.Password)},
+			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
 
@@ -202,6 +203,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 			{Key: "waist", Value: function.Coalesce(doc.Waist, user.Waist)},
 			{Key: "hip", Value: function.Coalesce(doc.Hip, user.Hip)},
 			{Key: "activitylevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
+			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
 	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)

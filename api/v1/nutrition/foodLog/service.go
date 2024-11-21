@@ -104,15 +104,23 @@ func (fs *FoodLogService) UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid
 		return nil, err
 	}
 	filter := bson.D{{Key: "_id", Value: objectID}}
-	foodlog := &FoodLog{}
-	err = fs.DB.Collection("foodlog").FindOne(context.Background(), filter).Decode(foodlog)
+
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "datetime", Value: doc.DateTime},
+			{Key: "meals", Value: doc.Meals},
+			{Key: "update_at", Value: time.Now()},
+		}},
+	}
+
+	_, err = fs.DB.Collection("foodlog").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return nil, err
 	}
-	foodlog.DateTime = doc.DateTime
-	foodlog.Meals = doc.Meals
-	foodlog.UpdateAt = time.Now()
-	_, err = fs.DB.Collection("foodlog").UpdateOne(context.Background(), filter, bson.D{{Key: "$set", Value: foodlog}})
+
+	// Fetch and return updated document
+	foodlog := &FoodLog{}
+	err = fs.DB.Collection("foodlog").FindOne(context.Background(), filter).Decode(foodlog)
 	if err != nil {
 		return nil, err
 	}
