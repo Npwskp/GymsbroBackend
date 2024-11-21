@@ -96,28 +96,6 @@ func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(meals)
 }
 
-// @Summary		Get meals by user and date
-// @Description	Get meals by user and date
-// @Tags		meals
-// @Accept		json
-// @Produce		json
-// @Param		userid path string true "User ID"
-// @Param		start query int true "Start date"
-// @Param		end query int true "End date"
-// @Success		200	{object} []Meal
-// @Failure		400	{object} Error
-// @Router		/meal/userdate/{userid} [get]
-func (nc *MealController) GetMealByUserDateHandler(c *fiber.Ctx) error {
-	userid := c.Params("userid")
-	start := c.QueryInt("start")
-	end := c.QueryInt("end")
-	meals, err := nc.Service.GetMealByUserDate(userid, start, end)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
-	}
-	return c.Status(fiber.StatusOK).JSON(meals)
-}
-
 // @Summary		Delete a meal
 // @Description	Delete a meal
 // @Tags		meals
@@ -209,7 +187,6 @@ func (nc *MealController) Handle() {
 	g.Get("/search", nc.SearchFilteredMealsHandler)
 	g.Get("/:id", nc.GetMealHandler)
 	g.Get("/user/:userid", nc.GetMealByUserHandler)
-	g.Get("/userdate/:userid", nc.GetMealByUserDateHandler)
 	g.Delete("/:id", nc.DeleteMealHandler)
 	g.Put("/:id", nc.UpdateMealHandler)
 }

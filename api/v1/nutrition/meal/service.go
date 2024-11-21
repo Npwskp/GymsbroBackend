@@ -21,7 +21,6 @@ type IMealService interface {
 	GetAllMeals() ([]*Meal, error)
 	GetMeal(id string) (*Meal, error)
 	GetMealByUser(userid string) ([]*Meal, error)
-	GetMealByUserDate(userid string, start int, end int) ([]*Meal, error)
 	DeleteMeal(id string) error
 	UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error)
 	SearchFilteredMeals(filters SearchFilters) ([]*Meal, error)
@@ -70,21 +69,6 @@ func (ns *MealService) GetMeal(id string) (*Meal, error) {
 
 func (ns *MealService) GetMealByUser(userid string) ([]*Meal, error) {
 	filter := bson.M{"userid": bson.M{"$in": []string{userid}}}
-	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	var Meals []*Meal
-	if err := cursor.All(context.Background(), &Meals); err != nil {
-		return nil, err
-	}
-	return Meals, nil
-}
-
-func (ns *MealService) GetMealByUserDate(userid string, start int, end int) ([]*Meal, error) {
-	start_time := time.Unix(int64(start), 0).Format("2006-01-02T15:04:05Z")
-	end_time := time.Unix(int64(end), 0).Format("2006-01-02T15:04:05Z")
-	filter := bson.M{"userid": bson.M{"$in": []string{userid}}, "created_at": bson.M{"$gte": start_time, "$lte": end_time}}
 	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
