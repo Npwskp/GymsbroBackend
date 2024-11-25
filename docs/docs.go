@@ -539,6 +539,15 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Food log object that needs to be updated",
+                        "name": "foodlog",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/foodlog.UpdateFoodLogDto"
+                        }
                     }
                 ],
                 "responses": {
@@ -1009,7 +1018,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/meal/user/{userid}": {
+        "/meal/user": {
             "get": {
                 "description": "Get meals by user",
                 "consumes": [
@@ -1022,15 +1031,6 @@ const docTemplate = `{
                     "meals"
                 ],
                 "summary": "Get meals by user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1906,6 +1906,23 @@ const docTemplate = `{
                 },
                 "userid": {
                     "type": "string"
+                }
+            }
+        },
+        "foodlog.UpdateFoodLogDto": {
+            "type": "object",
+            "required": [
+                "date"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "meals": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

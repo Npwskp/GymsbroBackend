@@ -114,6 +114,7 @@ func (fc *FoodLogController) DeleteFoodLog(c *fiber.Ctx) error {
 // @Accept		json
 // @Produce		json
 // @Param		id path	string true "Food log ID"
+// @Param		foodlog body UpdateFoodLogDto true "Food log object that needs to be updated"
 // @Success		200	{object} FoodLog
 // @Failure		400	{object} Error
 // @Router		/foodlog/{id} [put]

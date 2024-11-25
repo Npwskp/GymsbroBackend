@@ -54,7 +54,8 @@ func (fs *FoodLogService) GetFoodLog(id string, userid string) (*FoodLog, error)
 }
 
 func (fs *FoodLogService) GetFoodLogByUser(userid string) ([]*FoodLog, error) {
-	cursor, err := fs.DB.Collection("foodlog").Find(context.Background(), bson.D{{Key: "userid", Value: userid}})
+	filter := bson.D{{Key: "userid", Value: userid}}
+	cursor, err := fs.DB.Collection("foodlog").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}

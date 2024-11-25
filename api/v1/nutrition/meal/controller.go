@@ -83,7 +83,6 @@ func (nc *MealController) GetMealHandler(c *fiber.Ctx) error {
 // @Tags		meals
 // @Accept		json
 // @Produce		json
-// @Param		userid path string true "User ID"
 // @Success		200	{object} []Meal
 // @Failure		400	{object} Error
 // @Router		/meal/user [get]
@@ -91,8 +90,16 @@ func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 	userid := function.GetUserIDFromContext(c)
 	meals, err := nc.Service.GetMealByUser(userid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
+
+	// Initialize empty slice if meals is nil
+	if meals == nil {
+		meals = []*Meal{}
+	}
+
 	return c.Status(fiber.StatusOK).JSON(meals)
 }
 
@@ -185,8 +192,8 @@ func (nc *MealController) Handle() {
 	g.Post("/", nc.CreateMealHandler)
 	g.Get("/", nc.GetMealsHandler)
 	g.Get("/search", nc.SearchFilteredMealsHandler)
-	g.Get("/:id", nc.GetMealHandler)
 	g.Get("/user", nc.GetMealByUserHandler)
+	g.Get("/:id", nc.GetMealHandler)
 	g.Delete("/:id", nc.DeleteMealHandler)
 	g.Put("/:id", nc.UpdateMealHandler)
 }

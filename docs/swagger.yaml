@@ -142,6 +142,17 @@ definitions:
     - datetime
     - userid
     type: object
+  foodlog.UpdateFoodLogDto:
+    properties:
+      date:
+        type: string
+      meals:
+        items:
+          type: string
+        type: array
+    required:
+    - date
+    type: object
   function.CalPerActivity:
     properties:
       activityName:
@@ -881,6 +892,12 @@ paths:
         name: id
         required: true
         type: string
+      - description: Food log object that needs to be updated
+        in: body
+        name: foodlog
+        required: true
+        schema:
+          $ref: '#/definitions/foodlog.UpdateFoodLogDto'
       produces:
       - application/json
       responses:
@@ -1296,17 +1313,11 @@ paths:
       summary: Search and filter meals
       tags:
       - meals
-  /meal/user/{userid}:
+  /meal/user:
     get:
       consumes:
       - application/json
       description: Get meals by user
-      parameters:
-      - description: User ID
-        in: path
-        name: userid
-        required: true
-        type: string
       produces:
       - application/json
       responses:

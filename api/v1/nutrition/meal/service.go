@@ -68,16 +68,18 @@ func (ns *MealService) GetMeal(id string) (*Meal, error) {
 }
 
 func (ns *MealService) GetMealByUser(userid string) ([]*Meal, error) {
-	filter := bson.M{"userid": bson.M{"$in": []string{userid}}}
+	filter := bson.D{{Key: "userid", Value: userid}}
 	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}
-	var Meals []*Meal
-	if err := cursor.All(context.Background(), &Meals); err != nil {
+	defer cursor.Close(context.Background())
+
+	var meals []*Meal
+	if err := cursor.All(context.Background(), &meals); err != nil {
 		return nil, err
 	}
-	return Meals, nil
+	return meals, nil
 }
 
 func (ns *MealService) DeleteMeal(id string) error {
