@@ -21,7 +21,6 @@
 
 # Go cache
 /pkg/
-go.sum
 
 # Temporary files
 *~
