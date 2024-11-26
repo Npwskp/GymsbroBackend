@@ -17,17 +17,18 @@ type MealService struct {
 }
 
 type IMealService interface {
-	CreateMeal(meal *CreateMealDto) (*Meal, error)
-	GetAllMeals() ([]*Meal, error)
-	GetMeal(id string) (*Meal, error)
+	CreateMeal(meal *CreateMealDto, userid string) (*Meal, error)
+	GetAllMeals(userid string) ([]*Meal, error)
+	GetMeal(id string, userid string) (*Meal, error)
 	GetMealByUser(userid string) ([]*Meal, error)
-	DeleteMeal(id string) error
-	UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error)
+	DeleteMeal(id string, userid string) error
+	UpdateMeal(doc *UpdateMealDto, id string, userid string) (*Meal, error)
 	SearchFilteredMeals(filters SearchFilters) ([]*Meal, error)
 }
 
-func (ns *MealService) CreateMeal(meal *CreateMealDto) (*Meal, error) {
+func (ns *MealService) CreateMeal(meal *CreateMealDto, userid string) (*Meal, error) {
 	mealModel := CreateMealModel(meal)
+	mealModel.UserID = userid
 
 	result, err := ns.DB.Collection("meal").InsertOne(context.Background(), mealModel)
 	if err != nil {
@@ -42,8 +43,9 @@ func (ns *MealService) CreateMeal(meal *CreateMealDto) (*Meal, error) {
 	return createdMeal, nil
 }
 
-func (ns *MealService) GetAllMeals() ([]*Meal, error) {
-	cursor, err := ns.DB.Collection("meal").Find(context.Background(), bson.D{})
+func (ns *MealService) GetAllMeals(userid string) ([]*Meal, error) {
+	filter := bson.D{{Key: "userid", Value: userid}, {Key: "userid", Value: primitive.Null{}}, {Key: "userid", Value: ""}}
+	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}
@@ -54,12 +56,12 @@ func (ns *MealService) GetAllMeals() ([]*Meal, error) {
 	return Meals, nil
 }
 
-func (ns *MealService) GetMeal(id string) (*Meal, error) {
+func (ns *MealService) GetMeal(id string, userid string) (*Meal, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
 	meal := &Meal{}
 	if err := ns.DB.Collection("meal").FindOne(context.Background(), filter).Decode(meal); err != nil {
 		return nil, err
@@ -82,24 +84,24 @@ func (ns *MealService) GetMealByUser(userid string) ([]*Meal, error) {
 	return meals, nil
 }
 
-func (ns *MealService) DeleteMeal(id string) error {
+func (ns *MealService) DeleteMeal(id string, userid string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
 	if _, err := ns.DB.Collection("meal").DeleteOne(context.Background(), filter); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error) {
+func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string, userid string) (*Meal, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "carb", Value: doc.Carb},
@@ -112,7 +114,7 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string) (*Meal, error) 
 	if _, err := ns.DB.Collection("meal").UpdateOne(context.Background(), filter, update); err != nil {
 		return nil, err
 	}
-	return ns.GetMeal(id)
+	return ns.GetMeal(id, userid)
 }
 
 func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, error) {

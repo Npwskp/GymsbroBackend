@@ -6,7 +6,6 @@ type CreateMealDto struct {
 	Name        string             `json:"name" validate:"required"`
 	Description string             `json:"description"`
 	Category    string             `json:"category"`
-	UserID      string             `json:"userid"`
 	Image       string             `json:"image"`
 	Calories    float64            `json:"calories"`
 	Nutrients   []types.Nutrient   `json:"nutrients"`

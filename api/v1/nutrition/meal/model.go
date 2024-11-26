@@ -30,7 +30,7 @@ func CreateMealModel(dto *CreateMealDto) *Meal {
 		Name:        dto.Name,
 		Description: dto.Description,
 		Category:    dto.Category,
-		UserID:      dto.UserID,
+		UserID:      "",
 		Image:       dto.Image,
 		Calories:    dto.Calories,
 		Nutrients:   dto.Nutrients,
