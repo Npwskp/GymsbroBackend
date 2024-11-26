@@ -24,6 +24,7 @@ type MealController struct {
 // @Router		/meal [post]
 func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 	meal := new(CreateMealDto)
+	userid := function.GetUserIDFromContext(c)
 	validate := validator.New()
 	if err := c.BodyParser(meal); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
@@ -31,7 +32,7 @@ func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 	if err := validate.Struct(*meal); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
-	createdMeal, err := nc.Service.CreateMeal(meal)
+	createdMeal, err := nc.Service.CreateMeal(meal, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -47,7 +48,8 @@ func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 // @Failure		400	{object} Error
 // @Router		/meal [get]
 func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
-	meals, err := nc.Service.GetAllMeals()
+	userid := function.GetUserIDFromContext(c)
+	meals, err := nc.Service.GetAllMeals(userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -71,7 +73,8 @@ func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
 // @Router		/meal/{id} [get]
 func (nc *MealController) GetMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
-	meal, err := nc.Service.GetMeal(id)
+	userid := function.GetUserIDFromContext(c)
+	meal, err := nc.Service.GetMeal(id, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -114,7 +117,8 @@ func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 // @Router		/meal/{id} [delete]
 func (nc *MealController) DeleteMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
-	err := nc.Service.DeleteMeal(id)
+	userid := function.GetUserIDFromContext(c)
+	err := nc.Service.DeleteMeal(id, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -133,6 +137,7 @@ func (nc *MealController) DeleteMealHandler(c *fiber.Ctx) error {
 // @Router		/meal/{id} [put]
 func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
+	userid := function.GetUserIDFromContext(c)
 	validate := validator.New()
 	doc := new(UpdateMealDto)
 	if err := c.BodyParser(doc); err != nil {
@@ -141,7 +146,7 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 	if err := validate.Struct(*doc); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
-	meal, err := nc.Service.UpdateMeal(doc, id)
+	meal, err := nc.Service.UpdateMeal(doc, id, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
