@@ -278,8 +278,6 @@ definitions:
         items:
           $ref: '#/definitions/types.Nutrient'
         type: array
-      userid:
-        type: string
     required:
     - name
     type: object

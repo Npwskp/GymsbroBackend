@@ -67,6 +67,11 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
+
+	if foodlogs == nil {
+		foodlogs = []*FoodLog{}
+	}
+
 	return c.JSON(foodlogs)
 }
 
@@ -86,6 +91,11 @@ func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
+
+	if foodlog == nil {
+		foodlog = []*FoodLog{}
+	}
+
 	return c.JSON(foodlog)
 }
 
@@ -136,8 +146,8 @@ func (fc *FoodLogController) Handle() {
 	g := fc.Instance.Group("/foodlog")
 
 	g.Post("/", fc.CreateFoodLog)
-	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user", fc.GetFoodLogByUser)
+	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user/:date", fc.GetFoodLogByUserDate)
 	g.Delete("/:id", fc.DeleteFoodLog)
 	g.Put("/:id", fc.UpdateFoodLog)

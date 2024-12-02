@@ -2116,9 +2116,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },
