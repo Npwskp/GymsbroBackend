@@ -258,6 +258,22 @@ definitions:
           $ref: '#/definitions/types.Nutrient'
         type: array
     type: object
+  meal.CalculateNutrientBody:
+    properties:
+      ingredients:
+        items:
+          $ref: '#/definitions/types.Ingredient'
+        type: array
+    type: object
+  meal.CalculateNutrientResponse:
+    properties:
+      calories:
+        type: number
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
+    type: object
   meal.CreateMealDto:
     properties:
       calories:
@@ -278,8 +294,6 @@ definitions:
         items:
           $ref: '#/definitions/types.Nutrient'
         type: array
-      userid:
-        type: string
     required:
     - name
     type: object
@@ -386,22 +400,18 @@ definitions:
     type: object
   types.Ingredient:
     properties:
+      amount:
+        type: number
       ingredientId:
         type: string
       name:
         type: string
-      numOfServings:
-        type: number
       unit:
         type: string
-      value:
-        type: number
     required:
+    - amount
     - ingredientId
-    - name
-    - numOfServings
     - unit
-    - value
     type: object
   types.Nutrient:
     properties:
@@ -1270,6 +1280,31 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update a meal
+      tags:
+      - meals
+  /meal/calculate:
+    post:
+      consumes:
+      - application/json
+      description: Calculate nutrient
+      parameters:
+      - description: Calculate Nutrient
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/meal.CalculateNutrientBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meal.CalculateNutrientResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Calculate nutrient
       tags:
       - meals
   /meal/search:

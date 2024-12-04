@@ -956,6 +956,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/meal/calculate": {
+            "post": {
+                "description": "Calculate nutrient",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meals"
+                ],
+                "summary": "Calculate nutrient",
+                "parameters": [
+                    {
+                        "description": "Calculate Nutrient",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/meal.CalculateNutrientBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/meal.CalculateNutrientResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/meal/search": {
             "get": {
                 "description": "Search meals with optional filters",
@@ -2084,6 +2122,31 @@ const docTemplate = `{
                 }
             }
         },
+        "meal.CalculateNutrientBody": {
+            "type": "object",
+            "properties": {
+                "ingredients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Ingredient"
+                    }
+                }
+            }
+        },
+        "meal.CalculateNutrientResponse": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number"
+                },
+                "nutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Nutrient"
+                    }
+                }
+            }
+        },
         "meal.CreateMealDto": {
             "type": "object",
             "required": [
@@ -2116,9 +2179,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/types.Nutrient"
                     }
-                },
-                "userid": {
-                    "type": "string"
                 }
             }
         },
@@ -2275,27 +2335,22 @@ const docTemplate = `{
         "types.Ingredient": {
             "type": "object",
             "required": [
+                "amount",
                 "ingredientId",
-                "name",
-                "numOfServings",
-                "unit",
-                "value"
+                "unit"
             ],
             "properties": {
+                "amount": {
+                    "type": "number"
+                },
                 "ingredientId": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "numOfServings": {
-                    "type": "number"
-                },
                 "unit": {
                     "type": "string"
-                },
-                "value": {
-                    "type": "number"
                 }
             }
         },

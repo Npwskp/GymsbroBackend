@@ -3,6 +3,7 @@ package meal
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,6 +11,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
 )
 
 type MealService struct {
@@ -18,6 +23,7 @@ type MealService struct {
 
 type IMealService interface {
 	CreateMeal(meal *CreateMealDto, userid string) (*Meal, error)
+	CalculateNutrient(body *CalculateNutrientBody, userid string) (*CalculateNutrientResponse, error)
 	GetAllMeals(userid string) ([]*Meal, error)
 	GetMeal(id string, userid string) (*Meal, error)
 	GetMealByUser(userid string) ([]*Meal, error)
@@ -41,6 +47,102 @@ func (ns *MealService) CreateMeal(meal *CreateMealDto, userid string) (*Meal, er
 		return nil, err
 	}
 	return createdMeal, nil
+}
+
+func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid string) (*CalculateNutrientResponse, error) {
+	ingredientsBody := body.Ingredients
+	ingredientService := &ingredient.IngredientService{DB: ns.DB}
+
+	ingredientIDs := make([]primitive.ObjectID, len(ingredientsBody))
+	for i, ing := range ingredientsBody {
+		oid, err := primitive.ObjectIDFromHex(ing.IngredientId)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ingredient ID %s: %w", ing.IngredientId, err)
+		}
+		ingredientIDs[i] = oid
+	}
+
+	// Query all ingredients at once
+	filter := bson.M{
+		"_id": bson.M{"$in": ingredientIDs},
+		"$or": []bson.M{
+			{"userid": userid},
+			{"userid": ""},
+			{"userid": nil},
+		},
+	}
+	var ingredients []ingredient.Ingredient
+	cursor, err := ingredientService.DB.Collection("ingredient").Find(context.Background(), filter)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching ingredients: %w", err)
+	}
+	if err := cursor.All(context.Background(), &ingredients); err != nil {
+		return nil, fmt.Errorf("error decoding ingredients: %w", err)
+	}
+
+	// Convert slice to map for easier lookup
+	ingredientMap := make(map[primitive.ObjectID]*ingredient.Ingredient)
+	for i := range ingredients {
+		ingredientMap[ingredients[i].ID] = &ingredients[i]
+	}
+
+	totalNutrients := make(map[string]types.Nutrient)
+	totalCalories := 0.0
+
+	for _, ingBody := range ingredientsBody {
+		oid, err := primitive.ObjectIDFromHex(ingBody.IngredientId)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ingredient ID %s: %w", ingBody.IngredientId, err)
+		}
+
+		fullIngredient, ok := ingredientMap[oid]
+		if !ok {
+			return nil, fmt.Errorf("ingredient not found: %s", ingBody.IngredientId)
+		}
+
+		// Convert ingredient amount to grams for calculation
+		amountInGrams, err := function.ConvertUnit(ingBody.Amount, ingBody.Unit, "g")
+		if err != nil {
+			return nil, fmt.Errorf("error converting units for ingredient %s: %w", ingBody.IngredientId, err)
+		}
+
+		// Calculate the serving ratio (amount in grams / 100g base)
+		servingRatio := amountInGrams / 100.0
+
+		// Calculate calories based on the actual amount in grams
+		totalCalories, _ = strconv.ParseFloat(fmt.Sprintf("%.5f", fullIngredient.Calories*servingRatio), 64)
+
+		// Calculate nutrients based on the actual amount in grams
+		if fullIngredient.Nutrients != nil {
+			for _, nutrient := range fullIngredient.Nutrients {
+				if existing, ok := totalNutrients[nutrient.Name]; ok {
+					// Update existing nutrient with rounding
+					roundedAmount, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", existing.Amount+nutrient.Amount*servingRatio), 64)
+					existing.Amount = roundedAmount
+					totalNutrients[nutrient.Name] = existing
+				} else {
+					// Add new nutrient with rounding
+					roundedAmount, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", nutrient.Amount*servingRatio), 64)
+					totalNutrients[nutrient.Name] = types.Nutrient{
+						Name:   nutrient.Name,
+						Amount: roundedAmount,
+						Unit:   nutrient.Unit,
+					}
+				}
+			}
+		}
+	}
+
+	// Convert map directly to []types.Nutrient
+	nutrientValues := make([]types.Nutrient, 0, len(totalNutrients))
+	for _, nutrient := range totalNutrients {
+		nutrientValues = append(nutrientValues, nutrient)
+	}
+
+	return &CalculateNutrientResponse{
+		Calories:  totalCalories,
+		Nutrients: nutrientValues,
+	}, nil
 }
 
 func (ns *MealService) GetAllMeals(userid string) ([]*Meal, error) {
