@@ -12,9 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
+	"github.com/Npwskp/GymsbroBackend/api/v1/unit"
 )
 
 type MealService struct {
@@ -101,7 +101,7 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 		}
 
 		// Convert ingredient amount to grams for calculation
-		amountInGrams, err := function.ConvertUnit(ingBody.Amount, ingBody.Unit, "g")
+		amountInGrams, err := unit.Service.ConvertBetweenUnits(ingBody.Amount, ingBody.Unit, "g")
 		if err != nil {
 			return nil, fmt.Errorf("error converting units for ingredient %s: %w", ingBody.IngredientId, err)
 		}
