@@ -76,7 +76,7 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 // @Accept		json
 // @Produce		json
 // @Param		date path	string true "Date"
-// @Success		200	{object} []FoodLog
+// @Success		200	{object} FoodLog
 // @Failure		400	{object} Error
 // @Router		/foodlog/user/{date} [get]
 func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {

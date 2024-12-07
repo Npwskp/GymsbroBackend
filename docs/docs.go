@@ -472,10 +472,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/foodlog.FoodLog"
-                            }
+                            "$ref": "#/definitions/foodlog.FoodLog"
                         }
                     },
                     "400": {

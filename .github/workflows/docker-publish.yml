@@ -25,9 +25,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-
+        
       - name: Run Tests
-        run: go test -v ./api/v1/test/...
+        run: |
+          # Wait for MongoDB to be ready
+          sleep 5
+          go test -v ./api/v1/test/...
 
   build-and-push:
     needs: test  # This ensures tests pass before building
