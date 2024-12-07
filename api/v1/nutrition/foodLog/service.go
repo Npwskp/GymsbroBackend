@@ -2,6 +2,7 @@ package foodlog
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
@@ -18,13 +19,22 @@ type IFoodLogService interface {
 	CreateFoodLog(foodlog *CreateFoodLogDto, userid string) (*FoodLog, error)
 	GetFoodLog(id string, userid string) (*FoodLog, error)
 	GetFoodLogByUser(userid string) ([]*FoodLog, error)
-	GetFoodLogByUserDate(userid string, date string) ([]*FoodLog, error)
+	GetFoodLogByUserDate(userid string, date string) (*FoodLog, error)
 	DeleteFoodLog(id string, userid string) error
 	UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid string) (*FoodLog, error)
 }
 
 func (fs *FoodLogService) CreateFoodLog(foodlog *CreateFoodLogDto, userid string) (*FoodLog, error) {
-	model := CreateFoodLogModel(foodlog)
+	// Check if a food log already exists for this user and date
+	existingLog, err := fs.GetFoodLogByUserDate(userid, foodlog.Date)
+	if err == nil && existingLog != nil {
+		return nil, fmt.Errorf("food log already exists for this date, please use update instead")
+	}
+
+	model, err := CreateFoodLogModel(foodlog)
+	if err != nil {
+		return nil, err
+	}
 	model.UserID = userid
 	result, err := fs.DB.Collection("foodlog").InsertOne(context.Background(), model)
 	if err != nil {
@@ -66,35 +76,21 @@ func (fs *FoodLogService) GetFoodLogByUser(userid string) ([]*FoodLog, error) {
 	return foodlogs, nil
 }
 
-func (fs *FoodLogService) GetFoodLogByUserDate(userid string, date string) ([]*FoodLog, error) {
-	// Create a pipeline for aggregation
-	pipeline := mongo.Pipeline{
-		// Match documents for the user
-		{{Key: "$match", Value: bson.D{
-			{Key: "userid", Value: userid},
-			{Key: "datetime", Value: bson.D{
-				{Key: "$regex", Value: primitive.Regex{Pattern: "^" + date}},
-			}},
-		}}},
-		// Sort by datetime
-		{{Key: "$sort", Value: bson.D{
-			{Key: "datetime", Value: 1}, // 1 for ascending, -1 for descending
-		}}},
+func (fs *FoodLogService) GetFoodLogByUserDate(userid string, date string) (*FoodLog, error) {
+	// Create a filter for user and date
+	filter := bson.D{
+		{Key: "userid", Value: userid},
+		{Key: "date", Value: date},
 	}
 
-	// Execute the aggregation
-	cursor, err := fs.DB.Collection("foodlog").Aggregate(context.Background(), pipeline)
+	// Find one document
+	foodlog := &FoodLog{}
+	err := fs.DB.Collection("foodlog").FindOne(context.Background(), filter).Decode(foodlog)
 	if err != nil {
 		return nil, err
 	}
 
-	// Decode the results
-	var foodlogs []*FoodLog
-	if err := cursor.All(context.Background(), &foodlogs); err != nil {
-		return nil, err
-	}
-
-	return foodlogs, nil
+	return foodlog, nil
 }
 
 func (fs *FoodLogService) DeleteFoodLog(id string, userid string) error {
@@ -129,7 +125,7 @@ func (fs *FoodLogService) UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid
 
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "datetime", Value: doc.DateTime},
+			{Key: "date", Value: doc.Date},
 			{Key: "meals", Value: doc.Meals},
 			{Key: "update_at", Value: time.Now()},
 		}},
