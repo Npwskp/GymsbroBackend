@@ -126,7 +126,7 @@ definitions:
     properties:
       created_at:
         type: string
-      datetime:
+      date:
         type: string
       id:
         type: string
@@ -139,7 +139,7 @@ definitions:
       userid:
         type: string
     required:
-    - datetime
+    - date
     - userid
     type: object
   foodlog.UpdateFoodLogDto:

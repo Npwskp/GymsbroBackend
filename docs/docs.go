@@ -1920,14 +1920,14 @@ const docTemplate = `{
         "foodlog.FoodLog": {
             "type": "object",
             "required": [
-                "datetime",
+                "date",
                 "userid"
             ],
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
-                "datetime": {
+                "date": {
                     "type": "string"
                 },
                 "id": {
