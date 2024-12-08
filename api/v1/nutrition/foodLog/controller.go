@@ -139,8 +139,8 @@ func (fc *FoodLogController) Handle() {
 	g := fc.Instance.Group("/foodlog")
 
 	g.Post("/", fc.CreateFoodLog)
-	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user", fc.GetFoodLogByUser)
+	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user/:date", fc.GetFoodLogByUserDate)
 	g.Delete("/:id", fc.DeleteFoodLog)
 	g.Put("/:id", fc.UpdateFoodLog)
