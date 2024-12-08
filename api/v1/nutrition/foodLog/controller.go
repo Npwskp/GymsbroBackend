@@ -82,7 +82,6 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
 	userid := function.GetUserIDFromContext(c)
 	date := c.Params("date")
-	var foodlog *FoodLog
 	foodlog, err := fc.Service.GetFoodLogByUserDate(userid, date)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
