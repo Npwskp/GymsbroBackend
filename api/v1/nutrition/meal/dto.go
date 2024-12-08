@@ -28,3 +28,12 @@ type SearchFilters struct {
 	Nutrients   string `json:"nutrients"`
 	UserID      string `json:"userid"`
 }
+
+type CalculateNutrientBody struct {
+	Ingredients []types.Ingredient `json:"ingredients"`
+}
+
+type CalculateNutrientResponse struct {
+	Nutrients []types.Nutrient `json:"nutrients"`
+	Calories  float64          `json:"calories"`
+}

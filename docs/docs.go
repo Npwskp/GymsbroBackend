@@ -472,10 +472,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/foodlog.FoodLog"
-                            }
+                            "$ref": "#/definitions/foodlog.FoodLog"
                         }
                     },
                     "400": {
@@ -947,6 +944,44 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/meal.Meal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/meal/calculate": {
+            "post": {
+                "description": "Calculate nutrient",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meals"
+                ],
+                "summary": "Calculate nutrient",
+                "parameters": [
+                    {
+                        "description": "Calculate Nutrient",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/meal.CalculateNutrientBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/meal.CalculateNutrientResponse"
                         }
                     },
                     "400": {
@@ -1882,14 +1917,14 @@ const docTemplate = `{
         "foodlog.FoodLog": {
             "type": "object",
             "required": [
-                "datetime",
+                "date",
                 "userid"
             ],
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
-                "datetime": {
+                "date": {
                     "type": "string"
                 },
                 "id": {
@@ -2075,6 +2110,31 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "nutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Nutrient"
+                    }
+                }
+            }
+        },
+        "meal.CalculateNutrientBody": {
+            "type": "object",
+            "properties": {
+                "ingredients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Ingredient"
+                    }
+                }
+            }
+        },
+        "meal.CalculateNutrientResponse": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number"
                 },
                 "nutrients": {
                     "type": "array",
@@ -2272,27 +2332,22 @@ const docTemplate = `{
         "types.Ingredient": {
             "type": "object",
             "required": [
+                "amount",
                 "ingredientId",
-                "name",
-                "numOfServings",
-                "unit",
-                "value"
+                "unit"
             ],
             "properties": {
+                "amount": {
+                    "type": "number"
+                },
                 "ingredientId": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "numOfServings": {
-                    "type": "number"
-                },
                 "unit": {
                     "type": "string"
-                },
-                "value": {
-                    "type": "number"
                 }
             }
         },

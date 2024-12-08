@@ -67,11 +67,6 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
-	if foodlogs == nil {
-		foodlogs = []*FoodLog{}
-	}
-
 	return c.JSON(foodlogs)
 }
 
@@ -81,7 +76,7 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 // @Accept		json
 // @Produce		json
 // @Param		date path	string true "Date"
-// @Success		200	{object} []FoodLog
+// @Success		200	{object} FoodLog
 // @Failure		400	{object} Error
 // @Router		/foodlog/user/{date} [get]
 func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
@@ -89,14 +84,11 @@ func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
 	date := c.Params("date")
 	foodlog, err := fc.Service.GetFoodLogByUserDate(userid, date)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
-
-	if foodlog == nil {
-		foodlog = []*FoodLog{}
-	}
-
-	return c.JSON(foodlog)
+	return c.Status(fiber.StatusOK).JSON(foodlog)
 }
 
 // @Summary		Delete a food log

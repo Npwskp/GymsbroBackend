@@ -39,6 +39,28 @@ func (nc *MealController) CreateMealHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(createdMeal)
 }
 
+// @Summary		Calculate nutrient
+// @Description	Calculate nutrient
+// @Tags		meals
+// @Accept		json
+// @Produce		json
+// @Param		body body CalculateNutrientBody true "Calculate Nutrient"
+// @Success		200	{object} CalculateNutrientResponse
+// @Failure		400	{object} Error
+// @Router		/meal/calculate [post]
+func (nc *MealController) CalculateNutrientHandler(c *fiber.Ctx) error {
+	body := new(CalculateNutrientBody)
+	userid := function.GetUserIDFromContext(c)
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	}
+	nutrients, err := nc.Service.CalculateNutrient(body, userid)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(nutrients)
+}
+
 // @Summary		Get all meals
 // @Description	Get all meals
 // @Tags		meals
@@ -195,6 +217,7 @@ func (nc *MealController) Handle() {
 	g := nc.Instance.Group("/meal")
 
 	g.Post("/", nc.CreateMealHandler)
+	g.Post("/calculate", nc.CalculateNutrientHandler)
 	g.Get("/", nc.GetMealsHandler)
 	g.Get("/search", nc.SearchFilteredMealsHandler)
 	g.Get("/user", nc.GetMealByUserHandler)
