@@ -220,30 +220,19 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string, userid string) 
 }
 
 func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, error) {
-	filterQuery := bson.D{}
-	andConditions := []bson.D{}
+	// Common filter conditions
+	baseConditions := []bson.D{}
 
 	// Add name search if query is provided
 	if filters.Query != "" {
-		andConditions = append(andConditions, bson.D{
+		baseConditions = append(baseConditions, bson.D{
 			{Key: "name", Value: bson.D{{Key: "$regex", Value: primitive.Regex{Pattern: filters.Query, Options: "i"}}}},
-		})
-	}
-
-	// Add user filter
-	if filters.UserID != "" {
-		andConditions = append(andConditions, bson.D{
-			{Key: "$or", Value: []bson.D{
-				{{Key: "userid", Value: ""}},
-				{{Key: "userid", Value: filters.UserID}},
-				{{Key: "userid", Value: primitive.Null{}}},
-			}},
 		})
 	}
 
 	// Add category filter
 	if filters.Category != "" {
-		andConditions = append(andConditions, bson.D{
+		baseConditions = append(baseConditions, bson.D{
 			{Key: "category", Value: filters.Category},
 		})
 	}
@@ -257,7 +246,7 @@ func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, erro
 		if filters.MaxCalories > 0 {
 			caloriesFilter = append(caloriesFilter, bson.E{Key: "$lte", Value: filters.MaxCalories})
 		}
-		andConditions = append(andConditions, bson.D{
+		baseConditions = append(baseConditions, bson.D{
 			{Key: "calories", Value: caloriesFilter},
 		})
 	}
@@ -278,29 +267,56 @@ func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, erro
 			}
 		}
 		if len(nutrientFilters) > 0 {
-			andConditions = append(andConditions, bson.D{
+			baseConditions = append(baseConditions, bson.D{
 				{Key: "$or", Value: nutrientFilters},
 			})
 		}
 	}
 
-	// Combine all conditions
-	if len(andConditions) > 0 {
-		filterQuery = bson.D{{Key: "$and", Value: andConditions}}
+	// Create two separate queries: one for public meals and one for user-specific meals
+	publicQuery := bson.D{{Key: "$and", Value: append(baseConditions, bson.D{
+		{Key: "$or", Value: []bson.D{
+			{{Key: "userid", Value: ""}},
+			{{Key: "userid", Value: primitive.Null{}}},
+		}},
+	})}}
+
+	userQuery := bson.D{}
+	if filters.UserID != "" {
+		userQuery = bson.D{{Key: "$and", Value: append(baseConditions, bson.D{
+			{Key: "userid", Value: filters.UserID},
+		})}}
 	}
 
-	// Execute query with limit
+	// Execute both queries with limit
 	opts := options.Find().SetLimit(20)
-	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filterQuery, opts)
+
+	// Get public meals
+	publicCursor, err := ns.DB.Collection("meal").Find(context.Background(), publicQuery, opts)
 	if err != nil {
-		return nil, fmt.Errorf("error searching meals: %w", err)
+		return nil, fmt.Errorf("error searching public meals: %w", err)
 	}
-	defer cursor.Close(context.Background())
+	defer publicCursor.Close(context.Background())
 
-	var meals []*Meal
-	if err := cursor.All(context.Background(), &meals); err != nil {
-		return nil, fmt.Errorf("error decoding meals: %w", err)
+	var publicMeals []*Meal
+	if err := publicCursor.All(context.Background(), &publicMeals); err != nil {
+		return nil, fmt.Errorf("error decoding public meals: %w", err)
 	}
 
-	return meals, nil
+	// Get user-specific meals if UserID is provided
+	var userMeals []*Meal
+	if filters.UserID != "" {
+		userCursor, err := ns.DB.Collection("meal").Find(context.Background(), userQuery, opts)
+		if err != nil {
+			return nil, fmt.Errorf("error searching user meals: %w", err)
+		}
+		defer userCursor.Close(context.Background())
+
+		if err := userCursor.All(context.Background(), &userMeals); err != nil {
+			return nil, fmt.Errorf("error decoding user meals: %w", err)
+		}
+	}
+
+	// Combine both results
+	return append(publicMeals, userMeals...), nil
 }
