@@ -142,28 +142,19 @@ func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id strin
 }
 
 func (is *IngredientService) SearchFilteredIngredients(filters SearchFilters) ([]*Ingredient, error) {
-	filterQuery := bson.D{}
-	andConditions := []bson.D{}
+	// Common filter conditions
+	baseConditions := []bson.D{}
 
 	// Add name search if query is provided
 	if filters.Query != "" {
-		andConditions = append(andConditions, bson.D{
+		baseConditions = append(baseConditions, bson.D{
 			{Key: "name", Value: bson.D{{Key: "$regex", Value: primitive.Regex{Pattern: filters.Query, Options: "i"}}}},
 		})
 	}
 
-	// Add user filter
-	andConditions = append(andConditions, bson.D{
-		{Key: "$or", Value: []bson.D{
-			{{Key: "userid", Value: ""}},
-			{{Key: "userid", Value: filters.UserID}},
-			{{Key: "userid", Value: primitive.Null{}}},
-		}},
-	})
-
 	// Add category filter
 	if filters.Category != "" {
-		andConditions = append(andConditions, bson.D{
+		baseConditions = append(baseConditions, bson.D{
 			{Key: "category", Value: filters.Category},
 		})
 	}
@@ -177,7 +168,7 @@ func (is *IngredientService) SearchFilteredIngredients(filters SearchFilters) ([
 		if filters.MaxCalories > 0 {
 			caloriesFilter = append(caloriesFilter, bson.E{Key: "$lte", Value: filters.MaxCalories})
 		}
-		andConditions = append(andConditions, bson.D{
+		baseConditions = append(baseConditions, bson.D{
 			{Key: "calories", Value: caloriesFilter},
 		})
 	}
@@ -198,29 +189,56 @@ func (is *IngredientService) SearchFilteredIngredients(filters SearchFilters) ([
 			}
 		}
 		if len(nutrientFilters) > 0 {
-			andConditions = append(andConditions, bson.D{
+			baseConditions = append(baseConditions, bson.D{
 				{Key: "$or", Value: nutrientFilters},
 			})
 		}
 	}
 
-	// Combine all conditions
-	if len(andConditions) > 0 {
-		filterQuery = bson.D{{Key: "$and", Value: andConditions}}
+	// Create two separate queries: one for public ingredients and one for user-specific ingredients
+	publicQuery := bson.D{{Key: "$and", Value: append(baseConditions, bson.D{
+		{Key: "$or", Value: []bson.D{
+			{{Key: "userid", Value: ""}},
+			{{Key: "userid", Value: primitive.Null{}}},
+		}},
+	})}}
+
+	userQuery := bson.D{}
+	if filters.UserID != "" {
+		userQuery = bson.D{{Key: "$and", Value: append(baseConditions, bson.D{
+			{Key: "userid", Value: filters.UserID},
+		})}}
 	}
 
-	// Execute query with limit
+	// Execute both queries with limit
 	opts := options.Find().SetLimit(20)
-	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), filterQuery, opts)
+
+	// Get public ingredients
+	publicCursor, err := is.DB.Collection("ingredient").Find(context.Background(), publicQuery, opts)
 	if err != nil {
-		return nil, fmt.Errorf("error searching ingredients: %w", err)
+		return nil, fmt.Errorf("error searching public ingredients: %w", err)
 	}
-	defer cursor.Close(context.Background())
+	defer publicCursor.Close(context.Background())
 
-	var ingredients []*Ingredient
-	if err := cursor.All(context.Background(), &ingredients); err != nil {
-		return nil, fmt.Errorf("error decoding ingredients: %w", err)
+	var publicIngredients []*Ingredient
+	if err := publicCursor.All(context.Background(), &publicIngredients); err != nil {
+		return nil, fmt.Errorf("error decoding public ingredients: %w", err)
 	}
 
-	return ingredients, nil
+	// Get user-specific ingredients if UserID is provided
+	var userIngredients []*Ingredient
+	if filters.UserID != "" {
+		userCursor, err := is.DB.Collection("ingredient").Find(context.Background(), userQuery, opts)
+		if err != nil {
+			return nil, fmt.Errorf("error searching user ingredients: %w", err)
+		}
+		defer userCursor.Close(context.Background())
+
+		if err := userCursor.All(context.Background(), &userIngredients); err != nil {
+			return nil, fmt.Errorf("error decoding user ingredients: %w", err)
+		}
+	}
+
+	// Combine both results
+	return append(publicIngredients, userIngredients...), nil
 }
