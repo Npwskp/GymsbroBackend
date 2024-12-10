@@ -61,29 +61,6 @@ func (nc *MealController) CalculateNutrientHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(nutrients)
 }
 
-// @Summary		Get all meals
-// @Description	Get all meals
-// @Tags		meals
-// @Accept		json
-// @Produce		json
-// @Success		200	{object} []Meal
-// @Failure		400	{object} Error
-// @Router		/meal [get]
-func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
-	userid := function.GetUserIDFromContext(c)
-	meals, err := nc.Service.GetAllMeals(userid)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
-	}
-
-	// Initialize empty slice if meals is nil
-	if meals == nil {
-		meals = []*Meal{}
-	}
-
-	return c.Status(fiber.StatusOK).JSON(meals)
-}
-
 // @Summary		Get a meal
 // @Description	Get a meal
 // @Tags		meals
@@ -218,7 +195,6 @@ func (nc *MealController) Handle() {
 
 	g.Post("/", nc.CreateMealHandler)
 	g.Post("/calculate", nc.CalculateNutrientHandler)
-	g.Get("/", nc.GetMealsHandler)
 	g.Get("/search", nc.SearchFilteredMealsHandler)
 	g.Get("/user", nc.GetMealByUserHandler)
 	g.Get("/:id", nc.GetMealHandler)

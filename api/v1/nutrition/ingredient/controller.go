@@ -2,7 +2,6 @@ package ingredient
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
-	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -33,37 +32,6 @@ func (ic *IngredientController) CreateIngredient(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusCreated).JSON(ingredient)
-}
-
-// @Summary Get all ingredients
-// @Description Get all ingredients
-// @Tags ingredient
-// @Accept json
-// @Produce json
-// @Success 200 {object} []Ingredient
-// @Failure 400 {object} Error
-// @Router /ingredient [get]
-func (ic *IngredientController) GetAllIngredients(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "unauthorized",
-		})
-	}
-
-	ingredients, err := ic.Service.GetAllIngredients(userID.Hex())
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	// Initialize empty slice if ingredients is nil
-	if ingredients == nil {
-		ingredients = []*Ingredient{}
-	}
-
-	return c.JSON(ingredients)
 }
 
 // @Summary Get an ingredient
@@ -140,12 +108,11 @@ func (ic *IngredientController) DeleteIngredient(c *fiber.Ctx) error {
 // @Router /ingredient/{id} [put]
 func (ic *IngredientController) UpdateIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
-	user := c.Locals("user").(map[string]interface{})
-	userId := user["id"].(string)
+	userId := function.GetUserIDFromContext(c)
 
 	var doc UpdateIngredientDto
 	if err := c.BodyParser(&doc); err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	ingredient, err := ic.Service.UpdateIngredient(&doc, id, userId)
@@ -197,7 +164,6 @@ func (ic *IngredientController) Handle() {
 	g := ic.Instance.Group("/ingredient")
 
 	g.Post("/", ic.CreateIngredient)
-	g.Get("/", ic.GetAllIngredients)
 	g.Get("/search", ic.SearchFilteredIngredients)
 	g.Get("/user", ic.GetIngredientByUser)
 	g.Get("/:id", ic.GetIngredient)
