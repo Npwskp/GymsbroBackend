@@ -24,8 +24,8 @@ func createTestFoodLog(userid string) *foodlog.FoodLog {
 	}
 }
 
-func createTestDTO() *foodlog.CreateFoodLogDto {
-	return &foodlog.CreateFoodLogDto{
+func createTestDTO() *foodlog.AddMealToFoodLogDto {
+	return &foodlog.AddMealToFoodLogDto{
 		Date:  time.Now().Format("2006-01-02"),
 		Meals: []string{"meal1", "meal2"},
 	}
@@ -72,13 +72,13 @@ func TestCreateFoodLog(t *testing.T) {
 
 	// Test case 1: Create food log with valid data
 	t.Run("Valid food log creation", func(t *testing.T) {
-		dto := &foodlog.CreateFoodLogDto{
+		dto := &foodlog.AddMealToFoodLogDto{
 			Date:  time.Now().Format("2006-01-02"),
 			Meals: []string{"meal1", "meal2"},
 		}
 		userid := "test_user"
 
-		foodLog, err := service.CreateFoodLog(dto, userid)
+		foodLog, err := service.AddMealToFoodLog(dto, userid)
 		assert.NoError(t, err)
 		assert.NotNil(t, foodLog)
 		assert.Equal(t, userid, foodLog.UserID)

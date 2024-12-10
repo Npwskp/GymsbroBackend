@@ -1,9 +1,17 @@
 package foodlog_test
 
 import (
-	"github.com/stretchr/testify/mock"
+	"bytes"
+	"encoding/json"
+	"net/http/httptest"
+	"testing"
 
 	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Mock service
@@ -11,7 +19,7 @@ type MockFoodLogService struct {
 	mock.Mock
 }
 
-func (m *MockFoodLogService) CreateFoodLog(dto *foodlog.CreateFoodLogDto, userid string) (*foodlog.FoodLog, error) {
+func (m *MockFoodLogService) AddMealToFoodLog(dto *foodlog.AddMealToFoodLogDto, userid string) (*foodlog.FoodLog, error) {
 	args := m.Called(dto, userid)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -54,4 +62,178 @@ func (m *MockFoodLogService) UpdateFoodLog(doc *foodlog.UpdateFoodLogDto, id str
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*foodlog.FoodLog), args.Error(1)
+}
+
+func setupTest() (*fiber.App, *MockFoodLogService) {
+	app := fiber.New()
+	mockService := new(MockFoodLogService)
+
+	// Create a mock JWT token using golang-jwt/jwt/v4
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": "test-user-id",
+	})
+
+	// Replace the middleware with one that properly sets up the test context
+	app.Use(func(c *fiber.Ctx) error {
+		// Set the mock token in the context
+		c.Locals("user", token)
+		return c.Next()
+	})
+
+	controller := &foodlog.FoodLogController{
+		Instance: app,
+		Service:  mockService,
+	}
+	controller.Handle()
+	return app, mockService
+}
+
+func TestAddMealToFoodLogController(t *testing.T) {
+	app, mockService := setupTest()
+
+	dto := &foodlog.AddMealToFoodLogDto{
+		Date:  "2024-03-20",
+		Meals: []string{"Breakfast", "Lunch"},
+	}
+
+	expectedResponse := &foodlog.FoodLog{
+		ID:     primitive.NewObjectID(),
+		UserID: "test-user-id",
+		Date:   "2024-03-20",
+		Meals:  []string{"Breakfast", "Lunch"},
+	}
+
+	mockService.On("AddMealToFoodLog", mock.AnythingOfType("*foodlog.AddMealToFoodLogDto"), "test-user-id").
+		Return(expectedResponse, nil)
+
+	jsonBody, _ := json.Marshal(dto)
+	req := httptest.NewRequest("POST", "/foodlog", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestGetFoodLogController(t *testing.T) {
+	app, mockService := setupTest()
+
+	expectedResponse := &foodlog.FoodLog{
+		ID:     primitive.NewObjectID(),
+		UserID: "test-user-id",
+		Date:   "2024-03-20",
+		Meals:  []string{"Breakfast", "Lunch"},
+	}
+
+	mockService.On("GetFoodLog", expectedResponse.ID.Hex(), "test-user-id").Return(expectedResponse, nil)
+
+	req := httptest.NewRequest("GET", "/foodlog/"+expectedResponse.ID.Hex(), nil)
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestGetFoodLogByUserController(t *testing.T) {
+	app, mockService := setupTest()
+
+	expectedResponse := []*foodlog.FoodLog{
+		{
+			ID:     primitive.NewObjectID(),
+			UserID: "test-user-id",
+			Date:   "2024-03-20",
+			Meals:  []string{"Breakfast"},
+		},
+		{
+			ID:     primitive.NewObjectID(),
+			UserID: "test-user-id",
+			Date:   "2024-03-21",
+			Meals:  []string{"Lunch"},
+		},
+	}
+
+	mockService.On("GetFoodLogByUser", "test-user-id").Return(expectedResponse, nil)
+
+	req := httptest.NewRequest("GET", "/foodlog/user", nil)
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestGetFoodLogByUserDateController(t *testing.T) {
+	app, mockService := setupTest()
+
+	expectedResponse := &foodlog.FoodLog{
+		ID:     primitive.NewObjectID(),
+		UserID: "test-user-id",
+		Date:   "2024-03-20",
+		Meals:  []string{"Breakfast", "Lunch"},
+	}
+
+	mockService.On("GetFoodLogByUserDate", "test-user-id", "2024-03-20").Return(expectedResponse, nil)
+
+	req := httptest.NewRequest("GET", "/foodlog/user/2024-03-20", nil)
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestDeleteFoodLogController(t *testing.T) {
+	app, mockService := setupTest()
+
+	id := primitive.NewObjectID().Hex()
+	mockService.On("DeleteFoodLog", id, "test-user-id").Return(nil)
+
+	req := httptest.NewRequest("DELETE", "/foodlog/"+id, nil)
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusNoContent, resp.StatusCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateFoodLogController(t *testing.T) {
+	app, mockService := setupTest()
+
+	id := primitive.NewObjectID().Hex()
+	dto := &foodlog.UpdateFoodLogDto{
+		Date:  "2024-03-20",
+		Meals: []string{"Updated Breakfast", "Updated Lunch"},
+	}
+
+	expectedResponse := &foodlog.FoodLog{
+		ID:     primitive.NewObjectID(),
+		UserID: "test-user-id",
+		Date:   "2024-03-20",
+		Meals:  []string{"Updated Breakfast", "Updated Lunch"},
+	}
+
+	mockService.On("UpdateFoodLog", dto, id, "test-user-id").Return(expectedResponse, nil)
+
+	jsonBody, _ := json.Marshal(dto)
+	req := httptest.NewRequest("PUT", "/foodlog/"+id, bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+	mockService.AssertExpectations(t)
 }
