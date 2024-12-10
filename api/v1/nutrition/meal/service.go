@@ -24,7 +24,6 @@ type MealService struct {
 type IMealService interface {
 	CreateMeal(meal *CreateMealDto, userid string) (*Meal, error)
 	CalculateNutrient(body *CalculateNutrientBody, userid string) (*CalculateNutrientResponse, error)
-	GetAllMeals(userid string) ([]*Meal, error)
 	GetMeal(id string, userid string) (*Meal, error)
 	GetMealByUser(userid string) ([]*Meal, error)
 	DeleteMeal(id string, userid string) error
@@ -143,19 +142,6 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 		Calories:  totalCalories,
 		Nutrients: nutrientValues,
 	}, nil
-}
-
-func (ns *MealService) GetAllMeals(userid string) ([]*Meal, error) {
-	filter := bson.D{{Key: "userid", Value: userid}, {Key: "userid", Value: primitive.Null{}}, {Key: "userid", Value: ""}}
-	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	var Meals []*Meal
-	if err := cursor.All(context.Background(), &Meals); err != nil {
-		return nil, err
-	}
-	return Meals, nil
 }
 
 func (ns *MealService) GetMeal(id string, userid string) (*Meal, error) {

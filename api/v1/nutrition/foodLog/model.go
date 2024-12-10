@@ -14,18 +14,3 @@ type FoodLog struct {
 	CreatedAt time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 	UpdateAt  time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 }
-
-func CreateFoodLogModel(dto *CreateFoodLogDto) (*FoodLog, error) {
-	date, err := time.Parse("2006-01-02", dto.Date)
-	if err != nil {
-		return nil, err
-	}
-
-	return &FoodLog{
-		UserID:    "",
-		Date:      date.Format("2006-01-02"),
-		Meals:     dto.Meals,
-		CreatedAt: time.Now(),
-		UpdateAt:  time.Now(),
-	}, nil
-}

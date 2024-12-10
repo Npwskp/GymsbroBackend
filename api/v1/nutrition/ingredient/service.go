@@ -19,7 +19,6 @@ type IngredientService struct {
 
 type IIngredientService interface {
 	CreateIngredient(ingredient *CreateIngredientDto, userId string) (*Ingredient, error)
-	GetAllIngredients(userId string) ([]*Ingredient, error)
 	GetIngredient(id string, userId string) (*Ingredient, error)
 	GetIngredientByUser(userId string) ([]*Ingredient, error)
 	DeleteIngredient(id string, userId string) error
@@ -43,25 +42,6 @@ func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto, u
 	}
 
 	return createdIngredient, nil
-}
-
-func (is *IngredientService) GetAllIngredients(userId string) ([]*Ingredient, error) {
-	filter := bson.D{
-		{Key: "$or", Value: []bson.D{
-			{{Key: "userid", Value: ""}},
-			{{Key: "userid", Value: userId}},
-			{{Key: "userid", Value: primitive.Null{}}},
-		}},
-	}
-	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	var ingredients []*Ingredient
-	if err := cursor.All(context.Background(), &ingredients); err != nil {
-		return nil, err
-	}
-	return ingredients, nil
 }
 
 func (is *IngredientService) GetIngredient(id string, userId string) (*Ingredient, error) {

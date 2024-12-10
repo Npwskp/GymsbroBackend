@@ -398,7 +398,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/foodlog.CreateFoodLogDto"
+                            "$ref": "#/definitions/foodlog.AddMealToFoodLogDto"
                         }
                     }
                 ],
@@ -593,34 +593,6 @@ const docTemplate = `{
             }
         },
         "/ingredient": {
-            "get": {
-                "description": "Get all ingredients",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ingredient"
-                ],
-                "summary": "Get all ingredients",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ingredient.Ingredient"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Create new ingredient",
                 "consumes": [
@@ -888,34 +860,6 @@ const docTemplate = `{
             }
         },
         "/meal": {
-            "get": {
-                "description": "Get all meals",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "meals"
-                ],
-                "summary": "Get all meals",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/meal.Meal"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Create a meal",
                 "consumes": [
@@ -1897,7 +1841,7 @@ const docTemplate = `{
                 }
             }
         },
-        "foodlog.CreateFoodLogDto": {
+        "foodlog.AddMealToFoodLogDto": {
             "type": "object",
             "required": [
                 "date"

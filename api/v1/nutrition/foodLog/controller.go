@@ -17,17 +17,17 @@ type FoodLogController struct {
 // @Tags		foodlog
 // @Accept		json
 // @Produce		json
-// @Param		foodlog body CreateFoodLogDto true "Food log object that needs to be created"
+// @Param		foodlog body AddMealToFoodLogDto true "Food log object that needs to be created"
 // @Success		201	{object} FoodLog
 // @Failure		400	{object} Error
 // @Router		/foodlog [post]
-func (fc *FoodLogController) CreateFoodLog(c *fiber.Ctx) error {
-	dto := new(CreateFoodLogDto)
+func (fc *FoodLogController) AddMealToFoodLog(c *fiber.Ctx) error {
+	dto := new(AddMealToFoodLogDto)
 	userid := function.GetUserIDFromContext(c)
 	if err := c.BodyParser(dto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	foodlog, err := fc.Service.CreateFoodLog(dto, userid)
+	foodlog, err := fc.Service.AddMealToFoodLog(dto, userid)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -137,7 +137,7 @@ func (fc *FoodLogController) UpdateFoodLog(c *fiber.Ctx) error {
 func (fc *FoodLogController) Handle() {
 	g := fc.Instance.Group("/foodlog")
 
-	g.Post("/", fc.CreateFoodLog)
+	g.Post("/", fc.AddMealToFoodLog)
 	g.Get("/user", fc.GetFoodLogByUser)
 	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user/:date", fc.GetFoodLogByUserDate)
