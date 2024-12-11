@@ -12,8 +12,8 @@ type FoodLogController struct {
 	Service  IFoodLogService
 }
 
-// @Summary		Create a food log
-// @Description	Create a food log
+// @Summary		Add meal to food log
+// @Description	Add meal to food log
 // @Tags		foodlog
 // @Accept		json
 // @Produce		json
