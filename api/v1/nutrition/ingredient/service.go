@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -45,11 +44,6 @@ func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto, u
 }
 
 func (is *IngredientService) GetIngredient(id string, userId string) (*Ingredient, error) {
-	err := function.CheckOwnership(is.DB, id, userId, "ingredient", &Ingredient{})
-	if err != nil {
-		return nil, err
-	}
-
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -77,11 +71,6 @@ func (is *IngredientService) GetIngredientByUser(userId string) ([]*Ingredient, 
 }
 
 func (is *IngredientService) DeleteIngredient(id string, userId string) error {
-	err := function.CheckOwnership(is.DB, id, userId, "ingredient", &Ingredient{})
-	if err != nil {
-		return err
-	}
-
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err

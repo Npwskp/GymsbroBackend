@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -118,11 +117,6 @@ func (fs *FoodLogService) GetFoodLogByUserDate(userid string, date string) (*Foo
 }
 
 func (fs *FoodLogService) DeleteFoodLog(id string, userid string) error {
-	err := function.CheckOwnership(fs.DB, id, userid, "foodlog", &FoodLog{})
-	if err != nil {
-		return err
-	}
-
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -136,11 +130,6 @@ func (fs *FoodLogService) DeleteFoodLog(id string, userid string) error {
 }
 
 func (fs *FoodLogService) UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid string) (*FoodLog, error) {
-	err := function.CheckOwnership(fs.DB, id, userid, "foodlog", &FoodLog{})
-	if err != nil {
-		return nil, err
-	}
-
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
