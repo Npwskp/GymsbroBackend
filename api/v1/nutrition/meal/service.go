@@ -147,13 +147,28 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 func (ns *MealService) GetMeal(id string, userid string) (*Meal, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid meal ID format: %w", err)
 	}
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
+
+	// Allow access to both public meals and user-specific meals
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "$or", Value: []bson.M{
+			{"userid": userid}, // User's own meals
+			{"userid": ""},     // Public meals
+			{"userid": nil},    // Public meals (null userid)
+		}},
+	}
+
 	meal := &Meal{}
-	if err := ns.DB.Collection("meal").FindOne(context.Background(), filter).Decode(meal); err != nil {
-		return nil, err
+	err = ns.DB.Collection("meal").FindOne(context.Background(), filter).Decode(meal)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("meal not found with ID: %s", id)
+		}
+		return nil, fmt.Errorf("error retrieving meal: %w", err)
 	}
+
 	return meal, nil
 }
 

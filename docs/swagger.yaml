@@ -826,7 +826,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a food log
+      description: Add meal to food log
       parameters:
       - description: Food log object that needs to be created
         in: body
@@ -844,7 +844,7 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      summary: Create a food log
+      summary: Add meal to food log
       tags:
       - foodlog
   /foodlog/{id}:
