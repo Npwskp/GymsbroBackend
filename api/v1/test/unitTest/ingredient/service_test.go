@@ -202,3 +202,98 @@ func TestSearchFilteredIngredients(t *testing.T) {
 		assert.Equal(t, 1, len(results))
 	})
 }
+
+func TestGetPublicIngredient(t *testing.T) {
+	db := setupTestDB(t)
+	service := &ingredient.IngredientService{DB: db}
+
+	// Create a public ingredient (empty UserID)
+	publicIngredient := createTestIngredient("")
+	_, err := db.Collection("ingredient").InsertOne(context.Background(), publicIngredient)
+	assert.NoError(t, err)
+
+	// Create a public ingredient (null UserID)
+	nullUserIngredient := createTestIngredient("")
+	nullUserIngredient.UserID = "" // This will be stored as null in MongoDB
+	_, err = db.Collection("ingredient").InsertOne(context.Background(), nullUserIngredient)
+	assert.NoError(t, err)
+
+	t.Run("Get public ingredient with empty UserID", func(t *testing.T) {
+		// Any user should be able to access public ingredient
+		ingredient, err := service.GetIngredient(publicIngredient.ID.Hex(), "random_user_id")
+		assert.NoError(t, err)
+		assert.NotNil(t, ingredient)
+		assert.Equal(t, publicIngredient.ID, ingredient.ID)
+	})
+
+	t.Run("Get public ingredient with null UserID", func(t *testing.T) {
+		ingredient, err := service.GetIngredient(nullUserIngredient.ID.Hex(), "random_user_id")
+		assert.NoError(t, err)
+		assert.NotNil(t, ingredient)
+		assert.Equal(t, nullUserIngredient.ID, ingredient.ID)
+	})
+}
+
+func TestSearchPublicAndUserIngredients(t *testing.T) {
+	db := setupTestDB(t)
+	service := &ingredient.IngredientService{DB: db}
+
+	testIngredients := []interface{}{
+		&ingredient.Ingredient{
+			ID:       primitive.NewObjectID(),
+			UserID:   "test_user",
+			Name:     "User Chicken",
+			Category: "Meat",
+			Calories: 200,
+		},
+		&ingredient.Ingredient{
+			ID:       primitive.NewObjectID(),
+			UserID:   "", // Public ingredient
+			Name:     "Public Chicken",
+			Category: "Meat",
+			Calories: 200,
+		},
+		&ingredient.Ingredient{
+			ID:       primitive.NewObjectID(),
+			UserID:   "", // Will be stored as null
+			Name:     "Instant Chicken",
+			Category: "Meat",
+			Calories: 200,
+		},
+	}
+
+	_, err := db.Collection("ingredient").InsertMany(context.Background(), testIngredients)
+	assert.NoError(t, err)
+
+	t.Run("Search should return both public and user ingredients", func(t *testing.T) {
+		filters := ingredient.SearchFilters{
+			Query:  "Chicken",
+			UserID: "test_user",
+		}
+		results, err := service.SearchFilteredIngredients(filters)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(results)) // Should return all three ingredients
+	})
+
+	t.Run("Search public ingredients only", func(t *testing.T) {
+		filters := ingredient.SearchFilters{
+			Query:  "Public",
+			UserID: "different_user", // Different user should still see public ingredients
+		}
+		results, err := service.SearchFilteredIngredients(filters)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Public Chicken", results[0].Name)
+	})
+
+	t.Run("Search instant ingredients only", func(t *testing.T) {
+		filters := ingredient.SearchFilters{
+			Query:  "Instant",
+			UserID: "different_user",
+		}
+		results, err := service.SearchFilteredIngredients(filters)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Instant Chicken", results[0].Name)
+	})
+}

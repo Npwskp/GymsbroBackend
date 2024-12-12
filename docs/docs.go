@@ -380,7 +380,7 @@ const docTemplate = `{
         },
         "/foodlog": {
             "post": {
-                "description": "Create a food log",
+                "description": "Add meal to food log",
                 "consumes": [
                     "application/json"
                 ],
@@ -390,7 +390,7 @@ const docTemplate = `{
                 "tags": [
                     "foodlog"
                 ],
-                "summary": "Create a food log",
+                "summary": "Add meal to food log",
                 "parameters": [
                     {
                         "description": "Food log object that needs to be created",
