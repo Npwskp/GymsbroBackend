@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
-	"github.com/Npwskp/GymsbroBackend/api/v1/plans"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -113,13 +112,6 @@ func (us *UserService) DeleteUser(id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
-	}
-	planService := plans.PlanService{DB: us.DB}
-	for _, day := range function.Day {
-		err := planService.DeleteByUserDay(id, day)
-		if err != nil {
-			return err
-		}
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
 	if _, err := us.DB.Collection("users").DeleteOne(context.Background(), filter); err != nil {
