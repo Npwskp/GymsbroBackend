@@ -25,6 +25,7 @@ type User struct {
 	Picture       string             `json:"picture,omitempty" bson:"picture,omitempty"`
 	CreatedAt     time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
 	UpdatedAt     time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
+	IsFirstLogin  bool               `json:"is_first_login" bson:"is_first_login" default:"true"`
 }
 
 func CreateUserModel(user *CreateUserDto) *User {
@@ -40,6 +41,7 @@ func CreateUserModel(user *CreateUserDto) *User {
 		Waist:         user.Waist,
 		Hip:           user.Hip,
 		ActivityLevel: user.ActivityLevel,
+		IsFirstLogin:  true,
 		CreatedAt:     time.Now(),
 	}
 }

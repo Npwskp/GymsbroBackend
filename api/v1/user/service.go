@@ -27,6 +27,7 @@ type IUserService interface {
 	DeleteUser(id string) error
 	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
+	UpdateFirstLoginStatus(id string) error
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
@@ -206,4 +207,30 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	}
 
 	return UpdatedUser, nil
+}
+
+func (us *UserService) UpdateFirstLoginStatus(id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{{Key: "_id", Value: oid}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "is_first_login", Value: false},
+			{Key: "updated_at", Value: time.Now()},
+		}},
+	}
+
+	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
+		return errors.New("no user found for the given ID")
+	}
+
+	return nil
 }
