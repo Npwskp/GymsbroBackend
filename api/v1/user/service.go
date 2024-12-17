@@ -102,8 +102,27 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*function.EnergyCons
 		return nil, err
 	}
 
-	if user.Weight == 0 || user.Height == 0 || user.Age == 0 || user.Gender == "" || user.ActivityLevel == 0 || user.Goal == "" {
-		return nil, errors.New("data is not enough to calculate energy consume plan")
+	var missingFields []string
+	if user.Weight == 0 {
+		missingFields = append(missingFields, "Weight")
+	}
+	if user.Height == 0 {
+		missingFields = append(missingFields, "Height")
+	}
+	if user.Age == 0 {
+		missingFields = append(missingFields, "Age")
+	}
+	if user.Gender == "" {
+		missingFields = append(missingFields, "Gender")
+	}
+	if user.ActivityLevel == 0 {
+		missingFields = append(missingFields, "ActivityLevel")
+	}
+	if user.Goal == "" {
+		missingFields = append(missingFields, "Goal")
+	}
+	if len(missingFields) > 0 {
+		return nil, errors.New("missing fields for energy consume plan calculation: " + strings.Join(missingFields, ", "))
 	}
 
 	return function.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
