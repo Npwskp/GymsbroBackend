@@ -8,6 +8,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -46,4 +47,8 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	foodLogService := foodlog.FoodLogService{DB: db}
 	foodLogController := foodlog.FoodLogController{Instance: protected, Service: &foodLogService}
 	foodLogController.Handle()
+
+	workoutService := workout.WorkoutService{DB: db}
+	workoutController := workout.WorkoutController{Instance: protected, Service: &workoutService}
+	workoutController.Handle()
 }

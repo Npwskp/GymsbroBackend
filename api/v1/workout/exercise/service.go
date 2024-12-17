@@ -15,20 +15,34 @@ type ExerciseService struct {
 }
 
 type IExerciseService interface {
-	CreateExercise(exercise *CreateExerciseDto) (*Exercise, error)
-	CreateManyExercises(exercises *[]CreateExerciseDto) ([]*Exercise, error)
-	GetAllExercises() ([]*Exercise, error)
-	GetExercise(id string) (*Exercise, error)
-	GetExerciseByType(exerciseType string) ([]*Exercise, error)
-	DeleteExercise(id string) error
-	UpdateExercise(doc *UpdateExerciseDto, id string) (*Exercise, error)
+	CreateExercise(exercise *CreateExerciseDto, userId string) (*Exercise, error)
+	CreateManyExercises(exercises *[]CreateExerciseDto, userId string) ([]*Exercise, error)
+	GetAllExercises(userId string) ([]*Exercise, error)
+	GetExercise(id string, userId string) (*Exercise, error)
+	GetExerciseByType(exerciseType string, userId string) ([]*Exercise, error)
+	DeleteExercise(id string, userId string) error
+	UpdateExercise(doc *UpdateExerciseDto, id string, userId string) (*Exercise, error)
 }
 
-func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto) (*Exercise, error) {
+func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto, userId string) (*Exercise, error) {
 	if exercise.Type == nil {
 		exercise.Type = []string{}
 	}
-	result, err := es.DB.Collection("exercises").InsertOne(context.Background(), exercise)
+	if exercise.Muscle == nil {
+		exercise.Muscle = []string{}
+	}
+
+	// Create exercise with userId
+	exerciseDoc := &Exercise{
+		UserID:      userId,
+		Name:        exercise.Name,
+		Description: exercise.Description,
+		Type:        exercise.Type,
+		Muscle:      exercise.Muscle,
+		Image:       exercise.Image,
+	}
+
+	result, err := es.DB.Collection("exercises").InsertOne(context.Background(), exerciseDoc)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +55,7 @@ func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto) (*Exercis
 	return createdExercise, nil
 }
 
-func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto) ([]*Exercise, error) {
+func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto, userId string) ([]*Exercise, error) {
 	var result []interface{}
 	for _, exercise := range *exercises {
 		if exercise.Type == nil {
@@ -68,33 +82,8 @@ func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto) (
 	return createdExercises, nil
 }
 
-func (es *ExerciseService) GetAllExercises() ([]*Exercise, error) {
-	cursor, err := es.DB.Collection("exercises").Find(context.Background(), bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	var exercises []*Exercise
-	if err := cursor.All(context.Background(), &exercises); err != nil {
-		return nil, err
-	}
-	return exercises, nil
-}
-
-func (es *ExerciseService) GetExercise(id string) (*Exercise, error) {
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	filter := bson.D{{Key: "_id", Value: oid}}
-	exercise := &Exercise{}
-	if err := es.DB.Collection("exercises").FindOne(context.Background(), filter).Decode(exercise); err != nil {
-		return nil, err
-	}
-	return exercise, nil
-}
-
-func (es *ExerciseService) GetExerciseByType(exerciseType string) ([]*Exercise, error) {
-	filter := bson.M{"type": bson.M{"$in": []string{exerciseType}}}
+func (es *ExerciseService) GetAllExercises(userId string) ([]*Exercise, error) {
+	filter := bson.D{{Key: "userid", Value: userId}}
 	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
@@ -106,24 +95,59 @@ func (es *ExerciseService) GetExerciseByType(exerciseType string) ([]*Exercise, 
 	return exercises, nil
 }
 
-func (es *ExerciseService) DeleteExercise(id string) error {
+func (es *ExerciseService) GetExercise(id string, userId string) (*Exercise, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userid", Value: userId},
+	}
+	exercise := &Exercise{}
+	if err := es.DB.Collection("exercises").FindOne(context.Background(), filter).Decode(exercise); err != nil {
+		return nil, err
+	}
+	return exercise, nil
+}
+
+func (es *ExerciseService) GetExerciseByType(exerciseType string, userId string) ([]*Exercise, error) {
+	filter := bson.M{"type": bson.M{"$in": []string{exerciseType}}, "userid": userId}
+	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+	var exercises []*Exercise
+	if err := cursor.All(context.Background(), &exercises); err != nil {
+		return nil, err
+	}
+	return exercises, nil
+}
+
+func (es *ExerciseService) DeleteExercise(id string, userId string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userid", Value: userId},
+	}
 	if _, err := es.DB.Collection("exercises").DeleteOne(context.Background(), filter); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (es *ExerciseService) UpdateExercise(doc *UpdateExerciseDto, id string) (*Exercise, error) {
+func (es *ExerciseService) UpdateExercise(doc *UpdateExerciseDto, id string, userId string) (*Exercise, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userid", Value: userId},
+	}
 	exercise := &Exercise{}
 	if err := es.DB.Collection("exercises").FindOne(context.Background(), filter).Decode(exercise); err != nil {
 		return nil, err
@@ -141,5 +165,5 @@ func (es *ExerciseService) UpdateExercise(doc *UpdateExerciseDto, id string) (*E
 	if _, err := es.DB.Collection("exercises").UpdateOne(context.Background(), filter, update); err != nil {
 		return nil, err
 	}
-	return es.GetExercise(id)
+	return es.GetExercise(id, userId)
 }

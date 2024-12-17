@@ -21,10 +21,12 @@ type ExerciseController struct {
 // @Param		exercise body CreateExerciseDto true "Create Exercise"
 // @Success		201	{object} Exercise
 // @Failure		400	{object} Error
-// @Router		/exercise [post]
+// @Router		/workout/exercise [post]
 func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	exercise := new(CreateExerciseDto)
+	userId := function.GetUserIDFromContext(c)
+
 	if err := c.BodyParser(exercise); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -32,16 +34,16 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
 	for _, t := range exercise.Type {
-		if !function.CheckExerciseType(t) {
+		if _, err := function.ParseExerciseType(t); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 		}
 	}
 	for _, m := range exercise.Muscle {
-		if !function.CheckMuscleGroup(m) {
+		if _, err := function.ParseMuscleGroup(m); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
-	createdExercise, err := ec.Service.CreateExercise(exercise)
+	createdExercise, err := ec.Service.CreateExercise(exercise, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -56,10 +58,12 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 // @Param		exercises body []CreateExerciseDto true "Create Exercises"
 // @Success		201	{object} []Exercise
 // @Failure		400	{object} Error
-// @Router		/exercise/many [post]
+// @Router		/workout/exercise/many [post]
 func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	exercises := new([]CreateExerciseDto)
+	userId := function.GetUserIDFromContext(c)
+
 	if err := c.BodyParser(exercises); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -68,17 +72,17 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 		}
 		for _, t := range exercise.Type {
-			if !function.CheckExerciseType(t) {
+			if _, err := function.ParseExerciseType(t); err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 			}
 		}
 		for _, m := range exercise.Muscle {
-			if !function.CheckMuscleGroup(m) {
+			if _, err := function.ParseMuscleGroup(m); err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 			}
 		}
 	}
-	createdExercises, err := ec.Service.CreateManyExercises(exercises)
+	createdExercises, err := ec.Service.CreateManyExercises(exercises, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -92,9 +96,10 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Success		200	{object} []Exercise
 // @Failure		400	{object} Error
-// @Router		/exercise [get]
+// @Router		/workout/exercise [get]
 func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
-	exercises, err := ec.Service.GetAllExercises()
+	userId := function.GetUserIDFromContext(c)
+	exercises, err := ec.Service.GetAllExercises(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -109,10 +114,11 @@ func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Exercise ID"
 // @Success		200	{object} Exercise
 // @Failure		400	{object} Error
-// @Router		/exercise/{id} [get]
+// @Router		/workout/exercise/{id} [get]
 func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
-	exercise, err := ec.Service.GetExercise(id)
+	userId := function.GetUserIDFromContext(c)
+	exercise, err := ec.Service.GetExercise(id, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -127,10 +133,11 @@ func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 // @Param		type path string true "Exercise Type"
 // @Success		200	{object} []Exercise
 // @Failure		400	{object} Error
-// @Router		/exercise/type/{type} [get]
+// @Router		/workout/exercise/type/{type} [get]
 func (ec *ExerciseController) GetExerciseByTypeHandler(c *fiber.Ctx) error {
 	t := c.Params("type")
-	exercises, err := ec.Service.GetExerciseByType(t)
+	userId := function.GetUserIDFromContext(c)
+	exercises, err := ec.Service.GetExerciseByType(t, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -145,10 +152,11 @@ func (ec *ExerciseController) GetExerciseByTypeHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Exercise ID"
 // @Success		204	{object} Error
 // @Failure		400	{object} Error
-// @Router		/exercise/{id} [delete]
+// @Router		/workout/exercise/{id} [delete]
 func (ec *ExerciseController) DeleteExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if err := ec.Service.DeleteExercise(id); err != nil {
+	userId := function.GetUserIDFromContext(c)
+	if err := ec.Service.DeleteExercise(id, userId); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Exercise deleted"})
@@ -163,9 +171,10 @@ func (ec *ExerciseController) DeleteExerciseHandler(c *fiber.Ctx) error {
 // @Param		exercise body UpdateExerciseDto true "Update Exercise"
 // @Success		200	{object} Exercise
 // @Failure		400	{object} Error
-// @Router		/exercise/{id} [put]
+// @Router		/workout/exercise/{id} [put]
 func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
+	userId := function.GetUserIDFromContext(c)
 	validate := validator.New()
 	exercise := new(UpdateExerciseDto)
 	if err := c.BodyParser(exercise); err != nil {
@@ -175,16 +184,16 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
 	for _, t := range exercise.Type {
-		if !function.CheckExerciseType(t) {
+		if _, err := function.ParseExerciseType(t); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 		}
 	}
 	for _, m := range exercise.Muscle {
-		if !function.CheckMuscleGroup(m) {
+		if _, err := function.ParseMuscleGroup(m); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
-	updatedExercise, err := ec.Service.UpdateExercise(exercise, id)
+	updatedExercise, err := ec.Service.UpdateExercise(exercise, id, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
