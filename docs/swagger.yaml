@@ -87,12 +87,15 @@ definitions:
         items:
           type: string
         type: array
+      userid:
+        type: string
     required:
     - description
     - image
     - muscle
     - name
     - type
+    - userid
     type: object
   exercise.UpdateExerciseDto:
     properties:
@@ -353,51 +356,6 @@ definitions:
       protein:
         type: number
     type: object
-  plans.CreatePlanDto:
-    properties:
-      dayofweek:
-        type: string
-      exercise:
-        items:
-          type: string
-        type: array
-      typeofplan:
-        default: Rest
-        type: string
-      userid:
-        type: string
-    required:
-    - dayofweek
-    - userid
-    type: object
-  plans.Plan:
-    properties:
-      dayofweek:
-        type: string
-      exercise:
-        items:
-          type: string
-        type: array
-      id:
-        type: string
-      typeofplan:
-        type: string
-      userid:
-        type: string
-    required:
-    - dayofweek
-    - typeofplan
-    - userid
-    type: object
-  plans.UpdatePlanDto:
-    properties:
-      exercise:
-        items:
-          type: string
-        type: array
-      typeofplan:
-        type: string
-    type: object
   types.Ingredient:
     properties:
       amount:
@@ -539,6 +497,9 @@ definitions:
         type: number
       id:
         type: string
+      is_first_login:
+        default: true
+        type: boolean
       neck:
         default: 0
         description: default:"0" is not working
@@ -572,6 +533,72 @@ definitions:
     - gender
     - password
     - username
+    type: object
+  workout.CreateWorkoutDto:
+    properties:
+      description:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/workout.WorkoutExercise'
+        type: array
+      name:
+        type: string
+    required:
+    - exercises
+    - name
+    type: object
+  workout.UpdateWorkoutDto:
+    properties:
+      description:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/workout.WorkoutExercise'
+        type: array
+      name:
+        type: string
+    type: object
+  workout.Workout:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/workout.WorkoutExercise'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: string
+    required:
+    - exercises
+    - name
+    type: object
+  workout.WorkoutExercise:
+    properties:
+      exerciseId:
+        type: string
+      order:
+        minimum: 1
+        type: integer
+      reps:
+        minimum: 1
+        type: integer
+      sets:
+        minimum: 1
+        type: integer
+    required:
+    - exerciseId
+    - order
+    - reps
+    - sets
     type: object
 host: localhost:8080
 info:
@@ -648,180 +675,6 @@ paths:
       summary: Register
       tags:
       - auth
-  /exercise:
-    get:
-      consumes:
-      - application/json
-      description: Get all exercises
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exercise.Exercise'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get all exercises
-      tags:
-      - exercises
-    post:
-      consumes:
-      - application/json
-      description: Create an exercise
-      parameters:
-      - description: Create Exercise
-        in: body
-        name: exercise
-        required: true
-        schema:
-          $ref: '#/definitions/exercise.CreateExerciseDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/exercise.Exercise'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create an exercise
-      tags:
-      - exercises
-  /exercise/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete an exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema: {}
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete an exercise
-      tags:
-      - exercises
-    get:
-      consumes:
-      - application/json
-      description: Get an exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/exercise.Exercise'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get an exercise
-      tags:
-      - exercises
-    put:
-      consumes:
-      - application/json
-      description: Update an exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Exercise
-        in: body
-        name: exercise
-        required: true
-        schema:
-          $ref: '#/definitions/exercise.UpdateExerciseDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/exercise.Exercise'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update an exercise
-      tags:
-      - exercises
-  /exercise/many:
-    post:
-      consumes:
-      - application/json
-      description: Create many exercises
-      parameters:
-      - description: Create Exercises
-        in: body
-        name: exercises
-        required: true
-        schema:
-          items:
-            $ref: '#/definitions/exercise.CreateExerciseDto'
-          type: array
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            items:
-              $ref: '#/definitions/exercise.Exercise'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create many exercises
-      tags:
-      - exercises
-  /exercise/type/{type}:
-    get:
-      consumes:
-      - application/json
-      description: Get exercises by type
-      parameters:
-      - description: Exercise Type
-        in: path
-        name: type
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exercise.Exercise'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get exercises by type
-      tags:
-      - exercises
   /foodlog:
     post:
       consumes:
@@ -843,6 +696,9 @@ paths:
             $ref: '#/definitions/foodlog.FoodLog'
         "400":
           description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Add meal to food log
       tags:
@@ -888,6 +744,12 @@ paths:
             $ref: '#/definitions/foodlog.FoodLog'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Get a food log
       tags:
@@ -938,6 +800,9 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
       summary: Get a food log by user
       tags:
       - foodlog
@@ -961,6 +826,9 @@ paths:
             $ref: '#/definitions/foodlog.FoodLog'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
           schema: {}
       summary: Get a food log by user and date
       tags:
@@ -1009,6 +877,12 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
       summary: Delete an ingredient
       tags:
       - ingredient
@@ -1031,6 +905,12 @@ paths:
             $ref: '#/definitions/ingredient.Ingredient'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Get an ingredient
       tags:
@@ -1060,6 +940,12 @@ paths:
             $ref: '#/definitions/ingredient.Ingredient'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Update an ingredient
       tags:
@@ -1187,6 +1073,12 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
       summary: Delete a meal
       tags:
       - meals
@@ -1209,6 +1101,12 @@ paths:
             $ref: '#/definitions/meal.Meal'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Get a meal
       tags:
@@ -1238,6 +1136,12 @@ paths:
             $ref: '#/definitions/meal.Meal'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Update a meal
       tags:
@@ -1305,6 +1209,9 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
       summary: Search and filter meals
       tags:
       - meals
@@ -1328,240 +1235,6 @@ paths:
       summary: Get meals by user
       tags:
       - meals
-  /plan:
-    get:
-      consumes:
-      - application/json
-      description: Get all plans
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/plans.Plan'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get all plans
-      tags:
-      - plans
-    post:
-      consumes:
-      - application/json
-      description: Create a plan
-      parameters:
-      - description: Create Plan
-        in: body
-        name: plan
-        required: true
-        schema:
-          $ref: '#/definitions/plans.CreatePlanDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/plans.Plan'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create a plan
-      tags:
-      - plans
-  /plan/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a plan
-      parameters:
-      - description: Plan ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete a plan
-      tags:
-      - plans
-    get:
-      consumes:
-      - application/json
-      description: Get a plan
-      parameters:
-      - description: Plan ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/plans.Plan'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get a plan
-      tags:
-      - plans
-    put:
-      consumes:
-      - application/json
-      description: Update a plan
-      parameters:
-      - description: Plan ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Plan
-        in: body
-        name: plan
-        required: true
-        schema:
-          $ref: '#/definitions/plans.UpdatePlanDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/plans.Plan'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update a plan
-      tags:
-      - plans
-  /plan/{user_id}/{day}:
-    put:
-      consumes:
-      - application/json
-      description: Update a plan by user and day
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - description: Day of week
-        in: path
-        name: day
-        required: true
-        type: string
-      - description: Update Plan
-        in: body
-        name: plan
-        required: true
-        schema:
-          $ref: '#/definitions/plans.UpdatePlanDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/plans.Plan'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update a plan by user and day
-      tags:
-      - plans
-  /plan/user/{user_id}:
-    get:
-      consumes:
-      - application/json
-      description: Get a plan by user
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/plans.Plan'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get a plan by user
-      tags:
-      - plans
-  /plan/user/{user_id}/{day}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a plan by user and day
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - description: Day of week
-        in: path
-        name: day
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete a plan by user and day
-      tags:
-      - plans
-    get:
-      consumes:
-      - application/json
-      description: Get a plan by user and day
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - description: Day of week
-        in: path
-        name: day
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/plans.Plan'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get a plan by user and day
-      tags:
-      - plans
   /user:
     get:
       consumes:
@@ -1649,6 +1322,22 @@ paths:
       summary: Get a user energy consume plan
       tags:
       - users
+  /user/first-login:
+    put:
+      consumes:
+      - application/json
+      description: Mark user as not first time login
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update first login status
+      tags:
+      - users
   /user/me:
     delete:
       consumes:
@@ -1690,6 +1379,316 @@ paths:
       summary: Update a user username and password
       tags:
       - users
+  /workout:
+    get:
+      consumes:
+      - application/json
+      description: Get all workouts for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/workout.Workout'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get user workouts
+      tags:
+      - workouts
+    post:
+      consumes:
+      - application/json
+      description: Create a new workout plan
+      parameters:
+      - description: Create Workout
+        in: body
+        name: workout
+        required: true
+        schema:
+          $ref: '#/definitions/workout.CreateWorkoutDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/workout.Workout'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create a workout
+      tags:
+      - workouts
+  /workout/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a workout by ID
+      parameters:
+      - description: Workout ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete a workout
+      tags:
+      - workouts
+    get:
+      consumes:
+      - application/json
+      description: Get a workout by ID
+      parameters:
+      - description: Workout ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workout.Workout'
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get a workout
+      tags:
+      - workouts
+    put:
+      consumes:
+      - application/json
+      description: Update a workout by ID
+      parameters:
+      - description: Workout ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Workout
+        in: body
+        name: workout
+        required: true
+        schema:
+          $ref: '#/definitions/workout.UpdateWorkoutDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workout.Workout'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update a workout
+      tags:
+      - workouts
+  /workout/exercise:
+    get:
+      consumes:
+      - application/json
+      description: Get all exercises
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all exercises
+      tags:
+      - exercises
+    post:
+      consumes:
+      - application/json
+      description: Create an exercise
+      parameters:
+      - description: Create Exercise
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/exercise.CreateExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create an exercise
+      tags:
+      - exercises
+  /workout/exercise/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema: {}
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete an exercise
+      tags:
+      - exercises
+    get:
+      consumes:
+      - application/json
+      description: Get an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get an exercise
+      tags:
+      - exercises
+    put:
+      consumes:
+      - application/json
+      description: Update an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Exercise
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/exercise.UpdateExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update an exercise
+      tags:
+      - exercises
+  /workout/exercise/many:
+    post:
+      consumes:
+      - application/json
+      description: Create many exercises
+      parameters:
+      - description: Create Exercises
+        in: body
+        name: exercises
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/exercise.CreateExerciseDto'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create many exercises
+      tags:
+      - exercises
+  /workout/exercise/type/{type}:
+    get:
+      consumes:
+      - application/json
+      description: Get exercises by type
+      parameters:
+      - description: Exercise Type
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get exercises by type
+      tags:
+      - exercises
 schemes:
 - http
 - https
