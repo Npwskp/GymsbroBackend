@@ -2,13 +2,13 @@ package utils
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/auth"
-	"github.com/Npwskp/GymsbroBackend/api/v1/exercise"
 	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
-	"github.com/Npwskp/GymsbroBackend/api/v1/plans"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -32,10 +32,6 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	userController := user.UserController{Instance: protected, Service: &userService}
 	userController.Handle()
 
-	planService := plans.PlanService{DB: db}
-	planController := plans.PlanController{Instance: protected, Service: &planService}
-	planController.Handle()
-
 	exerciseService := exercise.ExerciseService{DB: db}
 	exerciseController := exercise.ExerciseController{Instance: protected, Service: &exerciseService}
 	exerciseController.Handle()
@@ -51,4 +47,8 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	foodLogService := foodlog.FoodLogService{DB: db}
 	foodLogController := foodlog.FoodLogController{Instance: protected, Service: &foodLogService}
 	foodLogController.Handle()
+
+	workoutService := workout.WorkoutService{DB: db}
+	workoutController := workout.WorkoutController{Instance: protected, Service: &workoutService}
+	workoutController.Handle()
 }

@@ -65,6 +65,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull ${{ env.DOCKER_IMAGE }}:latest
-            docker stack rm server
-            docker stack deploy -c ~/gymsBroBackend/docker-compose.yaml server
+            cd ~/gymsBroBackend
+            pwd
+            docker compose down
+            docker compose pull
+            docker compose up -d

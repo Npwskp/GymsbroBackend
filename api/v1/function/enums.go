@@ -1,41 +1,81 @@
 package function
 
 import (
-	"strings"
+	"fmt"
 )
 
-var Day = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+type Day string
+type ExerciseType string
+type MuscleGroup string
 
-var ExerciseType = []string{"Rest", "Push", "Pull", "Chest", "Back", "Legs", "Shoulders", "Arms", "Abs"}
+const (
+	Monday    Day = "Monday"
+	Tuesday   Day = "Tuesday"
+	Wednesday Day = "Wednesday"
+	Thursday  Day = "Thursday"
+	Friday    Day = "Friday"
+	Saturday  Day = "Saturday"
+	Sunday    Day = "Sunday"
+)
 
-var MuscleGroup = []string{"Triceps", "Biceps", "Forearms", "Upper Chest", "Middle Chest", "Lower Chest", "Latissimus", "Trapezius", "Lower Back", "Front Shoulders", "Side Shoulders", "Rear Shoulders", "Abs", "Side Abs", "Quads", "Hamstrings", "Calves", "Glutes"}
+const (
+	Rest      ExerciseType = "Rest"
+	Push      ExerciseType = "Push"
+	Pull      ExerciseType = "Pull"
+	Chest     ExerciseType = "Chest"
+	Back      ExerciseType = "Back"
+	Legs      ExerciseType = "Legs"
+	Shoulders ExerciseType = "Shoulders"
+	Arms      ExerciseType = "Arms"
+	Abs       ExerciseType = "Abs"
+)
+
+const (
+	Triceps        MuscleGroup = "Triceps"
+	Biceps         MuscleGroup = "Biceps"
+	Forearms       MuscleGroup = "Forearms"
+	UpperChest     MuscleGroup = "Upper Chest"
+	MiddleChest    MuscleGroup = "Middle Chest"
+	LowerChest     MuscleGroup = "Lower Chest"
+	Latissimus     MuscleGroup = "Latissimus"
+	Trapezius      MuscleGroup = "Trapezius"
+	LowerBack      MuscleGroup = "Lower Back"
+	FrontShoulders MuscleGroup = "Front Shoulders"
+	SideShoulders  MuscleGroup = "Side Shoulders"
+	RearShoulders  MuscleGroup = "Rear Shoulders"
+	Abdominal      MuscleGroup = "Abdominal"
+	SideAbs        MuscleGroup = "Side Abs"
+	Quads          MuscleGroup = "Quads"
+	Hamstrings     MuscleGroup = "Hamstrings"
+	Calves         MuscleGroup = "Calves"
+	Glutes         MuscleGroup = "Glutes"
+)
 
 func CheckDay(day string) bool {
-	checked := false
-	for _, d := range Day {
-		if strings.Compare(d, day) == 0 {
-			checked = true
-		}
+	switch Day(day) {
+	case Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday:
+		return true
+	default:
+		return false
 	}
-	return checked
 }
 
-func CheckExerciseType(exerciseType string) bool {
-	checked := false
-	for _, et := range ExerciseType {
-		if strings.Compare(et, exerciseType) == 0 {
-			checked = true
-		}
+func ParseExerciseType(s string) (ExerciseType, error) {
+	switch ExerciseType(s) {
+	case Rest, Push, Pull, Chest, Back, Legs, Shoulders, Arms, Abs:
+		return ExerciseType(s), nil
+	default:
+		return "", fmt.Errorf("invalid exercise type: %s", s)
 	}
-	return checked
 }
 
-func CheckMuscleGroup(muscleGroup string) bool {
-	checked := false
-	for _, mg := range MuscleGroup {
-		if strings.Compare(mg, muscleGroup) == 0 {
-			checked = true
-		}
+func ParseMuscleGroup(s string) (MuscleGroup, error) {
+	switch MuscleGroup(s) {
+	case Triceps, Biceps, Forearms, UpperChest, MiddleChest, LowerChest,
+		Latissimus, Trapezius, LowerBack, FrontShoulders, SideShoulders,
+		RearShoulders, Abdominal, SideAbs, Quads, Hamstrings, Calves, Glutes:
+		return MuscleGroup(s), nil
+	default:
+		return "", fmt.Errorf("invalid muscle group: %s", s)
 	}
-	return checked
 }
