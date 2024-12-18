@@ -7,6 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type Error error
+
 type WorkoutController struct {
 	Instance fiber.Router
 	Service  IWorkoutService
