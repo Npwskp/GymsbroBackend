@@ -2,8 +2,8 @@ package ingredient
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
-	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Error error
@@ -35,37 +35,6 @@ func (ic *IngredientController) CreateIngredient(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(ingredient)
 }
 
-// @Summary Get all ingredients
-// @Description Get all ingredients
-// @Tags ingredient
-// @Accept json
-// @Produce json
-// @Success 200 {object} []Ingredient
-// @Failure 400 {object} Error
-// @Router /ingredient [get]
-func (ic *IngredientController) GetAllIngredients(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "unauthorized",
-		})
-	}
-
-	ingredients, err := ic.Service.GetAllIngredients(userID.Hex())
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	// Initialize empty slice if ingredients is nil
-	if ingredients == nil {
-		ingredients = []*Ingredient{}
-	}
-
-	return c.JSON(ingredients)
-}
-
 // @Summary Get an ingredient
 // @Description Get an ingredient
 // @Tags ingredient
@@ -73,13 +42,20 @@ func (ic *IngredientController) GetAllIngredients(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "Ingredient ID"
 // @Success 200 {object} Ingredient
+// @Failure 404 {object} Error
 // @Failure 400 {object} Error
+// @Failure 500 {object} Error
 // @Router /ingredient/{id} [get]
 func (ic *IngredientController) GetIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
 	ingredient, err := ic.Service.GetIngredient(id, userId)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Ingredient not found",
+			})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(ingredient)
@@ -115,7 +91,9 @@ func (ic *IngredientController) GetIngredientByUser(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "Ingredient ID"
 // @Success 204 "No Content"
+// @Failure 404 {object} Error
 // @Failure 400 {object} Error
+// @Failure 500 {object} Error
 // @Router /ingredient/{id} [delete]
 func (ic *IngredientController) DeleteIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -123,6 +101,11 @@ func (ic *IngredientController) DeleteIngredient(c *fiber.Ctx) error {
 
 	err := ic.Service.DeleteIngredient(id, userId)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Ingredient not found",
+			})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.SendStatus(fiber.StatusNoContent)
@@ -136,20 +119,26 @@ func (ic *IngredientController) DeleteIngredient(c *fiber.Ctx) error {
 // @Param id path string true "Ingredient ID"
 // @Param ingredient body UpdateIngredientDto true "Ingredient object that needs to be updated"
 // @Success 200 {object} Ingredient
+// @Failure 404 {object} Error
 // @Failure 400 {object} Error
+// @Failure 500 {object} Error
 // @Router /ingredient/{id} [put]
 func (ic *IngredientController) UpdateIngredient(c *fiber.Ctx) error {
 	id := c.Params("id")
-	user := c.Locals("user").(map[string]interface{})
-	userId := user["id"].(string)
+	userId := function.GetUserIDFromContext(c)
 
 	var doc UpdateIngredientDto
 	if err := c.BodyParser(&doc); err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	ingredient, err := ic.Service.UpdateIngredient(&doc, id, userId)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Ingredient not found",
+			})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(ingredient)
@@ -197,7 +186,6 @@ func (ic *IngredientController) Handle() {
 	g := ic.Instance.Group("/ingredient")
 
 	g.Post("/", ic.CreateIngredient)
-	g.Get("/", ic.GetAllIngredients)
 	g.Get("/search", ic.SearchFilteredIngredients)
 	g.Get("/user", ic.GetIngredientByUser)
 	g.Get("/:id", ic.GetIngredient)

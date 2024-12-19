@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
-	"github.com/Npwskp/GymsbroBackend/api/v1/plans"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,6 +27,7 @@ type IUserService interface {
 	DeleteUser(id string) error
 	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
+	UpdateFirstLoginStatus(id string) error
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
@@ -102,8 +102,27 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*function.EnergyCons
 		return nil, err
 	}
 
-	if user.Weight == 0 || user.Height == 0 || user.Age == 0 || user.Gender == "" || user.ActivityLevel == 0 || user.Goal == "" {
-		return nil, errors.New("data is not enough to calculate energy consume plan")
+	var missingFields []string
+	if user.Weight == 0 {
+		missingFields = append(missingFields, "Weight")
+	}
+	if user.Height == 0 {
+		missingFields = append(missingFields, "Height")
+	}
+	if user.Age == 0 {
+		missingFields = append(missingFields, "Age")
+	}
+	if user.Gender == "" {
+		missingFields = append(missingFields, "Gender")
+	}
+	if user.ActivityLevel == 0 {
+		missingFields = append(missingFields, "ActivityLevel")
+	}
+	if user.Goal == "" {
+		missingFields = append(missingFields, "Goal")
+	}
+	if len(missingFields) > 0 {
+		return nil, errors.New("missing fields for energy consume plan calculation: " + strings.Join(missingFields, ", "))
 	}
 
 	return function.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
@@ -113,13 +132,6 @@ func (us *UserService) DeleteUser(id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
-	}
-	planService := plans.PlanService{DB: us.DB}
-	for _, day := range function.Day {
-		err := planService.DeleteByUserDay(id, day)
-		if err != nil {
-			return err
-		}
 	}
 	filter := bson.D{{Key: "_id", Value: oid}}
 	if _, err := us.DB.Collection("users").DeleteOne(context.Background(), filter); err != nil {
@@ -214,4 +226,30 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	}
 
 	return UpdatedUser, nil
+}
+
+func (us *UserService) UpdateFirstLoginStatus(id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{{Key: "_id", Value: oid}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "is_first_login", Value: false},
+			{Key: "updated_at", Value: time.Now()},
+		}},
+	}
+
+	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
+		return errors.New("no user found for the given ID")
+	}
+
+	return nil
 }

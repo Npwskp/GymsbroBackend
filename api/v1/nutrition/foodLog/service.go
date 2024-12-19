@@ -2,10 +2,8 @@ package foodlog
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,7 +14,7 @@ type FoodLogService struct {
 }
 
 type IFoodLogService interface {
-	CreateFoodLog(foodlog *CreateFoodLogDto, userid string) (*FoodLog, error)
+	AddMealToFoodLog(foodlog *AddMealToFoodLogDto, userid string) (*FoodLog, error)
 	GetFoodLog(id string, userid string) (*FoodLog, error)
 	GetFoodLogByUser(userid string) ([]*FoodLog, error)
 	GetFoodLogByUserDate(userid string, date string) (*FoodLog, error)
@@ -24,28 +22,53 @@ type IFoodLogService interface {
 	UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid string) (*FoodLog, error)
 }
 
-func (fs *FoodLogService) CreateFoodLog(foodlog *CreateFoodLogDto, userid string) (*FoodLog, error) {
+func (fs *FoodLogService) AddMealToFoodLog(foodlog *AddMealToFoodLogDto, userid string) (*FoodLog, error) {
 	// Check if a food log already exists for this user and date
 	existingLog, err := fs.GetFoodLogByUserDate(userid, foodlog.Date)
 	if err == nil && existingLog != nil {
-		return nil, fmt.Errorf("food log already exists for this date, please use update instead")
+		// Update existing log by adding the new meal
+		existingLog.Meals = append(existingLog.Meals, foodlog.Meals...)
+
+		// Create update document
+		update := bson.D{
+			{Key: "$set", Value: bson.D{
+				{Key: "meals", Value: existingLog.Meals},
+				{Key: "update_at", Value: time.Now()},
+			}},
+		}
+
+		// Update the existing document
+		filter := bson.D{{Key: "_id", Value: existingLog.ID}}
+		_, err = fs.DB.Collection("foodlog").UpdateOne(context.Background(), filter, update)
+		if err != nil {
+			return nil, err
+		}
+
+		return existingLog, nil
 	}
 
-	model, err := CreateFoodLogModel(foodlog)
+	// Create new food log if none exists
+	newFoodLog := &FoodLog{
+		UserID:    userid,
+		Date:      foodlog.Date,
+		Meals:     foodlog.Meals,
+		CreatedAt: time.Now(),
+		UpdateAt:  time.Now(),
+	}
+
+	// Insert the new food log
+	result, err := fs.DB.Collection("foodlog").InsertOne(context.Background(), newFoodLog)
 	if err != nil {
 		return nil, err
 	}
-	model.UserID = userid
-	result, err := fs.DB.Collection("foodlog").InsertOne(context.Background(), model)
-	if err != nil {
-		return nil, err
-	}
+
+	// Fetch and return the created document
 	filter := bson.D{{Key: "_id", Value: result.InsertedID}}
-	createdRecord := fs.DB.Collection("foodlog").FindOne(context.Background(), filter)
 	createdFoodLog := &FoodLog{}
-	if err := createdRecord.Decode(createdFoodLog); err != nil {
+	if err := fs.DB.Collection("foodlog").FindOne(context.Background(), filter).Decode(createdFoodLog); err != nil {
 		return nil, err
 	}
+
 	return createdFoodLog, nil
 }
 
@@ -94,11 +117,6 @@ func (fs *FoodLogService) GetFoodLogByUserDate(userid string, date string) (*Foo
 }
 
 func (fs *FoodLogService) DeleteFoodLog(id string, userid string) error {
-	err := function.CheckOwnership(fs.DB, id, userid, "foodlog", &FoodLog{})
-	if err != nil {
-		return err
-	}
-
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -112,11 +130,6 @@ func (fs *FoodLogService) DeleteFoodLog(id string, userid string) error {
 }
 
 func (fs *FoodLogService) UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid string) (*FoodLog, error) {
-	err := function.CheckOwnership(fs.DB, id, userid, "foodlog", &FoodLog{})
-	if err != nil {
-		return nil, err
-	}
-
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err

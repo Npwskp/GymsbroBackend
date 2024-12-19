@@ -24,7 +24,6 @@ type MealService struct {
 type IMealService interface {
 	CreateMeal(meal *CreateMealDto, userid string) (*Meal, error)
 	CalculateNutrient(body *CalculateNutrientBody, userid string) (*CalculateNutrientResponse, error)
-	GetAllMeals(userid string) ([]*Meal, error)
 	GetMeal(id string, userid string) (*Meal, error)
 	GetMealByUser(userid string) ([]*Meal, error)
 	DeleteMeal(id string, userid string) error
@@ -145,29 +144,31 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 	}, nil
 }
 
-func (ns *MealService) GetAllMeals(userid string) ([]*Meal, error) {
-	filter := bson.D{{Key: "userid", Value: userid}, {Key: "userid", Value: primitive.Null{}}, {Key: "userid", Value: ""}}
-	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	var Meals []*Meal
-	if err := cursor.All(context.Background(), &Meals); err != nil {
-		return nil, err
-	}
-	return Meals, nil
-}
-
 func (ns *MealService) GetMeal(id string, userid string) (*Meal, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid meal ID format: %w", err)
 	}
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
+
+	// Allow access to both public meals and user-specific meals
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "$or", Value: []bson.M{
+			{"userid": userid}, // User's own meals
+			{"userid": ""},     // Public meals
+			{"userid": nil},    // Public meals (null userid)
+		}},
+	}
+
 	meal := &Meal{}
-	if err := ns.DB.Collection("meal").FindOne(context.Background(), filter).Decode(meal); err != nil {
-		return nil, err
+	err = ns.DB.Collection("meal").FindOne(context.Background(), filter).Decode(meal)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("meal not found with ID: %s", id)
+		}
+		return nil, fmt.Errorf("error retrieving meal: %w", err)
 	}
+
 	return meal, nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Error error
@@ -61,29 +62,6 @@ func (nc *MealController) CalculateNutrientHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(nutrients)
 }
 
-// @Summary		Get all meals
-// @Description	Get all meals
-// @Tags		meals
-// @Accept		json
-// @Produce		json
-// @Success		200	{object} []Meal
-// @Failure		400	{object} Error
-// @Router		/meal [get]
-func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
-	userid := function.GetUserIDFromContext(c)
-	meals, err := nc.Service.GetAllMeals(userid)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
-	}
-
-	// Initialize empty slice if meals is nil
-	if meals == nil {
-		meals = []*Meal{}
-	}
-
-	return c.Status(fiber.StatusOK).JSON(meals)
-}
-
 // @Summary		Get a meal
 // @Description	Get a meal
 // @Tags		meals
@@ -91,14 +69,21 @@ func (nc *MealController) GetMealsHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Param		id path string true "Meal ID"
 // @Success		200	{object} Meal
+// @Failure		404	{object} Error
 // @Failure		400	{object} Error
+// @Failure		500	{object} Error
 // @Router		/meal/{id} [get]
 func (nc *MealController) GetMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userid := function.GetUserIDFromContext(c)
 	meal, err := nc.Service.GetMeal(id, userid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Meal not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(meal)
 }
@@ -135,14 +120,21 @@ func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Param		id path string true "Meal ID"
 // @Success		204
+// @Failure		404	{object} Error
 // @Failure		400	{object} Error
+// @Failure		500	{object} Error
 // @Router		/meal/{id} [delete]
 func (nc *MealController) DeleteMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userid := function.GetUserIDFromContext(c)
 	err := nc.Service.DeleteMeal(id, userid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Meal not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Meal deleted"})
 }
@@ -155,7 +147,9 @@ func (nc *MealController) DeleteMealHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Meal ID"
 // @Param		meal body UpdateMealDto true "Update Meal"
 // @Success		200	{object} Meal
+// @Failure		404	{object} Error
 // @Failure		400	{object} Error
+// @Failure		500	{object} Error
 // @Router		/meal/{id} [put]
 func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -170,6 +164,11 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 	}
 	meal, err := nc.Service.UpdateMeal(doc, id, userid)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Meal not found",
+			})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(meal)
@@ -187,6 +186,7 @@ func (nc *MealController) UpdateMealHandler(c *fiber.Ctx) error {
 // @Param nutrients query string false "Nutrients filter (comma-separated)"
 // @Success 200 {array} Meal
 // @Failure 400 {object} Error
+// @Failure 500 {object} Error
 // @Router /meal/search [get]
 func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 	filters := SearchFilters{
@@ -218,7 +218,6 @@ func (nc *MealController) Handle() {
 
 	g.Post("/", nc.CreateMealHandler)
 	g.Post("/calculate", nc.CalculateNutrientHandler)
-	g.Get("/", nc.GetMealsHandler)
 	g.Get("/search", nc.SearchFilteredMealsHandler)
 	g.Get("/user", nc.GetMealByUserHandler)
 	g.Get("/:id", nc.GetMealHandler)

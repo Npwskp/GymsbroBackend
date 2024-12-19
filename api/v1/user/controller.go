@@ -190,6 +190,25 @@ func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
+// @Summary     Update first login status
+// @Description Mark user as not first time login
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Success     204
+// @Failure     400 {object} Error
+// @Router      /user/first-login [put]
+func (uc *UserController) UpdateFirstLoginStatus(c *fiber.Ctx) error {
+	id := function.GetUserIDFromContext(c)
+	err := uc.Service.UpdateFirstLoginStatus(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
 func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/user")
 
@@ -200,4 +219,5 @@ func (uc *UserController) Handle() {
 	g.Delete("/me", uc.DeleteUserHandler)
 	g.Put("/usepass", uc.UpdateUsernamePassword)
 	g.Put("/body", uc.UpdateBody)
+	g.Put("/first-login", uc.UpdateFirstLoginStatus)
 }
