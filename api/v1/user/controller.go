@@ -72,7 +72,7 @@ func (uc *UserController) GetAllUsersHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Success		200	{object} User
 // @Failure		400	{object} Error
-// @Router		/me [get]
+// @Router		/user/me [get]
 func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	user, err := uc.Service.GetUser(id)
