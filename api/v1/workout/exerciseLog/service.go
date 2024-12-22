@@ -24,16 +24,53 @@ type IExerciseLogService interface {
 }
 
 func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string) (*ExerciseLog, error) {
+	// Calculate total volume and completed sets
+	var totalVolume float64
+	completedSets := len(dto.Sets)
+
+	for _, set := range dto.Sets {
+		totalVolume += float64(set.Reps) * set.Weight
+	}
+
 	log := &ExerciseLog{
-		UserID:     userId,
-		ExerciseID: dto.ExerciseID,
-		Date:       time.Now(),
-		Sets:       dto.Sets,
-		Notes:      dto.Notes,
-		CreatedAt:  time.Now(),
+		UserID:           userId,
+		ExerciseID:       dto.ExerciseID,
+		WorkoutSessionID: dto.WorkoutSessionID,
+		CompletedSets:    completedSets,
+		TotalVolume:      totalVolume,
+		Notes:            dto.Notes,
+		TimeUsedInSec:    0, // This will be updated when the session ends
+		Date:             time.Now(),
+		Sets:             dto.Sets,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
 	}
 
 	result, err := s.DB.Collection("exerciseLogs").InsertOne(context.Background(), log)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update the workout session with the exercise log reference
+	sessionOid, err := primitive.ObjectIDFromHex(dto.WorkoutSessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.DB.Collection("workoutSessions").UpdateOne(
+		context.Background(),
+		bson.D{
+			{Key: "_id", Value: sessionOid},
+			{Key: "userId", Value: userId},
+			{Key: "exercises.exerciseId", Value: dto.ExerciseID},
+		},
+		bson.D{{
+			Key: "$set",
+			Value: bson.D{
+				{Key: "exercises.$.exerciseLogId", Value: result.InsertedID},
+			},
+		}},
+	)
 	if err != nil {
 		return nil, err
 	}

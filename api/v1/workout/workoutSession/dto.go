@@ -22,6 +22,5 @@ type ExerciseOrder struct {
 }
 
 type CompleteExerciseDto struct {
-	ExerciseLogID string  `json:"exerciseLogId" validate:"required"`
-	TotalVolume   float64 `json:"totalVolume"`
+	ExerciseLogID string `json:"exerciseLogId" validate:"required"`
 }

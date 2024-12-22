@@ -7,13 +7,18 @@ import (
 )
 
 type ExerciseLog struct {
-	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	UserID     string             `json:"userId" bson:"userId" validate:"required"`
-	ExerciseID string             `json:"exerciseId" bson:"exerciseId" validate:"required"`
-	Date       time.Time          `json:"date" bson:"date"`
-	Sets       []SetLog           `json:"sets" validate:"required,dive"`
-	Notes      string             `json:"notes"`
-	CreatedAt  time.Time          `json:"createdAt" bson:"createdAt"`
+	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	UserID           string             `json:"userId" bson:"userId" validate:"required"`
+	ExerciseID       string             `json:"exerciseId" validate:"required"`
+	WorkoutSessionID string             `json:"workoutSessionId" bson:"workoutSessionId" validate:"required"`
+	CompletedSets    int                `json:"completedSets"`
+	TotalVolume      float64            `json:"totalVolume"`
+	Notes            string             `json:"notes"`
+	TimeUsedInSec    int                `json:"timeUsedInSec"`
+	Date             time.Time          `json:"date"`
+	Sets             []SetLog           `json:"sets" validate:"dive"`
+	CreatedAt        time.Time          `json:"createdAt" bson:"createdAt"`
+	UpdatedAt        time.Time          `json:"updatedAt" bson:"updatedAt"`
 }
 
 type SetType string

@@ -3,8 +3,10 @@ package workoutSession
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -49,11 +51,8 @@ func (s *WorkoutSessionService) StartSession(dto *CreateWorkoutSessionDto, userI
 		// Convert workout exercises to session exercises
 		for i, ex := range workout.Exercises {
 			exercises = append(exercises, SessionExercise{
-				ExerciseID:    ex.ExerciseID,
-				Order:         i,
-				CompletedSets: 0,
-				StartTime:     time.Now(),
-				EndTime:       time.Now(),
+				ExerciseID: ex.ExerciseID,
+				Order:      i,
 			})
 		}
 	}
@@ -109,10 +108,32 @@ func (s *WorkoutSessionService) EndSession(id string, userId string) (*WorkoutSe
 	endTime := time.Now()
 	duration := int(endTime.Sub(session.StartTime).Seconds())
 
+	// Calculate total volume from exercise logs
+	var totalVolume float64
+	for _, exercise := range session.Exercises {
+		if exercise.ExerciseLogID != "" {
+			logOid, err := primitive.ObjectIDFromHex(exercise.ExerciseLogID)
+			if err != nil {
+				continue
+			}
+
+			log := &exerciseLog.ExerciseLog{}
+			err = s.DB.Collection("exerciseLogs").FindOne(context.Background(), bson.D{
+				{Key: "_id", Value: logOid},
+			}).Decode(log)
+			if err != nil {
+				continue
+			}
+
+			totalVolume += log.TotalVolume
+		}
+	}
+
 	update := bson.D{{Key: "$set", Value: bson.D{
 		{Key: "endTime", Value: endTime},
 		{Key: "status", Value: StatusCompleted},
 		{Key: "duration", Value: duration},
+		{Key: "totalVolume", Value: totalVolume},
 		{Key: "updatedAt", Value: time.Now()},
 	}}}
 
@@ -175,25 +196,43 @@ func (s *WorkoutSessionService) LogExercise(sessionId string, exerciseId string,
 		return nil, err
 	}
 
-	// Update exercise entry or add new one
+	// Update exercise entry
 	exerciseEntry := SessionExercise{
 		ExerciseID:    exerciseId,
 		ExerciseLogID: dto.ExerciseLogID,
-		TotalVolume:   dto.TotalVolume,
-		StartTime:     time.Now(),
-		EndTime:       time.Now(),
+		Order:         len(session.Exercises), // Add to end if not existing
 	}
 
-	update := bson.D{
-		{Key: "$push", Value: bson.D{
-			{Key: "exercises", Value: exerciseEntry},
-		}},
-		{Key: "$inc", Value: bson.D{
-			{Key: "totalVolume", Value: dto.TotalVolume},
-		}},
-		{Key: "$set", Value: bson.D{
-			{Key: "updatedAt", Value: time.Now()},
-		}},
+	// Find if exercise already exists in session
+	existingIndex := -1
+	for i, ex := range session.Exercises {
+		if ex.ExerciseID == exerciseId {
+			existingIndex = i
+			exerciseEntry.Order = ex.Order // Preserve existing order
+			break
+		}
+	}
+
+	var update bson.D
+	if existingIndex >= 0 {
+		// Update existing exercise
+		update = bson.D{{
+			Key: "$set",
+			Value: bson.D{
+				{Key: fmt.Sprintf("exercises.%d", existingIndex), Value: exerciseEntry},
+				{Key: "updatedAt", Value: time.Now()},
+			},
+		}}
+	} else {
+		// Add new exercise
+		update = bson.D{
+			{Key: "$push", Value: bson.D{
+				{Key: "exercises", Value: exerciseEntry},
+			}},
+			{Key: "$set", Value: bson.D{
+				{Key: "updatedAt", Value: time.Now()},
+			}},
+		}
 	}
 
 	after := options.After

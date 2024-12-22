@@ -30,13 +30,9 @@ const (
 )
 
 type SessionExercise struct {
-	ExerciseID    string    `json:"exerciseId" validate:"required"`
-	ExerciseLogID string    `json:"exerciseLogId" bson:"exerciseLogId"`
-	Order         int       `json:"order" validate:"required,min=0"`
-	CompletedSets int       `json:"completedSets"`
-	TotalVolume   float64   `json:"totalVolume"`
-	StartTime     time.Time `json:"startTime"`
-	EndTime       time.Time `json:"endTime"`
+	ExerciseID    string `json:"exerciseId" validate:"required"`
+	ExerciseLogID string `json:"exerciseLogId" bson:"exerciseLogId"`
+	Order         int    `json:"order" validate:"required,min=0"`
 }
 
 type SessionStatus string
