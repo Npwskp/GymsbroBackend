@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,17 +24,49 @@ type IWorkoutSessionService interface {
 	GetSession(id string, userId string) (*WorkoutSession, error)
 	GetUserSessions(userId string) ([]*WorkoutSession, error)
 	DeleteSession(id string, userId string) error
+	ReorderExercises(sessionId string, dto *ReorderExercisesDto, userId string) (*WorkoutSession, error)
 }
 
 func (s *WorkoutSessionService) StartSession(dto *CreateWorkoutSessionDto, userId string) (*WorkoutSession, error) {
+	var exercises []SessionExercise
+
+	if dto.Type == PlannedSession && dto.WorkoutID != "" {
+		// If starting from a plan, fetch and copy the workout exercises
+		workout := &workout.Workout{}
+		workoutOid, err := primitive.ObjectIDFromHex(dto.WorkoutID)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.DB.Collection("workout").FindOne(context.Background(), bson.D{
+			{Key: "_id", Value: workoutOid},
+			{Key: "userId", Value: userId},
+		}).Decode(workout)
+		if err != nil {
+			return nil, err
+		}
+
+		// Convert workout exercises to session exercises
+		for i, ex := range workout.Exercises {
+			exercises = append(exercises, SessionExercise{
+				ExerciseID:    ex.ExerciseID,
+				Order:         i,
+				CompletedSets: 0,
+				StartTime:     time.Now(),
+				EndTime:       time.Now(),
+			})
+		}
+	}
+
 	session := &WorkoutSession{
 		UserID:      userId,
 		WorkoutID:   dto.WorkoutID,
+		Type:        dto.Type,
 		StartTime:   time.Now(),
 		Status:      StatusInProgress,
 		TotalVolume: 0,
 		Duration:    0,
-		Exercises:   []ExerciseEntry{},
+		Exercises:   exercises,
 		Notes:       dto.Notes,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -143,7 +176,7 @@ func (s *WorkoutSessionService) LogExercise(sessionId string, exerciseId string,
 	}
 
 	// Update exercise entry or add new one
-	exerciseEntry := ExerciseEntry{
+	exerciseEntry := SessionExercise{
 		ExerciseID:    exerciseId,
 		ExerciseLogID: dto.ExerciseLogID,
 		TotalVolume:   dto.TotalVolume,
@@ -232,4 +265,52 @@ func (s *WorkoutSessionService) DeleteSession(id string, userId string) error {
 	}
 
 	return nil
+}
+
+func (s *WorkoutSessionService) ReorderExercises(sessionId string, dto *ReorderExercisesDto, userId string) (*WorkoutSession, error) {
+	oid, err := primitive.ObjectIDFromHex(sessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userId", Value: userId},
+		{Key: "status", Value: StatusInProgress}, // Only allow reordering in-progress sessions
+	}
+
+	// Create a map of exerciseId to new order
+	orderMap := make(map[string]int)
+	for _, ex := range dto.Exercises {
+		orderMap[ex.ExerciseID] = ex.Order
+	}
+
+	// Get current session
+	session := &WorkoutSession{}
+	if err := s.DB.Collection("workoutSessions").FindOne(context.Background(), filter).Decode(session); err != nil {
+		return nil, err
+	}
+
+	// Update exercise orders
+	for i := range session.Exercises {
+		if newOrder, exists := orderMap[session.Exercises[i].ExerciseID]; exists {
+			session.Exercises[i].Order = newOrder
+		}
+	}
+
+	update := bson.D{{Key: "$set", Value: bson.D{
+		{Key: "exercises", Value: session.Exercises},
+		{Key: "updatedAt", Value: time.Now()},
+	}}}
+
+	after := options.After
+	opts := options.FindOneAndUpdate().SetReturnDocument(after)
+
+	result := &WorkoutSession{}
+	err = s.DB.Collection("workoutSessions").FindOneAndUpdate(context.Background(), filter, update, opts).Decode(result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

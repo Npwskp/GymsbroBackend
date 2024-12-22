@@ -18,7 +18,5 @@ type Workout struct {
 
 type WorkoutExercise struct {
 	ExerciseID string `json:"exerciseId" validate:"required"`
-	Sets       int    `json:"sets" validate:"required,min=1"`
-	Reps       int    `json:"reps" validate:"required,min=1"`
-	Order      int    `json:"order" validate:"required,min=1"`
+	Order      int    `json:"order" validate:"required,min=0"`
 }
