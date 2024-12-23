@@ -134,7 +134,7 @@ func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
 func (uc *UserController) UpdateUsernamePassword(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	validate := validator.New()
-	doc := new(UpadateUsernamePasswordDto)
+	doc := new(UpdateUsernamePasswordDto)
 	if err := c.BodyParser(&doc); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),

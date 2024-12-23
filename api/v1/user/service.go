@@ -25,7 +25,7 @@ type IUserService interface {
 	GetUserByOAuthID(oauthid string) (*User, error)
 	GetUserEnergyConsumePlan(id string) (*function.EnergyConsumptionPlan, error)
 	DeleteUser(id string) error
-	UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error)
+	UpdateUsernamePassword(doc *UpdateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
 	UpdateFirstLoginStatus(id string) error
 }
@@ -140,7 +140,7 @@ func (us *UserService) DeleteUser(id string) error {
 	return nil
 }
 
-func (us *UserService) UpdateUsernamePassword(doc *UpadateUsernamePasswordDto, id string) (*User, error) {
+func (us *UserService) UpdateUsernamePassword(doc *UpdateUsernamePasswordDto, id string) (*User, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err

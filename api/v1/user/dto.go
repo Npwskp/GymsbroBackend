@@ -17,7 +17,7 @@ type CreateUserDto struct {
 	Picture       string  `json:"picture,omitempty" default:""`
 }
 
-type UpadateUsernamePasswordDto struct {
+type UpdateUsernamePasswordDto struct {
 	Username    string `json:"username"`
 	Password    string `json:"password" validate:"required"`
 	NewPassword string `json:"newPassword"`
