@@ -217,7 +217,7 @@ func (uc *UserController) Handle() {
 	g.Get("/me", uc.GetUserHandler)
 	g.Get("/energyplan", uc.GetUserEnergyConsumePlanHandler)
 	g.Delete("/me", uc.DeleteUserHandler)
+	g.Patch("/body", uc.UpdateBody)
 	g.Put("/usepass", uc.UpdateUsernamePassword)
-	g.Put("/body", uc.UpdateBody)
 	g.Put("/first-login", uc.UpdateFirstLoginStatus)
 }
