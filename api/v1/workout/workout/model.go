@@ -8,15 +8,15 @@ import (
 
 type Workout struct {
 	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	UserID      string             `json:"userId" bson:"userId"`
-	Name        string             `json:"name" validate:"required"`
-	Description string             `json:"description"`
-	Exercises   []WorkoutExercise  `json:"exercises" validate:"required"`
-	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
-	UpdatedAt   time.Time          `json:"updatedAt" bson:"updatedAt"`
+	UserID      string             `json:"userid" bson:"userid"`
+	Name        string             `json:"name" bson:"name" validate:"required"`
+	Description string             `json:"description" bson:"description"`
+	Exercises   []WorkoutExercise  `json:"exercises" bson:"exercises" validate:"required"`
+	CreatedAt   time.Time          `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time          `json:"updated_at" bson:"updated_at"`
 }
 
 type WorkoutExercise struct {
-	ExerciseID string `json:"exerciseId" validate:"required"`
-	Order      int    `json:"order" validate:"required,min=0"`
+	ExerciseID string `json:"exerciseid" bson:"exerciseid" validate:"required"`
+	Order      int    `json:"order" bson:"order" validate:"required,min=0"`
 }

@@ -8,18 +8,18 @@ import (
 
 type WorkoutSession struct {
 	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	UserID      string             `json:"userId" bson:"userId" validate:"required"`
-	WorkoutID   string             `json:"workoutId" bson:"workoutId"`
+	UserID      string             `json:"userid" bson:"userid" validate:"required"`
+	WorkoutID   string             `json:"workoutid" bson:"workoutid"`
 	Type        SessionType        `json:"type" bson:"type" validate:"required"`
-	StartTime   time.Time          `json:"startTime" bson:"startTime"`
-	EndTime     *time.Time         `json:"endTime" bson:"endTime"`
+	StartTime   time.Time          `json:"start_time" bson:"start_time"`
+	EndTime     time.Time          `json:"end_time" bson:"end_time"`
 	Status      SessionStatus      `json:"status" bson:"status"`
-	TotalVolume float64            `json:"totalVolume" bson:"totalVolume"`
+	TotalVolume float64            `json:"total_volume" bson:"total_volume"`
 	Duration    int                `json:"duration" bson:"duration"`
 	Exercises   []SessionExercise  `json:"exercises" validate:"dive"`
-	Notes       string             `json:"notes"`
-	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
-	UpdatedAt   time.Time          `json:"updatedAt" bson:"updatedAt"`
+	Notes       string             `json:"notes" bson:"notes"`
+	CreatedAt   time.Time          `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time          `json:"updated_at" bson:"updated_at"`
 }
 
 type SessionType string
@@ -30,9 +30,9 @@ const (
 )
 
 type SessionExercise struct {
-	ExerciseID    string `json:"exerciseId" validate:"required"`
-	ExerciseLogID string `json:"exerciseLogId" bson:"exerciseLogId"`
-	Order         int    `json:"order" validate:"required,min=0"`
+	ExerciseID    string `json:"exerciseid" bson:"exerciseid" validate:"required"`
+	ExerciseLogID string `json:"exerciselogid" bson:"exerciselogid"`
+	Order         int    `json:"order" bson:"order" validate:"required,min=0"`
 }
 
 type SessionStatus string
