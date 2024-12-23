@@ -2227,6 +2227,9 @@ const docTemplate = `{
                 "userid"
             ],
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -2250,6 +2253,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "updated_at": {
+                    "type": "string"
                 },
                 "userid": {
                     "type": "string"
@@ -2286,7 +2292,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "exerciseId",
-                "sets"
+                "sets",
+                "workoutSessionId"
             ],
             "properties": {
                 "exerciseId": {
@@ -2300,24 +2307,30 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/exerciseLog.SetLog"
                     }
+                },
+                "workoutSessionId": {
+                    "type": "string"
                 }
             }
         },
         "exerciseLog.ExerciseLog": {
             "type": "object",
             "required": [
-                "exerciseId",
-                "sets",
-                "userId"
+                "exerciseid",
+                "userid",
+                "workoutsessionid"
             ],
             "properties": {
-                "createdAt": {
+                "completed_sets": {
+                    "type": "integer"
+                },
+                "created_at": {
                     "type": "string"
                 },
                 "date": {
                     "type": "string"
                 },
-                "exerciseId": {
+                "exerciseid": {
                     "type": "string"
                 },
                 "id": {
@@ -2332,7 +2345,19 @@ const docTemplate = `{
                         "$ref": "#/definitions/exerciseLog.SetLog"
                     }
                 },
-                "userId": {
+                "time_used_in_sec": {
+                    "type": "integer"
+                },
+                "total_volume": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "userid": {
+                    "type": "string"
+                },
+                "workoutsessionid": {
                     "type": "string"
                 }
             }
@@ -2764,17 +2789,26 @@ const docTemplate = `{
                 "calories": {
                     "type": "number"
                 },
-                "carb": {
-                    "type": "number"
+                "category": {
+                    "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "fat": {
-                    "type": "number"
+                "image": {
+                    "type": "string"
                 },
-                "protein": {
-                    "type": "number"
+                "ingredients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Ingredient"
+                    }
+                },
+                "nutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Nutrient"
+                    }
                 }
             }
         },
@@ -3069,7 +3103,7 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "description": {
@@ -3087,10 +3121,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
-                "userId": {
+                "userid": {
                     "type": "string"
                 }
             }
@@ -3098,26 +3132,16 @@ const docTemplate = `{
         "workout.WorkoutExercise": {
             "type": "object",
             "required": [
-                "exerciseId",
-                "order",
-                "reps",
-                "sets"
+                "exerciseid",
+                "order"
             ],
             "properties": {
-                "exerciseId": {
+                "exerciseid": {
                     "type": "string"
                 },
                 "order": {
                     "type": "integer",
-                    "minimum": 1
-                },
-                "reps": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "sets": {
-                    "type": "integer",
-                    "minimum": 1
+                    "minimum": 0
                 }
             }
         },
@@ -3129,52 +3153,50 @@ const docTemplate = `{
             "properties": {
                 "exerciseLogId": {
                     "type": "string"
-                },
-                "totalVolume": {
-                    "type": "number"
                 }
             }
         },
         "workoutSession.CreateWorkoutSessionDto": {
             "type": "object",
             "required": [
-                "workoutId"
+                "type"
             ],
             "properties": {
                 "notes": {
                     "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "planned",
+                        "custom"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/workoutSession.SessionType"
+                        }
+                    ]
                 },
                 "workoutId": {
                     "type": "string"
                 }
             }
         },
-        "workoutSession.ExerciseEntry": {
+        "workoutSession.SessionExercise": {
             "type": "object",
             "required": [
-                "exerciseId"
+                "exerciseid",
+                "order"
             ],
             "properties": {
-                "completedSets": {
-                    "type": "integer"
-                },
-                "endTime": {
+                "exerciseid": {
                     "type": "string"
                 },
-                "exerciseId": {
+                "exerciselogid": {
                     "type": "string"
                 },
-                "exerciseLogId": {
-                    "type": "string"
-                },
-                "plannedSets": {
-                    "type": "integer"
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "totalVolume": {
-                    "type": "number"
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -3191,13 +3213,24 @@ const docTemplate = `{
                 "StatusCancelled"
             ]
         },
+        "workoutSession.SessionType": {
+            "type": "string",
+            "enum": [
+                "planned",
+                "custom"
+            ],
+            "x-enum-varnames": [
+                "PlannedSession",
+                "CustomSession"
+            ]
+        },
         "workoutSession.UpdateWorkoutSessionDto": {
             "type": "object",
             "properties": {
                 "exercises": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/workoutSession.ExerciseEntry"
+                        "$ref": "#/definitions/workoutSession.SessionExercise"
                     }
                 },
                 "notes": {
@@ -3211,25 +3244,23 @@ const docTemplate = `{
         "workoutSession.WorkoutSession": {
             "type": "object",
             "required": [
-                "exercises",
-                "userId",
-                "workoutId"
+                "type",
+                "userid"
             ],
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "duration": {
-                    "description": "in seconds",
                     "type": "integer"
                 },
-                "endTime": {
+                "end_time": {
                     "type": "string"
                 },
                 "exercises": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/workoutSession.ExerciseEntry"
+                        "$ref": "#/definitions/workoutSession.SessionExercise"
                     }
                 },
                 "id": {
@@ -3238,22 +3269,25 @@ const docTemplate = `{
                 "notes": {
                     "type": "string"
                 },
-                "startTime": {
+                "start_time": {
                     "type": "string"
                 },
                 "status": {
                     "$ref": "#/definitions/workoutSession.SessionStatus"
                 },
-                "totalVolume": {
+                "total_volume": {
                     "type": "number"
                 },
-                "updatedAt": {
+                "type": {
+                    "$ref": "#/definitions/workoutSession.SessionType"
+                },
+                "updated_at": {
                     "type": "string"
                 },
-                "userId": {
+                "userid": {
                     "type": "string"
                 },
-                "workoutId": {
+                "workoutid": {
                     "type": "string"
                 }
             }

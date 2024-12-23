@@ -13,11 +13,12 @@ type CreateMealDto struct {
 }
 
 type UpdateMealDto struct {
-	Description string  `json:"description"`
-	Carb        float64 `json:"carb"`
-	Protein     float64 `json:"protein"`
-	Fat         float64 `json:"fat"`
-	Calories    float64 `json:"calories"`
+	Description string             `json:"description"`
+	Category    string             `json:"category"`
+	Image       string             `json:"image"`
+	Calories    float64            `json:"calories"`
+	Nutrients   []types.Nutrient   `json:"nutrients"`
+	Ingredients []types.Ingredient `json:"ingredients"`
 }
 
 type SearchFilters struct {

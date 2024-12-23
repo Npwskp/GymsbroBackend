@@ -71,6 +71,8 @@ definitions:
     type: object
   exercise.Exercise:
     properties:
+      created_at:
+        type: string
       description:
         type: string
       id:
@@ -87,6 +89,8 @@ definitions:
         items:
           type: string
         type: array
+      updated_at:
+        type: string
       userid:
         type: string
     required:
@@ -124,17 +128,22 @@ definitions:
         items:
           $ref: '#/definitions/exerciseLog.SetLog'
         type: array
+      workoutSessionId:
+        type: string
     required:
     - exerciseId
     - sets
+    - workoutSessionId
     type: object
   exerciseLog.ExerciseLog:
     properties:
-      createdAt:
+      completed_sets:
+        type: integer
+      created_at:
         type: string
       date:
         type: string
-      exerciseId:
+      exerciseid:
         type: string
       id:
         type: string
@@ -144,12 +153,20 @@ definitions:
         items:
           $ref: '#/definitions/exerciseLog.SetLog'
         type: array
-      userId:
+      time_used_in_sec:
+        type: integer
+      total_volume:
+        type: number
+      updated_at:
+        type: string
+      userid:
+        type: string
+      workoutsessionid:
         type: string
     required:
-    - exerciseId
-    - sets
-    - userId
+    - exerciseid
+    - userid
+    - workoutsessionid
     type: object
   exerciseLog.SetLog:
     properties:
@@ -439,14 +456,20 @@ definitions:
     properties:
       calories:
         type: number
-      carb:
-        type: number
+      category:
+        type: string
       description:
         type: string
-      fat:
-        type: number
-      protein:
-        type: number
+      image:
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/types.Ingredient'
+        type: array
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
     type: object
   types.Ingredient:
     properties:
@@ -653,7 +676,7 @@ definitions:
     type: object
   workout.Workout:
     properties:
-      createdAt:
+      created_at:
         type: string
       description:
         type: string
@@ -665,9 +688,9 @@ definitions:
         type: string
       name:
         type: string
-      updatedAt:
+      updated_at:
         type: string
-      userId:
+      userid:
         type: string
     required:
     - exercises
@@ -675,29 +698,19 @@ definitions:
     type: object
   workout.WorkoutExercise:
     properties:
-      exerciseId:
+      exerciseid:
         type: string
       order:
-        minimum: 1
-        type: integer
-      reps:
-        minimum: 1
-        type: integer
-      sets:
-        minimum: 1
+        minimum: 0
         type: integer
     required:
-    - exerciseId
+    - exerciseid
     - order
-    - reps
-    - sets
     type: object
   workoutSession.CompleteExerciseDto:
     properties:
       exerciseLogId:
         type: string
-      totalVolume:
-        type: number
     required:
     - exerciseLogId
     type: object
@@ -705,29 +718,29 @@ definitions:
     properties:
       notes:
         type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/workoutSession.SessionType'
+        enum:
+        - planned
+        - custom
       workoutId:
         type: string
     required:
-    - workoutId
+    - type
     type: object
-  workoutSession.ExerciseEntry:
+  workoutSession.SessionExercise:
     properties:
-      completedSets:
+      exerciseid:
+        type: string
+      exerciselogid:
+        type: string
+      order:
+        minimum: 0
         type: integer
-      endTime:
-        type: string
-      exerciseId:
-        type: string
-      exerciseLogId:
-        type: string
-      plannedSets:
-        type: integer
-      startTime:
-        type: string
-      totalVolume:
-        type: number
     required:
-    - exerciseId
+    - exerciseid
+    - order
     type: object
   workoutSession.SessionStatus:
     enum:
@@ -739,11 +752,19 @@ definitions:
     - StatusInProgress
     - StatusCompleted
     - StatusCancelled
+  workoutSession.SessionType:
+    enum:
+    - planned
+    - custom
+    type: string
+    x-enum-varnames:
+    - PlannedSession
+    - CustomSession
   workoutSession.UpdateWorkoutSessionDto:
     properties:
       exercises:
         items:
-          $ref: '#/definitions/workoutSession.ExerciseEntry'
+          $ref: '#/definitions/workoutSession.SessionExercise'
         type: array
       notes:
         type: string
@@ -752,37 +773,37 @@ definitions:
     type: object
   workoutSession.WorkoutSession:
     properties:
-      createdAt:
+      created_at:
         type: string
       duration:
-        description: in seconds
         type: integer
-      endTime:
+      end_time:
         type: string
       exercises:
         items:
-          $ref: '#/definitions/workoutSession.ExerciseEntry'
+          $ref: '#/definitions/workoutSession.SessionExercise'
         type: array
       id:
         type: string
       notes:
         type: string
-      startTime:
+      start_time:
         type: string
       status:
         $ref: '#/definitions/workoutSession.SessionStatus'
-      totalVolume:
+      total_volume:
         type: number
-      updatedAt:
+      type:
+        $ref: '#/definitions/workoutSession.SessionType'
+      updated_at:
         type: string
-      userId:
+      userid:
         type: string
-      workoutId:
+      workoutid:
         type: string
     required:
-    - exercises
-    - userId
-    - workoutId
+    - type
+    - userid
     type: object
 host: localhost:8080
 info:

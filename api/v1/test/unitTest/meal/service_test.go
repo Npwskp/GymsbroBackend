@@ -139,9 +139,10 @@ func TestUpdateMeal(t *testing.T) {
 		updateDto := &meal.UpdateMealDto{
 			Description: "Updated Description",
 			Calories:    600,
-			Carb:        50,
-			Protein:     30,
-			Fat:         20,
+			Category:    "Updated Category",
+			Image:       "Updated Image",
+			Nutrients:   []types.Nutrient{{Name: "Protein", Amount: 25, Unit: "g"}},
+			Ingredients: []types.Ingredient{{IngredientId: primitive.NewObjectID().Hex(), Amount: 150, Unit: "g"}},
 		}
 
 		updated, err := service.UpdateMeal(updateDto, testMeal.ID.Hex(), testMeal.UserID)
