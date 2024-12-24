@@ -21,7 +21,7 @@ type WorkoutSessionController struct {
 // @Param       session body CreateWorkoutSessionDto true "Create Session"
 // @Success     201 {object} WorkoutSession
 // @Failure     400 {object} Error
-// @Router      /workout/session [post]
+// @Router      /workout-session [post]
 func (c *WorkoutSessionController) StartSessionHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	validate := validator.New()
@@ -57,7 +57,7 @@ func (c *WorkoutSessionController) StartSessionHandler(ctx *fiber.Ctx) error {
 // @Param       id path string true "Session ID"
 // @Success     200 {object} WorkoutSession
 // @Failure     400 {object} Error
-// @Router      /workout/session/{id}/end [put]
+// @Router      /workout-session/{id}/end [put]
 func (c *WorkoutSessionController) EndSessionHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	sessionId := ctx.Params("id")
@@ -81,7 +81,7 @@ func (c *WorkoutSessionController) EndSessionHandler(ctx *fiber.Ctx) error {
 // @Param       session body UpdateWorkoutSessionDto true "Update Session"
 // @Success     200 {object} WorkoutSession
 // @Failure     400 {object} Error
-// @Router      /workout/session/{id} [put]
+// @Router      /workout-session/{id} [put]
 func (c *WorkoutSessionController) UpdateSessionHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	sessionId := ctx.Params("id")
@@ -120,7 +120,7 @@ func (c *WorkoutSessionController) UpdateSessionHandler(ctx *fiber.Ctx) error {
 // @Param       log body CompleteExerciseDto true "Exercise Completion"
 // @Success     200 {object} WorkoutSession
 // @Failure     400 {object} Error
-// @Router      /workout/session/{id}/exercise/{exerciseId} [post]
+// @Router      /workout-session/{id}/exercise/{exerciseId} [post]
 func (c *WorkoutSessionController) LogExerciseHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	sessionId := ctx.Params("id")
@@ -158,7 +158,7 @@ func (c *WorkoutSessionController) LogExerciseHandler(ctx *fiber.Ctx) error {
 // @Param       id path string true "Session ID"
 // @Success     200 {object} WorkoutSession
 // @Failure     400 {object} Error
-// @Router      /workout/session/{id} [get]
+// @Router      /workout-session/{id} [get]
 func (c *WorkoutSessionController) GetSessionHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	sessionId := ctx.Params("id")
@@ -180,7 +180,7 @@ func (c *WorkoutSessionController) GetSessionHandler(ctx *fiber.Ctx) error {
 // @Produce     json
 // @Success     200 {array} WorkoutSession
 // @Failure     400 {object} Error
-// @Router      /workout/session [get]
+// @Router      /workout-session [get]
 func (c *WorkoutSessionController) GetUserSessionsHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 
@@ -202,7 +202,7 @@ func (c *WorkoutSessionController) GetUserSessionsHandler(ctx *fiber.Ctx) error 
 // @Param       id path string true "Session ID"
 // @Success     204 {object} nil
 // @Failure     400 {object} Error
-// @Router      /workout/session/{id} [delete]
+// @Router      /workout-session/{id} [delete]
 func (c *WorkoutSessionController) DeleteSessionHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	sessionId := ctx.Params("id")
@@ -217,7 +217,7 @@ func (c *WorkoutSessionController) DeleteSessionHandler(ctx *fiber.Ctx) error {
 }
 
 func (c *WorkoutSessionController) Handle() {
-	g := c.Instance.Group("/session")
+	g := c.Instance.Group("/workout-session")
 
 	g.Post("/", c.StartSessionHandler)
 	g.Post("/:id/exercise/:exerciseId", c.LogExerciseHandler)

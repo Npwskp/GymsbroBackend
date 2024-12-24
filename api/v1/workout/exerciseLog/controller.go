@@ -23,7 +23,7 @@ type ExerciseLogController struct {
 // @Param       log body CreateExerciseLogDto true "Exercise Log"
 // @Success     201 {object} ExerciseLog
 // @Failure     400 {object} Error
-// @Router      /workout/log [post]
+// @Router      /exercise-log [post]
 func (c *ExerciseLogController) CreateLogHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	validate := validator.New()
@@ -58,7 +58,7 @@ func (c *ExerciseLogController) CreateLogHandler(ctx *fiber.Ctx) error {
 // @Produce     json
 // @Success     200 {array} ExerciseLog
 // @Failure     400 {object} Error
-// @Router      /workout/log [get]
+// @Router      /exercise-log [get]
 func (c *ExerciseLogController) GetUserLogsHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	logs, err := c.Service.GetLogsByUser(userId)
@@ -79,7 +79,7 @@ func (c *ExerciseLogController) GetUserLogsHandler(ctx *fiber.Ctx) error {
 // @Param       exerciseId path string true "Exercise ID"
 // @Success     200 {array} ExerciseLog
 // @Failure     400 {object} Error
-// @Router      /workout/log/exercise/{exerciseId} [get]
+// @Router      /exercise-log/exercise/{exerciseId} [get]
 func (c *ExerciseLogController) GetExerciseLogsHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	exerciseId := ctx.Params("exerciseId")
@@ -103,7 +103,7 @@ func (c *ExerciseLogController) GetExerciseLogsHandler(ctx *fiber.Ctx) error {
 // @Param       endDate query string true "End Date (YYYY-MM-DD)"
 // @Success     200 {array} ExerciseLog
 // @Failure     400 {object} Error
-// @Router      /workout/log/range [get]
+// @Router      /exercise-log/range [get]
 func (c *ExerciseLogController) GetLogsByDateRangeHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	startDate, err := time.Parse("2006-01-02", ctx.Query("startDate"))
@@ -139,7 +139,7 @@ func (c *ExerciseLogController) GetLogsByDateRangeHandler(ctx *fiber.Ctx) error 
 // @Param       log body UpdateExerciseLogDto true "Updated Log"
 // @Success     200 {object} ExerciseLog
 // @Failure     400 {object} Error
-// @Router      /workout/log/{id} [put]
+// @Router      /exercise-log/{id} [put]
 func (c *ExerciseLogController) UpdateLogHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	logId := ctx.Params("id")
@@ -176,7 +176,7 @@ func (c *ExerciseLogController) UpdateLogHandler(ctx *fiber.Ctx) error {
 // @Param       id path string true "Log ID"
 // @Success     204 {object} nil
 // @Failure     400 {object} Error
-// @Router      /workout/log/{id} [delete]
+// @Router      /exercise-log/{id} [delete]
 func (c *ExerciseLogController) DeleteLogHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 	logId := ctx.Params("id")
@@ -191,7 +191,7 @@ func (c *ExerciseLogController) DeleteLogHandler(ctx *fiber.Ctx) error {
 }
 
 func (c *ExerciseLogController) Handle() {
-	g := c.Instance.Group("/log")
+	g := c.Instance.Group("/exercise-log")
 
 	g.Post("/", c.CreateLogHandler)
 	g.Get("/", c.GetUserLogsHandler)

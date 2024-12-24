@@ -1,22 +1,11 @@
-package function
+package exerciseEnums
 
 import (
 	"fmt"
 )
 
-type Day string
 type ExerciseType string
 type MuscleGroup string
-
-const (
-	Monday    Day = "Monday"
-	Tuesday   Day = "Tuesday"
-	Wednesday Day = "Wednesday"
-	Thursday  Day = "Thursday"
-	Friday    Day = "Friday"
-	Saturday  Day = "Saturday"
-	Sunday    Day = "Sunday"
-)
 
 const (
 	Rest      ExerciseType = "Rest"
@@ -51,13 +40,14 @@ const (
 	Glutes         MuscleGroup = "Glutes"
 )
 
-func CheckDay(day string) bool {
-	switch Day(day) {
-	case Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday:
-		return true
-	default:
-		return false
-	}
+func GetAllExerciseTypes() []ExerciseType {
+	return []ExerciseType{Rest, Push, Pull, Chest, Back, Legs, Shoulders, Arms, Abs}
+}
+
+func GetAllMuscleGroups() []MuscleGroup {
+	return []MuscleGroup{Triceps, Biceps, Forearms, UpperChest, MiddleChest, LowerChest,
+		Latissimus, Trapezius, LowerBack, FrontShoulders, SideShoulders,
+		RearShoulders, Abdominal, SideAbs, Quads, Hamstrings, Calves, Glutes}
 }
 
 func ParseExerciseType(s string) (ExerciseType, error) {

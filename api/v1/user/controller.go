@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -89,7 +90,7 @@ func (uc *UserController) GetUserHandler(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Success		200	{object} function.EnergyConsumptionPlan
+// @Success		200	{object} userFitnessPreferenceEnums.EnergyConsumptionPlan
 // @Failure		400	{object} Error
 // @Router		/user/energyplan [get]
 func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
@@ -101,6 +102,45 @@ func (uc *UserController) GetUserEnergyConsumePlanHandler(c *fiber.Ctx) error {
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(plan)
+}
+
+// @Summary		Get all activity levels
+// @Description	Get all activity levels
+// @Tags		users
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	userFitnessPreferenceEnums.ActivityLevelType
+// @Failure		400	{object} Error
+// @Router		/user/activitylevels [get]
+func (uc *UserController) GetAllActivityLevels(c *fiber.Ctx) error {
+	levels := userFitnessPreferenceEnums.GetAllActivityLevels()
+	return c.Status(fiber.StatusOK).JSON(levels)
+}
+
+// @Summary		Get all goals
+// @Description	Get all goals
+// @Tags		users
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	userFitnessPreferenceEnums.GoalType
+// @Failure		400	{object} Error
+// @Router		/user/goals [get]
+func (uc *UserController) GetAllGoals(c *fiber.Ctx) error {
+	goals := userFitnessPreferenceEnums.GetAllGoals()
+	return c.Status(fiber.StatusOK).JSON(goals)
+}
+
+// @Summary		Get all carb preferences
+// @Description	Get all carb preferences
+// @Tags		users
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	userFitnessPreferenceEnums.CarbPreferenceType
+// @Failure		400	{object} Error
+// @Router		/user/carbpreferences [get]
+func (uc *UserController) GetAllCarbPreferences(c *fiber.Ctx) error {
+	carbPreferences := userFitnessPreferenceEnums.GetAllCarbPreferences()
+	return c.Status(fiber.StatusOK).JSON(carbPreferences)
 }
 
 // @Summary		Delete a user
@@ -216,6 +256,9 @@ func (uc *UserController) Handle() {
 	g.Get("", uc.GetAllUsersHandler)
 	g.Get("/me", uc.GetUserHandler)
 	g.Get("/energyplan", uc.GetUserEnergyConsumePlanHandler)
+	g.Get("/activitylevels", uc.GetAllActivityLevels)
+	g.Get("/goals", uc.GetAllGoals)
+	g.Get("/carbpreferences", uc.GetAllCarbPreferences)
 	g.Delete("/me", uc.DeleteUserHandler)
 	g.Patch("/body", uc.UpdateBody)
 	g.Patch("/usepass", uc.UpdateUsernamePassword)

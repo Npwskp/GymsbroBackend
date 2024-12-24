@@ -2,6 +2,7 @@ package exercise
 
 import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,7 +22,7 @@ type ExerciseController struct {
 // @Param		exercise body CreateExerciseDto true "Create Exercise"
 // @Success		201	{object} Exercise
 // @Failure		400	{object} Error
-// @Router		/workout/exercise [post]
+// @Router		/exercise [post]
 func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	exercise := new(CreateExerciseDto)
@@ -34,12 +35,12 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
 	for _, t := range exercise.Type {
-		if _, err := function.ParseExerciseType(t); err != nil {
+		if _, err := exerciseEnums.ParseExerciseType(t); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 		}
 	}
 	for _, m := range exercise.Muscle {
-		if _, err := function.ParseMuscleGroup(m); err != nil {
+		if _, err := exerciseEnums.ParseMuscleGroup(m); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
@@ -58,7 +59,7 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 // @Param		exercises body []CreateExerciseDto true "Create Exercises"
 // @Success		201	{object} []Exercise
 // @Failure		400	{object} Error
-// @Router		/workout/exercise/many [post]
+// @Router		/exercise/many [post]
 func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 	validate := validator.New()
 	exercises := new([]CreateExerciseDto)
@@ -72,12 +73,12 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 		}
 		for _, t := range exercise.Type {
-			if _, err := function.ParseExerciseType(t); err != nil {
+			if _, err := exerciseEnums.ParseExerciseType(t); err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 			}
 		}
 		for _, m := range exercise.Muscle {
-			if _, err := function.ParseMuscleGroup(m); err != nil {
+			if _, err := exerciseEnums.ParseMuscleGroup(m); err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 			}
 		}
@@ -96,7 +97,7 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 // @Produce		json
 // @Success		200	{object} []Exercise
 // @Failure		400	{object} Error
-// @Router		/workout/exercise [get]
+// @Router		/exercise [get]
 func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(c)
 	exercises, err := ec.Service.GetAllExercises(userId)
@@ -114,7 +115,7 @@ func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Exercise ID"
 // @Success		200	{object} Exercise
 // @Failure		400	{object} Error
-// @Router		/workout/exercise/{id} [get]
+// @Router		/exercise/{id} [get]
 func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -133,7 +134,7 @@ func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 // @Param		type path string true "Exercise Type"
 // @Success		200	{object} []Exercise
 // @Failure		400	{object} Error
-// @Router		/workout/exercise/type/{type} [get]
+// @Router		/exercise/type/{type} [get]
 func (ec *ExerciseController) GetExerciseByTypeHandler(c *fiber.Ctx) error {
 	t := c.Params("type")
 	userId := function.GetUserIDFromContext(c)
@@ -144,6 +145,32 @@ func (ec *ExerciseController) GetExerciseByTypeHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(exercises)
 }
 
+// @Summary		Get all exercise types
+// @Description	Get all exercise types
+// @Tags		exercises
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	exerciseEnums.ExerciseType
+// @Failure		400	{object} Error
+// @Router		/exercise/types [get]
+func (ec *ExerciseController) GetAllExerciseTypesHandler(c *fiber.Ctx) error {
+	types := exerciseEnums.GetAllExerciseTypes()
+	return c.Status(fiber.StatusOK).JSON(types)
+}
+
+// @Summary		Get all muscle groups
+// @Description	Get all muscle groups
+// @Tags		exercises
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	exerciseEnums.MuscleGroup
+// @Failure		400	{object} Error
+// @Router		/exercise/muscles [get]
+func (ec *ExerciseController) GetAllMuscleGroupsHandler(c *fiber.Ctx) error {
+	muscles := exerciseEnums.GetAllMuscleGroups()
+	return c.Status(fiber.StatusOK).JSON(muscles)
+}
+
 // @Summary		Delete an exercise
 // @Description	Delete an exercise
 // @Tags		exercises
@@ -152,7 +179,7 @@ func (ec *ExerciseController) GetExerciseByTypeHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Exercise ID"
 // @Success		204	{object} Error
 // @Failure		400	{object} Error
-// @Router		/workout/exercise/{id} [delete]
+// @Router		/exercise/{id} [delete]
 func (ec *ExerciseController) DeleteExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -171,7 +198,7 @@ func (ec *ExerciseController) DeleteExerciseHandler(c *fiber.Ctx) error {
 // @Param		exercise body UpdateExerciseDto true "Update Exercise"
 // @Success		200	{object} Exercise
 // @Failure		400	{object} Error
-// @Router		/workout/exercise/{id} [put]
+// @Router		/exercise/{id} [put]
 func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -184,12 +211,12 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
 	for _, t := range exercise.Type {
-		if _, err := function.ParseExerciseType(t); err != nil {
+		if _, err := exerciseEnums.ParseExerciseType(t); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 		}
 	}
 	for _, m := range exercise.Muscle {
-		if _, err := function.ParseMuscleGroup(m); err != nil {
+		if _, err := exerciseEnums.ParseMuscleGroup(m); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
@@ -206,6 +233,8 @@ func (ec *ExerciseController) Handle() {
 	g.Post("/", ec.PostExerciseHandler)
 	g.Post("/many", ec.PostManyExerciseHandler)
 	g.Get("/", ec.GetExercisesHandler)
+	g.Get("/types", ec.GetAllExerciseTypesHandler)
+	g.Get("/muscles", ec.GetAllMuscleGroupsHandler)
 	g.Get("/:id", ec.GetExerciseHandler)
 	g.Get("/type/:type", ec.GetExerciseByTypeHandler)
 	g.Delete("/:id", ec.DeleteExerciseHandler)

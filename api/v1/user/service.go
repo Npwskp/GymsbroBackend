@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +24,7 @@ type IUserService interface {
 	GetUser(id string) (*User, error)
 	GetUserByEmail(email string) (*User, error)
 	GetUserByOAuthID(oauthid string) (*User, error)
-	GetUserEnergyConsumePlan(id string) (*function.EnergyConsumptionPlan, error)
+	GetUserEnergyConsumePlan(id string) (*userFitnessPreferenceEnums.EnergyConsumptionPlan, error)
 	DeleteUser(id string) error
 	UpdateUsernamePassword(doc *UpdateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
@@ -96,7 +97,7 @@ func (us *UserService) GetUserByOAuthID(oauthid string) (*User, error) {
 	return user, nil
 }
 
-func (us *UserService) GetUserEnergyConsumePlan(id string) (*function.EnergyConsumptionPlan, error) {
+func (us *UserService) GetUserEnergyConsumePlan(id string) (*userFitnessPreferenceEnums.EnergyConsumptionPlan, error) {
 	user, err := us.GetUser(id)
 	if err != nil {
 		return nil, err
@@ -125,7 +126,7 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*function.EnergyCons
 		return nil, errors.New("missing fields for energy consume plan calculation: " + strings.Join(missingFields, ", "))
 	}
 
-	return function.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
+	return userFitnessPreferenceEnums.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
 }
 
 func (us *UserService) DeleteUser(id string) error {

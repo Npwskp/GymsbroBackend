@@ -118,6 +118,68 @@ definitions:
           type: string
         type: array
     type: object
+  exerciseEnums.ExerciseType:
+    enum:
+    - Rest
+    - Push
+    - Pull
+    - Chest
+    - Back
+    - Legs
+    - Shoulders
+    - Arms
+    - Abs
+    type: string
+    x-enum-varnames:
+    - Rest
+    - Push
+    - Pull
+    - Chest
+    - Back
+    - Legs
+    - Shoulders
+    - Arms
+    - Abs
+  exerciseEnums.MuscleGroup:
+    enum:
+    - Triceps
+    - Biceps
+    - Forearms
+    - Upper Chest
+    - Middle Chest
+    - Lower Chest
+    - Latissimus
+    - Trapezius
+    - Lower Back
+    - Front Shoulders
+    - Side Shoulders
+    - Rear Shoulders
+    - Abdominal
+    - Side Abs
+    - Quads
+    - Hamstrings
+    - Calves
+    - Glutes
+    type: string
+    x-enum-varnames:
+    - Triceps
+    - Biceps
+    - Forearms
+    - UpperChest
+    - MiddleChest
+    - LowerChest
+    - Latissimus
+    - Trapezius
+    - LowerBack
+    - FrontShoulders
+    - SideShoulders
+    - RearShoulders
+    - Abdominal
+    - SideAbs
+    - Quads
+    - Hamstrings
+    - Calves
+    - Glutes
   exerciseLog.CreateExerciseLogDto:
     properties:
       exerciseId:
@@ -264,79 +326,6 @@ definitions:
         type: array
     required:
     - date
-    type: object
-  function.ActivityLevelType:
-    enum:
-    - base
-    - sedentary
-    - lightly_active
-    - moderately_active
-    - very_active
-    - extra_active
-    type: string
-    x-enum-varnames:
-    - ActivityBase
-    - ActivitySedentary
-    - ActivityLightlyActive
-    - ActivityModerate
-    - ActivityVeryActive
-    - ActivityExtraActive
-  function.CalPerActivity:
-    properties:
-      activityName:
-        type: string
-      calories:
-        type: number
-    type: object
-  function.CarbPreferenceType:
-    enum:
-    - moderate_carb
-    - low_carb
-    - high_carb
-    type: string
-    x-enum-varnames:
-    - CarbModerate
-    - CarbLow
-    - CarbHigh
-  function.EnergyConsumptionPlan:
-    properties:
-      activityLevel:
-        $ref: '#/definitions/function.ActivityLevelType'
-      allActivityCaloriesPerDay:
-        items:
-          $ref: '#/definitions/function.CalPerActivity'
-        type: array
-      bmr:
-        type: number
-      macronutrients:
-        items:
-          $ref: '#/definitions/function.Macronutrients'
-        type: array
-    type: object
-  function.GoalType:
-    enum:
-    - maintain
-    - cutting
-    - bulking
-    type: string
-    x-enum-varnames:
-    - GoalMaintain
-    - GoalCutting
-    - GoalBulking
-  function.Macronutrients:
-    properties:
-      calories:
-        type: number
-      carbPreference:
-        $ref: '#/definitions/function.CarbPreferenceType'
-      carbs:
-        type: number
-      fat:
-        type: number
-      goal:
-        $ref: '#/definitions/function.GoalType'
-      protein:
-        type: number
     type: object
   ingredient.CreateIngredientDto:
     properties:
@@ -685,6 +674,77 @@ definitions:
     - password
     - username
     type: object
+  userFitnessPreferenceEnums.ActivityLevelType:
+    enum:
+    - sedentary
+    - lightly_active
+    - moderately_active
+    - very_active
+    - extra_active
+    type: string
+    x-enum-varnames:
+    - ActivitySedentary
+    - ActivityLightlyActive
+    - ActivityModerate
+    - ActivityVeryActive
+    - ActivityExtraActive
+  userFitnessPreferenceEnums.CalPerActivity:
+    properties:
+      activityName:
+        type: string
+      calories:
+        type: number
+    type: object
+  userFitnessPreferenceEnums.CarbPreferenceType:
+    enum:
+    - moderate_carb
+    - low_carb
+    - high_carb
+    type: string
+    x-enum-varnames:
+    - CarbModerate
+    - CarbLow
+    - CarbHigh
+  userFitnessPreferenceEnums.EnergyConsumptionPlan:
+    properties:
+      activityLevel:
+        $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+      allActivityCaloriesPerDay:
+        items:
+          $ref: '#/definitions/userFitnessPreferenceEnums.CalPerActivity'
+        type: array
+      bmr:
+        type: number
+      macronutrients:
+        items:
+          $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
+        type: array
+    type: object
+  userFitnessPreferenceEnums.GoalType:
+    enum:
+    - maintain
+    - cutting
+    - bulking
+    type: string
+    x-enum-varnames:
+    - GoalMaintain
+    - GoalCutting
+    - GoalBulking
+  userFitnessPreferenceEnums.Macronutrients:
+    properties:
+      calories:
+        type: number
+      carbPreference:
+        $ref: '#/definitions/userFitnessPreferenceEnums.CarbPreferenceType'
+      carbs:
+        type: number
+      fat:
+        type: number
+      goal:
+        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
+      protein:
+        type: number
+    type: object
   workout.CreateWorkoutDto:
     properties:
       description:
@@ -916,6 +976,220 @@ paths:
       summary: Register
       tags:
       - auth
+  /exercise:
+    get:
+      consumes:
+      - application/json
+      description: Get all exercises
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all exercises
+      tags:
+      - exercises
+    post:
+      consumes:
+      - application/json
+      description: Create an exercise
+      parameters:
+      - description: Create Exercise
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/exercise.CreateExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create an exercise
+      tags:
+      - exercises
+  /exercise/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema: {}
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete an exercise
+      tags:
+      - exercises
+    get:
+      consumes:
+      - application/json
+      description: Get an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get an exercise
+      tags:
+      - exercises
+    put:
+      consumes:
+      - application/json
+      description: Update an exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Exercise
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/exercise.UpdateExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update an exercise
+      tags:
+      - exercises
+  /exercise/many:
+    post:
+      consumes:
+      - application/json
+      description: Create many exercises
+      parameters:
+      - description: Create Exercises
+        in: body
+        name: exercises
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/exercise.CreateExerciseDto'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create many exercises
+      tags:
+      - exercises
+  /exercise/muscles:
+    get:
+      consumes:
+      - application/json
+      description: Get all muscle groups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseEnums.MuscleGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all muscle groups
+      tags:
+      - exercises
+  /exercise/type/{type}:
+    get:
+      consumes:
+      - application/json
+      description: Get exercises by type
+      parameters:
+      - description: Exercise Type
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get exercises by type
+      tags:
+      - exercises
+  /exercise/types:
+    get:
+      consumes:
+      - application/json
+      description: Get all exercise types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseEnums.ExerciseType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all exercise types
+      tags:
+      - exercises
   /foodlog:
     post:
       consumes:
@@ -1252,6 +1526,158 @@ paths:
       summary: Get ingredients by user
       tags:
       - ingredient
+  /log:
+    get:
+      consumes:
+      - application/json
+      description: Get all exercise logs for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseLog.ExerciseLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get user logs
+      tags:
+      - exerciseLogs
+    post:
+      consumes:
+      - application/json
+      description: Log a completed exercise
+      parameters:
+      - description: Exercise Log
+        in: body
+        name: log
+        required: true
+        schema:
+          $ref: '#/definitions/exerciseLog.CreateExerciseLogDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/exerciseLog.ExerciseLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create exercise log
+      tags:
+      - exerciseLogs
+  /log/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exercise log
+      parameters:
+      - description: Log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete exercise log
+      tags:
+      - exerciseLogs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing exercise log
+      parameters:
+      - description: Log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Log
+        in: body
+        name: log
+        required: true
+        schema:
+          $ref: '#/definitions/exerciseLog.UpdateExerciseLogDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exerciseLog.ExerciseLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update exercise log
+      tags:
+      - exerciseLogs
+  /log/exercise/{exerciseId}:
+    get:
+      consumes:
+      - application/json
+      description: Get logs for a specific exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: exerciseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseLog.ExerciseLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get exercise logs
+      tags:
+      - exerciseLogs
+  /log/range:
+    get:
+      consumes:
+      - application/json
+      description: Get exercise logs within a date range
+      parameters:
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseLog.ExerciseLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get logs by date range
+      tags:
+      - exerciseLogs
   /meal:
     post:
       consumes:
@@ -1502,6 +1928,26 @@ paths:
       summary: Create a user
       tags:
       - users
+  /user/activitylevels:
+    get:
+      consumes:
+      - application/json
+      description: Get all activity levels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all activity levels
+      tags:
+      - users
   /user/body:
     patch:
       consumes:
@@ -1527,6 +1973,26 @@ paths:
       summary: Update a user body
       tags:
       - users
+  /user/carbpreferences:
+    get:
+      consumes:
+      - application/json
+      description: Get all carb preferences
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userFitnessPreferenceEnums.CarbPreferenceType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all carb preferences
+      tags:
+      - users
   /user/energyplan:
     get:
       consumes:
@@ -1538,7 +2004,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/function.EnergyConsumptionPlan'
+            $ref: '#/definitions/userFitnessPreferenceEnums.EnergyConsumptionPlan'
         "400":
           description: Bad Request
           schema: {}
@@ -1559,6 +2025,26 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update first login status
+      tags:
+      - users
+  /user/goals:
+    get:
+      consumes:
+      - application/json
+      description: Get all goals
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all goals
       tags:
       - users
   /user/me:
@@ -1669,6 +2155,183 @@ paths:
       summary: Create a workout
       tags:
       - workouts
+  /workout-session:
+    get:
+      consumes:
+      - application/json
+      description: Get all workout sessions for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/workoutSession.WorkoutSession'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get user sessions
+      tags:
+      - workoutSessions
+    post:
+      consumes:
+      - application/json
+      description: Start a new workout session
+      parameters:
+      - description: Create Session
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/workoutSession.CreateWorkoutSessionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Start workout session
+      tags:
+      - workoutSessions
+  /workout-session/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a workout session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete session
+      tags:
+      - workoutSessions
+    get:
+      consumes:
+      - application/json
+      description: Get a workout session by ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get session
+      tags:
+      - workoutSessions
+    put:
+      consumes:
+      - application/json
+      description: Update a workout session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Session
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/workoutSession.UpdateWorkoutSessionDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update workout session
+      tags:
+      - workoutSessions
+  /workout-session/{id}/end:
+    put:
+      consumes:
+      - application/json
+      description: End an active workout session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: End workout session
+      tags:
+      - workoutSessions
+  /workout-session/{id}/exercise/{exerciseId}:
+    post:
+      consumes:
+      - application/json
+      description: Log a completed exercise in the session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Exercise ID
+        in: path
+        name: exerciseId
+        required: true
+        type: string
+      - description: Exercise Completion
+        in: body
+        name: log
+        required: true
+        schema:
+          $ref: '#/definitions/workoutSession.CompleteExerciseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Log exercise completion
+      tags:
+      - workoutSessions
   /workout/{id}:
     delete:
       consumes:
@@ -1755,509 +2418,6 @@ paths:
       summary: Update a workout
       tags:
       - workouts
-  /workout/exercise:
-    get:
-      consumes:
-      - application/json
-      description: Get all exercises
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exercise.Exercise'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get all exercises
-      tags:
-      - exercises
-    post:
-      consumes:
-      - application/json
-      description: Create an exercise
-      parameters:
-      - description: Create Exercise
-        in: body
-        name: exercise
-        required: true
-        schema:
-          $ref: '#/definitions/exercise.CreateExerciseDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/exercise.Exercise'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create an exercise
-      tags:
-      - exercises
-  /workout/exercise/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete an exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema: {}
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete an exercise
-      tags:
-      - exercises
-    get:
-      consumes:
-      - application/json
-      description: Get an exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/exercise.Exercise'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get an exercise
-      tags:
-      - exercises
-    put:
-      consumes:
-      - application/json
-      description: Update an exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Exercise
-        in: body
-        name: exercise
-        required: true
-        schema:
-          $ref: '#/definitions/exercise.UpdateExerciseDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/exercise.Exercise'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update an exercise
-      tags:
-      - exercises
-  /workout/exercise/many:
-    post:
-      consumes:
-      - application/json
-      description: Create many exercises
-      parameters:
-      - description: Create Exercises
-        in: body
-        name: exercises
-        required: true
-        schema:
-          items:
-            $ref: '#/definitions/exercise.CreateExerciseDto'
-          type: array
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            items:
-              $ref: '#/definitions/exercise.Exercise'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create many exercises
-      tags:
-      - exercises
-  /workout/exercise/type/{type}:
-    get:
-      consumes:
-      - application/json
-      description: Get exercises by type
-      parameters:
-      - description: Exercise Type
-        in: path
-        name: type
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exercise.Exercise'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get exercises by type
-      tags:
-      - exercises
-  /workout/log:
-    get:
-      consumes:
-      - application/json
-      description: Get all exercise logs for a user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exerciseLog.ExerciseLog'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get user logs
-      tags:
-      - exerciseLogs
-    post:
-      consumes:
-      - application/json
-      description: Log a completed exercise
-      parameters:
-      - description: Exercise Log
-        in: body
-        name: log
-        required: true
-        schema:
-          $ref: '#/definitions/exerciseLog.CreateExerciseLogDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/exerciseLog.ExerciseLog'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create exercise log
-      tags:
-      - exerciseLogs
-  /workout/log/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete an exercise log
-      parameters:
-      - description: Log ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete exercise log
-      tags:
-      - exerciseLogs
-    put:
-      consumes:
-      - application/json
-      description: Update an existing exercise log
-      parameters:
-      - description: Log ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Updated Log
-        in: body
-        name: log
-        required: true
-        schema:
-          $ref: '#/definitions/exerciseLog.UpdateExerciseLogDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/exerciseLog.ExerciseLog'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update exercise log
-      tags:
-      - exerciseLogs
-  /workout/log/exercise/{exerciseId}:
-    get:
-      consumes:
-      - application/json
-      description: Get logs for a specific exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: exerciseId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exerciseLog.ExerciseLog'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get exercise logs
-      tags:
-      - exerciseLogs
-  /workout/log/range:
-    get:
-      consumes:
-      - application/json
-      description: Get exercise logs within a date range
-      parameters:
-      - description: Start Date (YYYY-MM-DD)
-        in: query
-        name: startDate
-        required: true
-        type: string
-      - description: End Date (YYYY-MM-DD)
-        in: query
-        name: endDate
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exerciseLog.ExerciseLog'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get logs by date range
-      tags:
-      - exerciseLogs
-  /workout/session:
-    get:
-      consumes:
-      - application/json
-      description: Get all workout sessions for a user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/workoutSession.WorkoutSession'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get user sessions
-      tags:
-      - workoutSessions
-    post:
-      consumes:
-      - application/json
-      description: Start a new workout session
-      parameters:
-      - description: Create Session
-        in: body
-        name: session
-        required: true
-        schema:
-          $ref: '#/definitions/workoutSession.CreateWorkoutSessionDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/workoutSession.WorkoutSession'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Start workout session
-      tags:
-      - workoutSessions
-  /workout/session/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a workout session
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete session
-      tags:
-      - workoutSessions
-    get:
-      consumes:
-      - application/json
-      description: Get a workout session by ID
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/workoutSession.WorkoutSession'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get session
-      tags:
-      - workoutSessions
-    put:
-      consumes:
-      - application/json
-      description: Update a workout session
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Session
-        in: body
-        name: session
-        required: true
-        schema:
-          $ref: '#/definitions/workoutSession.UpdateWorkoutSessionDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/workoutSession.WorkoutSession'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update workout session
-      tags:
-      - workoutSessions
-  /workout/session/{id}/end:
-    put:
-      consumes:
-      - application/json
-      description: End an active workout session
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/workoutSession.WorkoutSession'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: End workout session
-      tags:
-      - workoutSessions
-  /workout/session/{id}/exercise/{exerciseId}:
-    post:
-      consumes:
-      - application/json
-      description: Log a completed exercise in the session
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Exercise ID
-        in: path
-        name: exerciseId
-        required: true
-        type: string
-      - description: Exercise Completion
-        in: body
-        name: log
-        required: true
-        schema:
-          $ref: '#/definitions/workoutSession.CompleteExerciseDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/workoutSession.WorkoutSession'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Log exercise completion
-      tags:
-      - workoutSessions
 schemes:
 - http
 - https
