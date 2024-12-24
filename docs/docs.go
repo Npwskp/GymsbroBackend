@@ -1146,7 +1146,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpadateUsernamePasswordDto"
+                            "$ref": "#/definitions/user.UpdateUsernamePasswordDto"
                         }
                     }
                 ],
@@ -2502,6 +2502,25 @@ const docTemplate = `{
                 }
             }
         },
+        "function.ActivityLevelType": {
+            "type": "string",
+            "enum": [
+                "base",
+                "sedentary",
+                "lightly_active",
+                "moderately_active",
+                "very_active",
+                "extra_active"
+            ],
+            "x-enum-varnames": [
+                "ActivityBase",
+                "ActivitySedentary",
+                "ActivityLightlyActive",
+                "ActivityModerate",
+                "ActivityVeryActive",
+                "ActivityExtraActive"
+            ]
+        },
         "function.CalPerActivity": {
             "type": "object",
             "properties": {
@@ -2513,11 +2532,24 @@ const docTemplate = `{
                 }
             }
         },
+        "function.CarbPreferenceType": {
+            "type": "string",
+            "enum": [
+                "moderate_carb",
+                "low_carb",
+                "high_carb"
+            ],
+            "x-enum-varnames": [
+                "CarbModerate",
+                "CarbLow",
+                "CarbHigh"
+            ]
+        },
         "function.EnergyConsumptionPlan": {
             "type": "object",
             "properties": {
                 "activityLevel": {
-                    "type": "string"
+                    "$ref": "#/definitions/function.ActivityLevelType"
                 },
                 "allActivityCaloriesPerDay": {
                     "type": "array",
@@ -2536,6 +2568,19 @@ const docTemplate = `{
                 }
             }
         },
+        "function.GoalType": {
+            "type": "string",
+            "enum": [
+                "maintain",
+                "cutting",
+                "bulking"
+            ],
+            "x-enum-varnames": [
+                "GoalMaintain",
+                "GoalCutting",
+                "GoalBulking"
+            ]
+        },
         "function.Macronutrients": {
             "type": "object",
             "properties": {
@@ -2543,7 +2588,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "carbPreference": {
-                    "type": "string"
+                    "$ref": "#/definitions/function.CarbPreferenceType"
                 },
                 "carbs": {
                     "type": "number"
@@ -2552,7 +2597,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "goal": {
-                    "type": "string"
+                    "$ref": "#/definitions/function.GoalType"
                 },
                 "protein": {
                     "type": "number"
@@ -2923,23 +2968,6 @@ const docTemplate = `{
                 }
             }
         },
-        "user.UpadateUsernamePasswordDto": {
-            "type": "object",
-            "required": [
-                "password"
-            ],
-            "properties": {
-                "newPassword": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
         "user.UpdateBodyDto": {
             "type": "object",
             "properties": {
@@ -2966,6 +2994,23 @@ const docTemplate = `{
                 },
                 "weight": {
                     "type": "number"
+                }
+            }
+        },
+        "user.UpdateUsernamePasswordDto": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "newPassword": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

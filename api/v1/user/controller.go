@@ -127,7 +127,7 @@ func (uc *UserController) DeleteUserHandler(c *fiber.Ctx) error {
 // @Tags		users
 // @Accept		json
 // @Produce		json
-// @Param		user body UpadateUsernamePasswordDto true "UpdateUsernamePassword User"
+// @Param		user body UpdateUsernamePasswordDto true "UpdateUsernamePassword User"
 // @Success		200	{object} User
 // @Failure		400	{object} Error
 // @Router		/user/usepass [patch]

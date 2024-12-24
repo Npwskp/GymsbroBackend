@@ -265,6 +265,22 @@ definitions:
     required:
     - date
     type: object
+  function.ActivityLevelType:
+    enum:
+    - base
+    - sedentary
+    - lightly_active
+    - moderately_active
+    - very_active
+    - extra_active
+    type: string
+    x-enum-varnames:
+    - ActivityBase
+    - ActivitySedentary
+    - ActivityLightlyActive
+    - ActivityModerate
+    - ActivityVeryActive
+    - ActivityExtraActive
   function.CalPerActivity:
     properties:
       activityName:
@@ -272,10 +288,20 @@ definitions:
       calories:
         type: number
     type: object
+  function.CarbPreferenceType:
+    enum:
+    - moderate_carb
+    - low_carb
+    - high_carb
+    type: string
+    x-enum-varnames:
+    - CarbModerate
+    - CarbLow
+    - CarbHigh
   function.EnergyConsumptionPlan:
     properties:
       activityLevel:
-        type: string
+        $ref: '#/definitions/function.ActivityLevelType'
       allActivityCaloriesPerDay:
         items:
           $ref: '#/definitions/function.CalPerActivity'
@@ -287,18 +313,28 @@ definitions:
           $ref: '#/definitions/function.Macronutrients'
         type: array
     type: object
+  function.GoalType:
+    enum:
+    - maintain
+    - cutting
+    - bulking
+    type: string
+    x-enum-varnames:
+    - GoalMaintain
+    - GoalCutting
+    - GoalBulking
   function.Macronutrients:
     properties:
       calories:
         type: number
       carbPreference:
-        type: string
+        $ref: '#/definitions/function.CarbPreferenceType'
       carbs:
         type: number
       fat:
         type: number
       goal:
-        type: string
+        $ref: '#/definitions/function.GoalType'
       protein:
         type: number
     type: object
@@ -552,17 +588,6 @@ definitions:
     - password
     - username
     type: object
-  user.UpadateUsernamePasswordDto:
-    properties:
-      newPassword:
-        type: string
-      password:
-        type: string
-      username:
-        type: string
-    required:
-    - password
-    type: object
   user.UpdateBodyDto:
     properties:
       activityLevel:
@@ -581,6 +606,17 @@ definitions:
         type: number
       weight:
         type: number
+    type: object
+  user.UpdateUsernamePasswordDto:
+    properties:
+      newPassword:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
     type: object
   user.User:
     properties:
@@ -1569,7 +1605,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/user.UpadateUsernamePasswordDto'
+          $ref: '#/definitions/user.UpdateUsernamePasswordDto'
       produces:
       - application/json
       responses:

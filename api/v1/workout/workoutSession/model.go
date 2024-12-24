@@ -34,7 +34,6 @@ type SessionExercise struct {
 	ExerciseLogID string `json:"exerciselogid" bson:"exerciselogid"`
 	Order         int    `json:"order" bson:"order" validate:"required,min=0"`
 }
-
 type SessionStatus string
 
 const (
