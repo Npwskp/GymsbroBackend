@@ -2,6 +2,7 @@ package userFitnessPreferenceEnums
 
 import (
 	"fmt"
+	"slices"
 )
 
 // ActivityLevelType represents the activity level enum
@@ -63,6 +64,7 @@ func GetAllCarbPreferences() []CarbPreferenceType {
 type EnergyConsumptionPlan struct {
 	BMR                       float64
 	ActivityLevel             ActivityLevelType
+	Goal                      GoalType
 	AllActivityCaloriesPerDay []*CalPerActivity
 	Macronutrients            []*Macronutrients
 }
@@ -73,7 +75,6 @@ type CalPerActivity struct {
 }
 
 type Macronutrients struct {
-	Goal           GoalType
 	CarbPreference CarbPreferenceType
 	Calories       float64
 	Protein        float64
@@ -190,7 +191,6 @@ func CalculateMacronutrients(calories float64) []*Macronutrients {
 			carbsCals := calories * carbRatio
 
 			macros = append(macros, &Macronutrients{
-				Goal:           goal,
 				CarbPreference: carbPreference,
 				Calories:       calories,
 				Protein:        proteinCals / 4,
@@ -203,20 +203,20 @@ func CalculateMacronutrients(calories float64) []*Macronutrients {
 	return macros
 }
 
-func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender string, activityLevel int, goal string) (*EnergyConsumptionPlan, error) {
+func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender string, activityLevel ActivityLevelType, goal GoalType) (*EnergyConsumptionPlan, error) {
 	bmr := CalculateBMR(weight, height, age, gender)
 	allActivityLevels := GetAllActivityLevels()
-	if activityLevel < 0 || activityLevel >= len(allActivityLevels) {
+	if activityLevel == "" || !slices.Contains(allActivityLevels, activityLevel) {
 		return nil, fmt.Errorf("invalid activity level index")
 	}
 
-	selectedActivity := allActivityLevels[activityLevel]
-	allActivityCaloriesPerDay := CalculateCaloriesPerDay(bmr, selectedActivity)
+	allActivityCaloriesPerDay := CalculateCaloriesPerDay(bmr, activityLevel)
 	macronutrients := CalculateMacronutrients(bmr)
 
 	return &EnergyConsumptionPlan{
 		BMR:                       bmr,
-		ActivityLevel:             selectedActivity,
+		ActivityLevel:             activityLevel,
+		Goal:                      goal,
 		AllActivityCaloriesPerDay: allActivityCaloriesPerDay,
 		Macronutrients:            macronutrients,
 	}, nil

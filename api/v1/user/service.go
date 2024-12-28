@@ -116,7 +116,7 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*userFitnessPreferen
 	if user.Gender == "" {
 		missingFields = append(missingFields, "Gender")
 	}
-	if user.ActivityLevel == 0 {
+	if user.ActivityLevel == "" {
 		missingFields = append(missingFields, "ActivityLevel")
 	}
 	if user.Goal == "" {
@@ -205,6 +205,9 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 			{Key: "waist", Value: function.Coalesce(doc.Waist, user.Waist)},
 			{Key: "hip", Value: function.Coalesce(doc.Hip, user.Hip)},
 			{Key: "activitylevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
+			{Key: "goal", Value: function.Coalesce(doc.Goal, user.Goal)},
+			{Key: "macronutrients", Value: function.Coalesce(doc.Macronutrients, user.Macronutrients)},
+			{Key: "bmr", Value: function.Coalesce(doc.BMR, user.BMR)},
 			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
