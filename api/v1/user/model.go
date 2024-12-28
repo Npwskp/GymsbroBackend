@@ -12,14 +12,14 @@ type User struct {
 	Username       string                                       `json:"username" validate:"required,min=3,max=20"`
 	Email          string                                       `json:"email" validate:"required,email"`
 	Password       string                                       `json:"password" validate:"required"`
-	Weight         float64                                      `json:"weight" default:"0"` // default:"0" is not working
-	Height         float64                                      `json:"height" default:"0"` // default:"0" is not working
+	Weight         float64                                      `json:"weight" default:"0"`
+	Height         float64                                      `json:"height" default:"0"`
 	Age            int                                          `json:"age" validate:"required,min=1,max=120"`
 	Gender         string                                       `json:"gender" validate:"required"`
-	Neck           float64                                      `json:"neck" default:"0"`          // default:"0" is not working
-	Waist          float64                                      `json:"waist" default:"0"`         // default:"0" is not working
-	Hip            float64                                      `json:"hip" default:"0"`           // default:"0" is not working
-	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"0"` // default:"0" is not working
+	Neck           float64                                      `json:"neck" default:"0"`
+	Waist          float64                                      `json:"waist" default:"0"`
+	Hip            float64                                      `json:"hip" default:"0"`
+	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"0"`
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal" default:"maintain"`
 	BMR            float64                                      `json:"bmr" default:"0"`
 	Macronutrients userFitnessPreferenceEnums.Macronutrients    `json:"macronutrients" default:"0"`
