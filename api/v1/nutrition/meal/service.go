@@ -207,10 +207,12 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string, userid string) 
 	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "carb", Value: doc.Carb},
-			{Key: "protein", Value: doc.Protein},
-			{Key: "fat", Value: doc.Fat},
+			{Key: "description", Value: doc.Description},
+			{Key: "category", Value: doc.Category},
+			{Key: "image", Value: doc.Image},
 			{Key: "calories", Value: doc.Calories},
+			{Key: "nutrients", Value: doc.Nutrients},
+			{Key: "ingredients", Value: doc.Ingredients},
 			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
