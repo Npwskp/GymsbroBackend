@@ -3260,17 +3260,6 @@ const docTemplate = `{
                 "ActivityExtraActive"
             ]
         },
-        "userFitnessPreferenceEnums.CalPerActivity": {
-            "type": "object",
-            "properties": {
-                "activityName": {
-                    "type": "string"
-                },
-                "calories": {
-                    "type": "number"
-                }
-            }
-        },
         "userFitnessPreferenceEnums.CarbPreferenceType": {
             "type": "string",
             "enum": [
@@ -3287,14 +3276,8 @@ const docTemplate = `{
         "userFitnessPreferenceEnums.EnergyConsumptionPlan": {
             "type": "object",
             "properties": {
-                "activityLevel": {
+                "activity_level": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
-                },
-                "allActivityCaloriesPerDay": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/userFitnessPreferenceEnums.CalPerActivity"
-                    }
                 },
                 "bmr": {
                     "type": "number"

@@ -23,6 +23,7 @@ type User struct {
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal" default:"maintain"`
 	Macronutrients *userFitnessPreferenceEnums.Macronutrients   `json:"macronutrients" bson:"macronutrients"`
 	BMR            float64                                      `json:"bmr" default:"0"`
+	BMI            float64                                      `json:"bmi" default:"0"`
 	OAuthProvider  string                                       `json:"oauth_provider,omitempty" bson:"oauth_provider,omitempty"`
 	OAuthID        string                                       `json:"oauth_id,omitempty" bson:"oauth_id,omitempty"`
 	Picture        string                                       `json:"picture,omitempty" bson:"picture,omitempty"`
@@ -57,6 +58,14 @@ func CreateUserModel(user *CreateUserDto) *User {
 			model.Height,
 			model.Age,
 			model.Gender,
+		)
+	}
+
+	// Calculate BMI if possible
+	if model.Weight > 0 && model.Height > 0 {
+		model.BMI = userFitnessPreferenceEnums.CalculateBMI(
+			model.Weight,
+			model.Height,
 		)
 	}
 

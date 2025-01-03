@@ -101,10 +101,6 @@ func (us *UserService) GetUserByOAuthID(oauthid string) (*User, error) {
 }
 
 func (us *UserService) GetUserEnergyConsumePlan(id string) (*userFitnessPreferenceEnums.EnergyConsumptionPlan, error) {
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
 	user, err := us.GetUser(id)
 	if err != nil {
 		return nil, err
@@ -114,26 +110,7 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*userFitnessPreferen
 		return nil, err
 	}
 
-	planResponse, err := userFitnessPreferenceEnums.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
-	if err != nil {
-		return nil, err
-	}
-
-	update := bson.D{
-		{Key: "$set", Value: bson.D{
-			{Key: "bmr", Value: planResponse.BMR},
-			{Key: "updated_at", Value: time.Now()},
-		}},
-	}
-
-	filter := bson.D{{Key: "_id", Value: oid}}
-
-	_, err = us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return nil, err
-	}
-
-	return planResponse, nil
+	return userFitnessPreferenceEnums.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
 }
 
 func (us *UserService) DeleteUser(id string) error {
@@ -203,7 +180,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		return nil, err
 	}
 
-	// Create a temporary user with the updated values to check if BMR can be calculated
+	// Create a temporary user with the updated values to check if BMR and BMI can be calculated
 	tempUser := &User{
 		Weight: function.Coalesce(doc.Weight, user.Weight).(float64),
 		Height: function.Coalesce(doc.Height, user.Height).(float64),
@@ -211,8 +188,8 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		Gender: function.Coalesce(doc.Gender, user.Gender).(string),
 	}
 
-	// Calculate new BMR if possible
-	calculateAndUpdateBMR(tempUser)
+	// Calculate new BMR and BMI if possible
+	calculateAndUpdateBMIAndBMR(tempUser)
 
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
@@ -227,6 +204,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 			{Key: "goal", Value: function.Coalesce(doc.Goal, user.Goal)},
 			{Key: "macronutrients", Value: function.Coalesce(doc.Macronutrients, user.Macronutrients)},
 			{Key: "bmr", Value: tempUser.BMR}, // Use the newly calculated BMR
+			{Key: "bmi", Value: tempUser.BMI}, // Use the newly calculated BMI
 			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
@@ -236,12 +214,10 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		return nil, err
 	}
 
-	// Check if any document was modified
 	if result.ModifiedCount == 0 {
 		return nil, errors.New("no user found for the given ID")
 	}
 
-	// Retrieve the updated document
 	filter = bson.D{{Key: "_id", Value: oid}}
 	UpdatedUser := &User{}
 	updatedRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
@@ -318,6 +294,24 @@ func calculateAndUpdateBMR(user *User) {
 			user.Height,
 			user.Age,
 			user.Gender,
+		)
+	}
+}
+
+func calculateAndUpdateBMIAndBMR(user *User) {
+	if canCalculateBMR(user) {
+		user.BMR = userFitnessPreferenceEnums.CalculateBMR(
+			user.Weight,
+			user.Height,
+			user.Age,
+			user.Gender,
+		)
+	}
+
+	if user.Weight > 0 && user.Height > 0 {
+		user.BMI = userFitnessPreferenceEnums.CalculateBMI(
+			user.Weight,
+			user.Height,
 		)
 	}
 }

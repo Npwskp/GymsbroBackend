@@ -694,13 +694,6 @@ definitions:
     - ActivityModerate
     - ActivityVeryActive
     - ActivityExtraActive
-  userFitnessPreferenceEnums.CalPerActivity:
-    properties:
-      activityName:
-        type: string
-      calories:
-        type: number
-    type: object
   userFitnessPreferenceEnums.CarbPreferenceType:
     enum:
     - moderate_carb
@@ -713,12 +706,8 @@ definitions:
     - CarbHigh
   userFitnessPreferenceEnums.EnergyConsumptionPlan:
     properties:
-      activityLevel:
+      activity_level:
         $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
-      allActivityCaloriesPerDay:
-        items:
-          $ref: '#/definitions/userFitnessPreferenceEnums.CalPerActivity'
-        type: array
       bmr:
         type: number
       goal:
