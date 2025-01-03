@@ -537,7 +537,7 @@ definitions:
       email:
         type: string
       gender:
-        type: string
+        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
       goal:
         allOf:
         - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
@@ -585,7 +585,7 @@ definitions:
       bmr:
         type: number
       gender:
-        type: string
+        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
       goal:
         $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       height:
@@ -622,6 +622,9 @@ definitions:
         maximum: 120
         minimum: 1
         type: integer
+      bmi:
+        default: 0
+        type: number
       bmr:
         default: 0
         type: number
@@ -631,7 +634,7 @@ definitions:
       email:
         type: string
       gender:
-        type: string
+        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
       goal:
         allOf:
         - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
@@ -717,6 +720,14 @@ definitions:
           $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
         type: array
     type: object
+  userFitnessPreferenceEnums.GenderType:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - GenderMale
+    - GenderFemale
   userFitnessPreferenceEnums.GoalType:
     enum:
     - maintain
@@ -2020,6 +2031,26 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update first login status
+      tags:
+      - users
+  /user/genders:
+    get:
+      consumes:
+      - application/json
+      description: Get all available gender types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all genders
       tags:
       - users
   /user/goals:

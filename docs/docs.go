@@ -1684,6 +1684,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/genders": {
+            "get": {
+                "description": "Get all available gender types",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all genders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/user/goals": {
             "get": {
                 "description": "Get all goals",
@@ -3041,7 +3071,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
                 },
                 "goal": {
                     "default": "maintain",
@@ -3103,7 +3133,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
                 },
                 "goal": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
@@ -3168,6 +3198,10 @@ const docTemplate = `{
                     "maximum": 120,
                     "minimum": 1
                 },
+                "bmi": {
+                    "type": "number",
+                    "default": 0
+                },
                 "bmr": {
                     "type": "number",
                     "default": 0
@@ -3180,7 +3214,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
                 },
                 "goal": {
                     "default": "maintain",
@@ -3292,6 +3326,17 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "userFitnessPreferenceEnums.GenderType": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female"
+            ],
+            "x-enum-varnames": [
+                "GenderMale",
+                "GenderFemale"
+            ]
         },
         "userFitnessPreferenceEnums.GoalType": {
             "type": "string",

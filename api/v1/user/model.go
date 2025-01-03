@@ -15,7 +15,7 @@ type User struct {
 	Weight         float64                                      `json:"weight" default:"0"`
 	Height         float64                                      `json:"height" default:"0"`
 	Age            int                                          `json:"age" validate:"required,min=1,max=120"`
-	Gender         string                                       `json:"gender" validate:"required"`
+	Gender         userFitnessPreferenceEnums.GenderType        `json:"gender" validate:"required"`
 	Neck           float64                                      `json:"neck" default:"0"`
 	Waist          float64                                      `json:"waist" default:"0"`
 	Hip            float64                                      `json:"hip" default:"0"`

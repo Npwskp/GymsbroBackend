@@ -185,7 +185,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		Weight: function.Coalesce(doc.Weight, user.Weight).(float64),
 		Height: function.Coalesce(doc.Height, user.Height).(float64),
 		Age:    function.Coalesce(doc.Age, user.Age).(int),
-		Gender: function.Coalesce(doc.Gender, user.Gender).(string),
+		Gender: function.Coalesce(doc.Gender, user.Gender).(userFitnessPreferenceEnums.GenderType),
 	}
 
 	// Calculate new BMR and BMI if possible

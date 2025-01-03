@@ -13,6 +13,9 @@ type GoalType string
 // CarbPreferenceType represents the carb preference enum
 type CarbPreferenceType string
 
+// GenderType represents the gender enum
+type GenderType string
+
 const (
 	// Activity Levels
 	ActivitySedentary     ActivityLevelType = "sedentary"
@@ -30,6 +33,10 @@ const (
 	CarbModerate CarbPreferenceType = "moderate_carb"
 	CarbLow      CarbPreferenceType = "low_carb"
 	CarbHigh     CarbPreferenceType = "high_carb"
+
+	// Genders
+	GenderMale   GenderType = "male"
+	GenderFemale GenderType = "female"
 )
 
 // Replace the slice variables with functions that return all possible values
@@ -59,6 +66,13 @@ func GetAllCarbPreferences() []CarbPreferenceType {
 	}
 }
 
+func GetAllGenders() []GenderType {
+	return []GenderType{
+		GenderMale,
+		GenderFemale,
+	}
+}
+
 // Update the struct to use the new types
 type EnergyConsumptionPlan struct {
 	BMR            float64           `json:"bmr"`
@@ -80,12 +94,14 @@ type Macronutrients struct {
 	Carbs          float64            `json:"carbs"`
 }
 
-func CalculateBMR(weight float64, height float64, age int, gender string) float64 {
-	if gender == "male" {
+func CalculateBMR(weight float64, height float64, age int, gender GenderType) float64 {
+	if gender == GenderMale {
 		return (10 * weight) + (6.25 * height) - (5 * float64(age)) + 5
-	} else {
+	} else if gender == GenderFemale {
 		return (10 * weight) + (6.25 * height) - (5 * float64(age)) - 161
 	}
+
+	return 0
 }
 
 func CalculateBMI(weight float64, height float64) float64 {
@@ -158,7 +174,7 @@ func CalculateMacronutrients(calories float64) []*Macronutrients {
 	return macros
 }
 
-func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender string, activityLevel ActivityLevelType, goal GoalType) (*EnergyConsumptionPlan, error) {
+func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender GenderType, activityLevel ActivityLevelType, goal GoalType) (*EnergyConsumptionPlan, error) {
 	bmr := CalculateBMR(weight, height, age, gender)
 
 	caloriesPerDay := CalculateCaloriesPerDay(bmr, activityLevel)

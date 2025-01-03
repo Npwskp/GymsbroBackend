@@ -143,6 +143,19 @@ func (uc *UserController) GetAllCarbPreferences(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(carbPreferences)
 }
 
+// @Summary		Get all genders
+// @Description	Get all available gender types
+// @Tags		users
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	userFitnessPreferenceEnums.GenderType
+// @Failure		400	{object} Error
+// @Router		/user/genders [get]
+func (uc *UserController) GetAllGenders(c *fiber.Ctx) error {
+	genders := userFitnessPreferenceEnums.GetAllGenders()
+	return c.Status(fiber.StatusOK).JSON(genders)
+}
+
 // @Summary		Delete a user
 // @Description	Delete a user
 // @Tags		users
@@ -259,6 +272,7 @@ func (uc *UserController) Handle() {
 	g.Get("/activitylevels", uc.GetAllActivityLevels)
 	g.Get("/goals", uc.GetAllGoals)
 	g.Get("/carbpreferences", uc.GetAllCarbPreferences)
+	g.Get("/genders", uc.GetAllGenders)
 	g.Delete("/me", uc.DeleteUserHandler)
 	g.Patch("/body", uc.UpdateBody)
 	g.Patch("/usepass", uc.UpdateUsernamePassword)
