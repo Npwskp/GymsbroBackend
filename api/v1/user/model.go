@@ -21,7 +21,7 @@ type User struct {
 	Hip            float64                                      `json:"hip" default:"0"`
 	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"0"`
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal" default:"maintain"`
-	Macronutrients userFitnessPreferenceEnums.Macronutrients    `json:"macronutrients" default:"0"`
+	Macronutrients *userFitnessPreferenceEnums.Macronutrients   `json:"macronutrients" bson:"macronutrients"`
 	BMR            float64                                      `json:"bmr" default:"0"`
 	OAuthProvider  string                                       `json:"oauth_provider,omitempty" bson:"oauth_provider,omitempty"`
 	OAuthID        string                                       `json:"oauth_id,omitempty" bson:"oauth_id,omitempty"`

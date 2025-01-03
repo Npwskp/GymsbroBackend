@@ -527,9 +527,9 @@ definitions:
   user.CreateUserDto:
     properties:
       activityLevel:
-        default: 0
-        description: default:"0" is not working
-        type: integer
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+        default: "0"
       age:
         maximum: 120
         minimum: 1
@@ -538,17 +538,18 @@ definitions:
         type: string
       gender:
         type: string
+      goal:
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
+        default: maintain
       height:
         default: 0
-        description: default:"0" is not working
         type: number
       hip:
         default: 0
-        description: default:"0" is not working
         type: number
       neck:
         default: 0
-        description: default:"0" is not working
         type: number
       oauth_id:
         type: string
@@ -564,11 +565,9 @@ definitions:
         type: string
       waist:
         default: 0
-        description: default:"0" is not working
         type: number
       weight:
         default: 0
-        description: default:"0" is not working
         type: number
     required:
     - age
@@ -580,15 +579,21 @@ definitions:
   user.UpdateBodyDto:
     properties:
       activityLevel:
-        type: integer
+        $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
       age:
         type: integer
+      bmr:
+        type: number
       gender:
         type: string
+      goal:
+        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       height:
         type: number
       hip:
         type: number
+      macronutrients:
+        $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
       neck:
         type: number
       waist:
@@ -610,13 +615,16 @@ definitions:
   user.User:
     properties:
       activitylevel:
-        default: 0
-        description: default:"0" is not working
-        type: integer
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+        default: "0"
       age:
         maximum: 120
         minimum: 1
         type: integer
+      bmr:
+        default: 0
+        type: number
       created_at:
         default: "null"
         type: string
@@ -625,24 +633,24 @@ definitions:
       gender:
         type: string
       goal:
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
         default: maintain
-        type: string
       height:
         default: 0
-        description: default:"0" is not working
         type: number
       hip:
         default: 0
-        description: default:"0" is not working
         type: number
       id:
         type: string
       is_first_login:
         default: true
         type: boolean
+      macronutrients:
+        $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
       neck:
         default: 0
-        description: default:"0" is not working
         type: number
       oauth_id:
         type: string
@@ -661,11 +669,9 @@ definitions:
         type: string
       waist:
         default: 0
-        description: default:"0" is not working
         type: number
       weight:
         default: 0
-        description: default:"0" is not working
         type: number
     required:
     - age
@@ -715,6 +721,8 @@ definitions:
         type: array
       bmr:
         type: number
+      goal:
+        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       macronutrients:
         items:
           $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
@@ -734,14 +742,12 @@ definitions:
     properties:
       calories:
         type: number
-      carbPreference:
+      carb_preference:
         $ref: '#/definitions/userFitnessPreferenceEnums.CarbPreferenceType'
       carbs:
         type: number
       fat:
         type: number
-      goal:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       protein:
         type: number
     type: object

@@ -36,6 +36,6 @@ type UpdateBodyDto struct {
 	Hip            float64                                      `json:"hip"`
 	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activityLevel"`
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal"`
-	Macronutrients userFitnessPreferenceEnums.Macronutrients    `json:"macronutrients"`
+	Macronutrients *userFitnessPreferenceEnums.Macronutrients   `json:"macronutrients"`
 	BMR            float64                                      `json:"bmr"`
 }

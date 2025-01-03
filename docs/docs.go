@@ -3025,9 +3025,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "activityLevel": {
-                    "description": "default:\"0\" is not working",
-                    "type": "integer",
-                    "default": 0
+                    "default": "0",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
+                        }
+                    ]
                 },
                 "age": {
                     "type": "integer",
@@ -3040,18 +3043,23 @@ const docTemplate = `{
                 "gender": {
                     "type": "string"
                 },
+                "goal": {
+                    "default": "maintain",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
+                        }
+                    ]
+                },
                 "height": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "hip": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "neck": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
@@ -3073,12 +3081,10 @@ const docTemplate = `{
                     "minLength": 3
                 },
                 "waist": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "weight": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 }
@@ -3088,19 +3094,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "activityLevel": {
-                    "type": "integer"
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
                 },
                 "age": {
                     "type": "integer"
                 },
+                "bmr": {
+                    "type": "number"
+                },
                 "gender": {
                     "type": "string"
+                },
+                "goal": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 },
                 "height": {
                     "type": "number"
                 },
                 "hip": {
                     "type": "number"
+                },
+                "macronutrients": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
                 },
                 "neck": {
                     "type": "number"
@@ -3141,14 +3156,21 @@ const docTemplate = `{
             ],
             "properties": {
                 "activitylevel": {
-                    "description": "default:\"0\" is not working",
-                    "type": "integer",
-                    "default": 0
+                    "default": "0",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
+                        }
+                    ]
                 },
                 "age": {
                     "type": "integer",
                     "maximum": 120,
                     "minimum": 1
+                },
+                "bmr": {
+                    "type": "number",
+                    "default": 0
                 },
                 "created_at": {
                     "type": "string",
@@ -3161,16 +3183,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "goal": {
-                    "type": "string",
-                    "default": "maintain"
+                    "default": "maintain",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
+                        }
+                    ]
                 },
                 "height": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "hip": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
@@ -3181,8 +3205,10 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": true
                 },
+                "macronutrients": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
+                },
                 "neck": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
@@ -3208,12 +3234,10 @@ const docTemplate = `{
                     "minLength": 3
                 },
                 "waist": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "weight": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 }
@@ -3275,6 +3299,9 @@ const docTemplate = `{
                 "bmr": {
                     "type": "number"
                 },
+                "goal": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
+                },
                 "macronutrients": {
                     "type": "array",
                     "items": {
@@ -3302,7 +3329,7 @@ const docTemplate = `{
                 "calories": {
                     "type": "number"
                 },
-                "carbPreference": {
+                "carb_preference": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.CarbPreferenceType"
                 },
                 "carbs": {
@@ -3310,9 +3337,6 @@ const docTemplate = `{
                 },
                 "fat": {
                     "type": "number"
-                },
-                "goal": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 },
                 "protein": {
                     "type": "number"

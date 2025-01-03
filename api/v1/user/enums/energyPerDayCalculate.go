@@ -75,11 +75,11 @@ type CalPerActivity struct {
 }
 
 type Macronutrients struct {
-	CarbPreference CarbPreferenceType
-	Calories       float64
-	Protein        float64
-	Fat            float64
-	Carbs          float64
+	CarbPreference CarbPreferenceType `json:"carb_preference"`
+	Calories       float64            `json:"calories"`
+	Protein        float64            `json:"protein"`
+	Fat            float64            `json:"fat"`
+	Carbs          float64            `json:"carbs"`
 }
 
 func CalculateBMR(weight float64, height float64, age int, gender string) float64 {
