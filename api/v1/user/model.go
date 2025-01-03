@@ -21,8 +21,8 @@ type User struct {
 	Hip            float64                                      `json:"hip" default:"0"`
 	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"0"`
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal" default:"maintain"`
-	BMR            float64                                      `json:"bmr" default:"0"`
 	Macronutrients userFitnessPreferenceEnums.Macronutrients    `json:"macronutrients" default:"0"`
+	BMR            float64                                      `json:"bmr" default:"0"`
 	OAuthProvider  string                                       `json:"oauth_provider,omitempty" bson:"oauth_provider,omitempty"`
 	OAuthID        string                                       `json:"oauth_id,omitempty" bson:"oauth_id,omitempty"`
 	Picture        string                                       `json:"picture,omitempty" bson:"picture,omitempty"`
@@ -32,7 +32,7 @@ type User struct {
 }
 
 func CreateUserModel(user *CreateUserDto) *User {
-	return &User{
+	model := &User{
 		Username:      user.Username,
 		Email:         user.Email,
 		Password:      user.Password,
@@ -48,4 +48,17 @@ func CreateUserModel(user *CreateUserDto) *User {
 		IsFirstLogin:  true,
 		CreatedAt:     time.Now(),
 	}
+
+	// Calculate initial BMR if possible
+	if model.Weight > 0 && model.Height > 0 && model.Age > 0 &&
+		(model.Gender == "male" || model.Gender == "female") {
+		model.BMR = userFitnessPreferenceEnums.CalculateBMR(
+			model.Weight,
+			model.Height,
+			model.Age,
+			model.Gender,
+		)
+	}
+
+	return model
 }
