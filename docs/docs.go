@@ -2331,7 +2331,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
                 },
                 "oauth_id": {
                     "type": "string"

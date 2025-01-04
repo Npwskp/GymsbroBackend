@@ -19,7 +19,7 @@ definitions:
       email:
         type: string
       gender:
-        type: string
+        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
       oauth_id:
         type: string
       oauth_provider:
