@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -110,4 +111,13 @@ func (s *MinioService) DeleteFile(ctx context.Context, bucketName string, object
 	}
 
 	return nil
+}
+
+// GetBaseURL returns the base URL for the MinIO service
+func (s *MinioService) GetBaseURL() string {
+	return os.Getenv("MINIO_ENDPOINT")
+}
+
+func (s *MinioService) GetFullBucketName(bucketName string) string {
+	return fmt.Sprintf("%s-%s", DefaultBucketName, bucketName)
 }
