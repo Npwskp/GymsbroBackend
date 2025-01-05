@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"go.mongodb.org/mongo-driver/bson"
@@ -185,7 +186,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		Weight: function.Coalesce(doc.Weight, user.Weight).(float64),
 		Height: function.Coalesce(doc.Height, user.Height).(float64),
 		Age:    function.Coalesce(doc.Age, user.Age).(int),
-		Gender: function.Coalesce(doc.Gender, user.Gender).(userFitnessPreferenceEnums.GenderType),
+		Gender: function.Coalesce(doc.Gender, user.Gender).(authEnums.GenderType),
 	}
 
 	// Calculate new BMR and BMI if possible

@@ -3,6 +3,7 @@ package auth
 import (
 	"time"
 
+	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/config"
 	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	"github.com/go-playground/validator"
@@ -16,6 +17,19 @@ type AuthController struct {
 }
 
 type Error error
+
+// @Summary		Get all genders
+// @Description	Get all genders
+// @Tags		auth
+// @Accept		json
+// @Produce		json
+// @Success		200	{array}	authEnums.GenderType
+// @Failure		400	{object} Error
+// @Router		/auth/genders [get]
+func (ac *AuthController) GetAllGenders(c *fiber.Ctx) error {
+	genders := authEnums.GetAllGenders()
+	return c.Status(fiber.StatusOK).JSON(genders)
+}
 
 // @Summary		Login
 // @Description	Login
@@ -141,6 +155,7 @@ func (ac *AuthController) PostLogoutHandler(c *fiber.Ctx) error {
 
 func (ac *AuthController) Handle() {
 	g := ac.Instance.Group("/auth")
+	g.Get("/genders", ac.GetAllGenders)
 	g.Post("/login", middleware.CheckNotLoggedIn(), ac.PostLoginHandler)
 	g.Post("/register", middleware.CheckNotLoggedIn(), ac.PostRegisterHandler)
 	g.Post("/logout", middleware.AuthMiddleware(), ac.PostLogoutHandler)

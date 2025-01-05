@@ -19,7 +19,7 @@ definitions:
       email:
         type: string
       gender:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
+        $ref: '#/definitions/authEnums.GenderType'
       oauth_id:
         type: string
       oauth_provider:
@@ -46,6 +46,14 @@ definitions:
       token:
         type: string
     type: object
+  authEnums.GenderType:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - GenderMale
+    - GenderFemale
   exercise.CreateExerciseDto:
     properties:
       description:
@@ -537,7 +545,7 @@ definitions:
       email:
         type: string
       gender:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
+        $ref: '#/definitions/authEnums.GenderType'
       goal:
         allOf:
         - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
@@ -585,7 +593,7 @@ definitions:
       bmr:
         type: number
       gender:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
+        $ref: '#/definitions/authEnums.GenderType'
       goal:
         $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       height:
@@ -634,7 +642,7 @@ definitions:
       email:
         type: string
       gender:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
+        $ref: '#/definitions/authEnums.GenderType'
       goal:
         allOf:
         - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
@@ -720,14 +728,6 @@ definitions:
           $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
         type: array
     type: object
-  userFitnessPreferenceEnums.GenderType:
-    enum:
-    - male
-    - female
-    type: string
-    x-enum-varnames:
-    - GenderMale
-    - GenderFemale
   userFitnessPreferenceEnums.GoalType:
     enum:
     - maintain
@@ -914,6 +914,26 @@ info:
   title: GymsBro API
   version: "1.0"
 paths:
+  /auth/genders:
+    get:
+      consumes:
+      - application/json
+      description: Get all genders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/authEnums.GenderType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all genders
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -2031,26 +2051,6 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update first login status
-      tags:
-      - users
-  /user/genders:
-    get:
-      consumes:
-      - application/json
-      description: Get all available gender types
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/userFitnessPreferenceEnums.GenderType'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get all genders
       tags:
       - users
   /user/goals:

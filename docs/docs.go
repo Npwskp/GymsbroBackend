@@ -15,6 +15,36 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/genders": {
+            "get": {
+                "description": "Get all genders",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get all genders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/authEnums.GenderType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Login",
@@ -1684,36 +1714,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/genders": {
-            "get": {
-                "description": "Get all available gender types",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all genders",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/user/goals": {
             "get": {
                 "description": "Get all goals",
@@ -2331,7 +2331,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
+                    "$ref": "#/definitions/authEnums.GenderType"
                 },
                 "oauth_id": {
                     "type": "string"
@@ -2362,6 +2362,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "authEnums.GenderType": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female"
+            ],
+            "x-enum-varnames": [
+                "GenderMale",
+                "GenderFemale"
+            ]
         },
         "exercise.CreateExerciseDto": {
             "type": "object",
@@ -3071,7 +3082,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
+                    "$ref": "#/definitions/authEnums.GenderType"
                 },
                 "goal": {
                     "default": "maintain",
@@ -3133,7 +3144,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "gender": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
+                    "$ref": "#/definitions/authEnums.GenderType"
                 },
                 "goal": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
@@ -3214,7 +3225,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GenderType"
+                    "$ref": "#/definitions/authEnums.GenderType"
                 },
                 "goal": {
                     "default": "maintain",
@@ -3326,17 +3337,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "userFitnessPreferenceEnums.GenderType": {
-            "type": "string",
-            "enum": [
-                "male",
-                "female"
-            ],
-            "x-enum-varnames": [
-                "GenderMale",
-                "GenderFemale"
-            ]
         },
         "userFitnessPreferenceEnums.GoalType": {
             "type": "string",

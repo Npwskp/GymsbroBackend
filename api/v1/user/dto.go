@@ -1,6 +1,9 @@
 package user
 
-import userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+import (
+	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+)
 
 type CreateUserDto struct {
 	Username      string                                       `json:"username" validate:"required,min=3,max=20"`
@@ -9,7 +12,7 @@ type CreateUserDto struct {
 	Weight        float64                                      `json:"weight" default:"0"`
 	Height        float64                                      `json:"height" default:"0"`
 	Age           int                                          `json:"age" validate:"required,min=1,max=120"`
-	Gender        userFitnessPreferenceEnums.GenderType        `json:"gender" validate:"required"`
+	Gender        authEnums.GenderType                         `json:"gender" validate:"required"`
 	Neck          float64                                      `json:"neck" default:"0"`
 	Waist         float64                                      `json:"waist" default:"0"`
 	Hip           float64                                      `json:"hip" default:"0"`
@@ -30,7 +33,7 @@ type UpdateBodyDto struct {
 	Weight         float64                                      `json:"weight"`
 	Height         float64                                      `json:"height"`
 	Age            int                                          `json:"age"`
-	Gender         userFitnessPreferenceEnums.GenderType        `json:"gender"`
+	Gender         authEnums.GenderType                         `json:"gender"`
 	Neck           float64                                      `json:"neck"`
 	Waist          float64                                      `json:"waist"`
 	Hip            float64                                      `json:"hip"`
