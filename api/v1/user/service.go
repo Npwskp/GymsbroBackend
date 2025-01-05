@@ -267,11 +267,13 @@ func (us *UserService) UpdateFirstLoginStatus(id string) error {
 }
 
 func (us *UserService) UpdateUserPicture(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string) (*User, error) {
-	// Get user first to verify existence
-	_, err := us.GetUser(id)
+	// Get user first to verify existence and get current picture URL
+	user, err := us.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
+
+	oldPictureURL := user.Picture
 
 	ext := strings.ToLower(filepath.Ext(filename))
 	// Generate unique filename using user ID, timestamp, and a random component
@@ -307,6 +309,18 @@ func (us *UserService) UpdateUserPicture(c *fiber.Ctx, id string, file io.Reader
 
 	if result.ModifiedCount == 0 {
 		return nil, errors.New("no user found for the given ID")
+	}
+
+	// Delete old picture after successful upload and update
+	if oldPictureURL != "" {
+		baseURL := strings.Split(oldPictureURL, "?")[0]
+		urlParts := strings.Split(baseURL, us.MinioService.GetFullBucketName(UserPictureBucketName)+"/")
+		if len(urlParts) > 1 {
+			oldObjectName := urlParts[1]
+			if err := us.MinioService.DeleteFile(c.Context(), UserPictureBucketName, oldObjectName); err != nil {
+				fmt.Printf("Warning: Failed to delete old profile picture: %v\n", err)
+			}
+		}
 	}
 
 	// Get updated user
