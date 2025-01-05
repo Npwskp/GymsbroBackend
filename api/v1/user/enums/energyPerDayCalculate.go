@@ -1,7 +1,9 @@
 package userFitnessPreferenceEnums
 
 import (
-	"fmt"
+	"math"
+
+	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 )
 
 // ActivityLevelType represents the activity level enum
@@ -61,10 +63,10 @@ func GetAllCarbPreferences() []CarbPreferenceType {
 
 // Update the struct to use the new types
 type EnergyConsumptionPlan struct {
-	BMR                       float64
-	ActivityLevel             ActivityLevelType
-	AllActivityCaloriesPerDay []*CalPerActivity
-	Macronutrients            []*Macronutrients
+	BMR            float64           `json:"bmr"`
+	ActivityLevel  ActivityLevelType `json:"activity_level"`
+	Goal           GoalType          `json:"goal"`
+	Macronutrients []*Macronutrients `json:"macronutrients"`
 }
 
 type CalPerActivity struct {
@@ -73,151 +75,103 @@ type CalPerActivity struct {
 }
 
 type Macronutrients struct {
-	Goal           GoalType
-	CarbPreference CarbPreferenceType
-	Calories       float64
-	Protein        float64
-	Fat            float64
-	Carbs          float64
+	CarbPreference CarbPreferenceType `json:"carb_preference"`
+	Calories       float64            `json:"calories"`
+	Protein        float64            `json:"protein"`
+	Fat            float64            `json:"fat"`
+	Carbs          float64            `json:"carbs"`
 }
 
-func CalculateBMR(weight float64, height float64, age int, gender string) float64 {
-	if gender == "male" {
+func CalculateBMR(weight float64, height float64, age int, gender authEnums.GenderType) float64 {
+	if gender == authEnums.GenderMale {
 		return (10 * weight) + (6.25 * height) - (5 * float64(age)) + 5
-	} else {
+	} else if gender == authEnums.GenderFemale {
 		return (10 * weight) + (6.25 * height) - (5 * float64(age)) - 161
 	}
+
+	return 0
 }
 
-func CalculateCaloriesPerDay(bmr float64, activityLevel ActivityLevelType) []*CalPerActivity {
-	caloriesPerDay := []*CalPerActivity{}
+func CalculateBMI(weight float64, height float64) float64 {
+	// Convert height from cm to meters
+	heightInMeters := height / 100
+	if heightInMeters == 0 {
+		return 0
+	}
+	return math.Round((weight/(heightInMeters*heightInMeters))*10) / 10
+}
 
-	// Add base BMR
-	caloriesPerDay = append(caloriesPerDay, &CalPerActivity{
-		ActivityName: string(ActivitySedentary),
-		Calories:     bmr,
-	})
+func CalculateCaloriesPerDay(bmr float64, activityLevel ActivityLevelType) float64 {
+	var calories float64
 
-	// Calculate calories for all activity levels
-	activityMultipliers := map[ActivityLevelType]float64{
-		ActivitySedentary:     1.2,
-		ActivityLightlyActive: 1.375,
-		ActivityModerate:      1.55,
-		ActivityVeryActive:    1.725,
-		ActivityExtraActive:   1.9,
+	switch activityLevel {
+	case ActivitySedentary:
+		calories = bmr * 1.2
+	case ActivityLightlyActive:
+		calories = bmr * 1.375
+	case ActivityModerate:
+		calories = bmr * 1.55
+	case ActivityVeryActive:
+		calories = bmr * 1.725
+	case ActivityExtraActive:
+		calories = bmr * 1.9
+	default:
+		calories = bmr
 	}
 
-	for activity, multiplier := range activityMultipliers {
-		caloriesPerDay = append(caloriesPerDay, &CalPerActivity{
-			ActivityName: string(activity),
-			Calories:     bmr * multiplier,
-		})
-	}
-
-	return caloriesPerDay
+	return math.Round(calories)
 }
 
 func CalculateMacronutrients(calories float64) []*Macronutrients {
 	macros := []*Macronutrients{}
 
-	for _, goal := range GetAllGoals() {
-		for _, carbPreference := range GetAllCarbPreferences() {
-			var proteinRatio, fatRatio, carbRatio float64
+	var proteinRatio, fatRatio, carbRatio float64
 
-			switch goal {
-			case GoalMaintain:
-				switch carbPreference {
-				case CarbModerate:
-					// 30/30/40 (protein/fat/carb)
-					proteinRatio = 0.30
-					fatRatio = 0.30
-					carbRatio = 0.40
-				case CarbLow:
-					// 35/35/30
-					proteinRatio = 0.35
-					fatRatio = 0.35
-					carbRatio = 0.30
-				case CarbHigh:
-					// 25/25/50
-					proteinRatio = 0.25
-					fatRatio = 0.25
-					carbRatio = 0.50
-				}
-
-			case GoalCutting:
-				calories = calories - 500
-				switch carbPreference {
-				case CarbModerate:
-					// 40/30/30
-					proteinRatio = 0.40
-					fatRatio = 0.30
-					carbRatio = 0.30
-				case CarbLow:
-					// 45/35/20
-					proteinRatio = 0.45
-					fatRatio = 0.35
-					carbRatio = 0.20
-				case CarbHigh:
-					// 35/25/40
-					proteinRatio = 0.35
-					fatRatio = 0.25
-					carbRatio = 0.40
-				}
-
-			case GoalBulking:
-				calories = calories + 500
-				switch carbPreference {
-				case CarbModerate:
-					// 25/25/50
-					proteinRatio = 0.25
-					fatRatio = 0.25
-					carbRatio = 0.50
-				case CarbLow:
-					// 30/35/35
-					proteinRatio = 0.30
-					fatRatio = 0.35
-					carbRatio = 0.35
-				case CarbHigh:
-					// 20/20/60
-					proteinRatio = 0.20
-					fatRatio = 0.20
-					carbRatio = 0.60
-				}
-			}
-
-			proteinCals := calories * proteinRatio
-			fatCals := calories * fatRatio
-			carbsCals := calories * carbRatio
-
-			macros = append(macros, &Macronutrients{
-				Goal:           goal,
-				CarbPreference: carbPreference,
-				Calories:       calories,
-				Protein:        proteinCals / 4,
-				Fat:            fatCals / 9,
-				Carbs:          carbsCals / 4,
-			})
+	for _, carbPreference := range GetAllCarbPreferences() {
+		switch carbPreference {
+		case CarbModerate:
+			// 30/35/35 (protein/fat/carb)
+			proteinRatio = 0.30
+			fatRatio = 0.35
+			carbRatio = 0.35
+		case CarbLow:
+			// 40/40/20
+			proteinRatio = 0.40
+			fatRatio = 0.40
+			carbRatio = 0.20
+		case CarbHigh:
+			// 30/20/50
+			proteinRatio = 0.30
+			fatRatio = 0.20
+			carbRatio = 0.50
 		}
+
+		proteinCals := calories * proteinRatio
+		fatCals := calories * fatRatio
+		carbsCals := calories * carbRatio
+
+		macros = append(macros, &Macronutrients{
+			CarbPreference: carbPreference,
+			Calories:       math.Round(calories),
+			Protein:        math.Round(proteinCals / 4),
+			Fat:            math.Round(fatCals / 9),
+			Carbs:          math.Round(carbsCals / 4),
+		})
 	}
 
 	return macros
 }
 
-func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender string, activityLevel int, goal string) (*EnergyConsumptionPlan, error) {
+func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender authEnums.GenderType, activityLevel ActivityLevelType, goal GoalType) (*EnergyConsumptionPlan, error) {
 	bmr := CalculateBMR(weight, height, age, gender)
-	allActivityLevels := GetAllActivityLevels()
-	if activityLevel < 0 || activityLevel >= len(allActivityLevels) {
-		return nil, fmt.Errorf("invalid activity level index")
-	}
 
-	selectedActivity := allActivityLevels[activityLevel]
-	allActivityCaloriesPerDay := CalculateCaloriesPerDay(bmr, selectedActivity)
-	macronutrients := CalculateMacronutrients(bmr)
+	caloriesPerDay := CalculateCaloriesPerDay(bmr, activityLevel)
+	macronutrients := CalculateMacronutrients(caloriesPerDay)
 
 	return &EnergyConsumptionPlan{
-		BMR:                       bmr,
-		ActivityLevel:             selectedActivity,
-		AllActivityCaloriesPerDay: allActivityCaloriesPerDay,
-		Macronutrients:            macronutrients,
+		BMR:            bmr,
+		ActivityLevel:  activityLevel,
+		Goal:           goal,
+		Macronutrients: macronutrients,
 	}, nil
 }

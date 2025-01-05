@@ -15,6 +15,36 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/genders": {
+            "get": {
+                "description": "Get all genders",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get all genders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/authEnums.GenderType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Login",
@@ -176,6 +206,233 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/exercise.Exercise"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise-log": {
+            "get": {
+                "description": "Get all exercise logs for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exerciseLogs"
+                ],
+                "summary": "Get user logs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exerciseLog.ExerciseLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Log a completed exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exerciseLogs"
+                ],
+                "summary": "Create exercise log",
+                "parameters": [
+                    {
+                        "description": "Exercise Log",
+                        "name": "log",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/exerciseLog.CreateExerciseLogDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/exerciseLog.ExerciseLog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise-log/exercise/{exerciseId}": {
+            "get": {
+                "description": "Get logs for a specific exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exerciseLogs"
+                ],
+                "summary": "Get exercise logs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "exerciseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exerciseLog.ExerciseLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise-log/range": {
+            "get": {
+                "description": "Get exercise logs within a date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exerciseLogs"
+                ],
+                "summary": "Get logs by date range",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "startDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "endDate",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exerciseLog.ExerciseLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise-log/{id}": {
+            "put": {
+                "description": "Update an existing exercise log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exerciseLogs"
+                ],
+                "summary": "Update exercise log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Log ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated Log",
+                        "name": "log",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/exerciseLog.UpdateExerciseLogDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/exerciseLog.ExerciseLog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an exercise log",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exerciseLogs"
+                ],
+                "summary": "Delete exercise log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Log ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -931,233 +1188,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/log": {
-            "get": {
-                "description": "Get all exercise logs for a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "exerciseLogs"
-                ],
-                "summary": "Get user logs",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/exerciseLog.ExerciseLog"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
-            "post": {
-                "description": "Log a completed exercise",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "exerciseLogs"
-                ],
-                "summary": "Create exercise log",
-                "parameters": [
-                    {
-                        "description": "Exercise Log",
-                        "name": "log",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/exerciseLog.CreateExerciseLogDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/exerciseLog.ExerciseLog"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/log/exercise/{exerciseId}": {
-            "get": {
-                "description": "Get logs for a specific exercise",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "exerciseLogs"
-                ],
-                "summary": "Get exercise logs",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Exercise ID",
-                        "name": "exerciseId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/exerciseLog.ExerciseLog"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/log/range": {
-            "get": {
-                "description": "Get exercise logs within a date range",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "exerciseLogs"
-                ],
-                "summary": "Get logs by date range",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Start Date (YYYY-MM-DD)",
-                        "name": "startDate",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "End Date (YYYY-MM-DD)",
-                        "name": "endDate",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/exerciseLog.ExerciseLog"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/log/{id}": {
-            "put": {
-                "description": "Update an existing exercise log",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "exerciseLogs"
-                ],
-                "summary": "Update exercise log",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Log ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated Log",
-                        "name": "log",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/exerciseLog.UpdateExerciseLogDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/exerciseLog.ExerciseLog"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete an exercise log",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "exerciseLogs"
-                ],
-                "summary": "Delete exercise log",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Log ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {}
                     }
                 }
@@ -2301,7 +2331,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/authEnums.GenderType"
                 },
                 "oauth_id": {
                     "type": "string"
@@ -2332,6 +2362,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "authEnums.GenderType": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female"
+            ],
+            "x-enum-varnames": [
+                "GenderMale",
+                "GenderFemale"
+            ]
         },
         "exercise.CreateExerciseDto": {
             "type": "object",
@@ -3025,9 +3066,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "activityLevel": {
-                    "description": "default:\"0\" is not working",
-                    "type": "integer",
-                    "default": 0
+                    "default": "0",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
+                        }
+                    ]
                 },
                 "age": {
                     "type": "integer",
@@ -3038,20 +3082,25 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/authEnums.GenderType"
+                },
+                "goal": {
+                    "default": "maintain",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
+                        }
+                    ]
                 },
                 "height": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "hip": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "neck": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
@@ -3073,12 +3122,10 @@ const docTemplate = `{
                     "minLength": 3
                 },
                 "waist": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "weight": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 }
@@ -3088,19 +3135,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "activityLevel": {
-                    "type": "integer"
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
                 },
                 "age": {
                     "type": "integer"
                 },
+                "bmr": {
+                    "type": "number"
+                },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/authEnums.GenderType"
+                },
+                "goal": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 },
                 "height": {
                     "type": "number"
                 },
                 "hip": {
                     "type": "number"
+                },
+                "macronutrients": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
                 },
                 "neck": {
                     "type": "number"
@@ -3141,14 +3197,25 @@ const docTemplate = `{
             ],
             "properties": {
                 "activitylevel": {
-                    "description": "default:\"0\" is not working",
-                    "type": "integer",
-                    "default": 0
+                    "default": "0",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
+                        }
+                    ]
                 },
                 "age": {
                     "type": "integer",
                     "maximum": 120,
                     "minimum": 1
+                },
+                "bmi": {
+                    "type": "number",
+                    "default": 0
+                },
+                "bmr": {
+                    "type": "number",
+                    "default": 0
                 },
                 "created_at": {
                     "type": "string",
@@ -3158,19 +3225,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "$ref": "#/definitions/authEnums.GenderType"
                 },
                 "goal": {
-                    "type": "string",
-                    "default": "maintain"
+                    "default": "maintain",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
+                        }
+                    ]
                 },
                 "height": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "hip": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
@@ -3181,8 +3250,10 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": true
                 },
+                "macronutrients": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
+                },
                 "neck": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
@@ -3208,12 +3279,10 @@ const docTemplate = `{
                     "minLength": 3
                 },
                 "waist": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 },
                 "weight": {
-                    "description": "default:\"0\" is not working",
                     "type": "number",
                     "default": 0
                 }
@@ -3236,17 +3305,6 @@ const docTemplate = `{
                 "ActivityExtraActive"
             ]
         },
-        "userFitnessPreferenceEnums.CalPerActivity": {
-            "type": "object",
-            "properties": {
-                "activityName": {
-                    "type": "string"
-                },
-                "calories": {
-                    "type": "number"
-                }
-            }
-        },
         "userFitnessPreferenceEnums.CarbPreferenceType": {
             "type": "string",
             "enum": [
@@ -3263,17 +3321,14 @@ const docTemplate = `{
         "userFitnessPreferenceEnums.EnergyConsumptionPlan": {
             "type": "object",
             "properties": {
-                "activityLevel": {
+                "activity_level": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
-                },
-                "allActivityCaloriesPerDay": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/userFitnessPreferenceEnums.CalPerActivity"
-                    }
                 },
                 "bmr": {
                     "type": "number"
+                },
+                "goal": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 },
                 "macronutrients": {
                     "type": "array",
@@ -3302,7 +3357,7 @@ const docTemplate = `{
                 "calories": {
                     "type": "number"
                 },
-                "carbPreference": {
+                "carb_preference": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.CarbPreferenceType"
                 },
                 "carbs": {
@@ -3310,9 +3365,6 @@ const docTemplate = `{
                 },
                 "fat": {
                     "type": "number"
-                },
-                "goal": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 },
                 "protein": {
                     "type": "number"

@@ -19,7 +19,7 @@ definitions:
       email:
         type: string
       gender:
-        type: string
+        $ref: '#/definitions/authEnums.GenderType'
       oauth_id:
         type: string
       oauth_provider:
@@ -46,6 +46,14 @@ definitions:
       token:
         type: string
     type: object
+  authEnums.GenderType:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - GenderMale
+    - GenderFemale
   exercise.CreateExerciseDto:
     properties:
       description:
@@ -527,9 +535,9 @@ definitions:
   user.CreateUserDto:
     properties:
       activityLevel:
-        default: 0
-        description: default:"0" is not working
-        type: integer
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+        default: "0"
       age:
         maximum: 120
         minimum: 1
@@ -537,18 +545,19 @@ definitions:
       email:
         type: string
       gender:
-        type: string
+        $ref: '#/definitions/authEnums.GenderType'
+      goal:
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
+        default: maintain
       height:
         default: 0
-        description: default:"0" is not working
         type: number
       hip:
         default: 0
-        description: default:"0" is not working
         type: number
       neck:
         default: 0
-        description: default:"0" is not working
         type: number
       oauth_id:
         type: string
@@ -564,11 +573,9 @@ definitions:
         type: string
       waist:
         default: 0
-        description: default:"0" is not working
         type: number
       weight:
         default: 0
-        description: default:"0" is not working
         type: number
     required:
     - age
@@ -580,15 +587,21 @@ definitions:
   user.UpdateBodyDto:
     properties:
       activityLevel:
-        type: integer
+        $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
       age:
         type: integer
+      bmr:
+        type: number
       gender:
-        type: string
+        $ref: '#/definitions/authEnums.GenderType'
+      goal:
+        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       height:
         type: number
       hip:
         type: number
+      macronutrients:
+        $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
       neck:
         type: number
       waist:
@@ -610,39 +623,45 @@ definitions:
   user.User:
     properties:
       activitylevel:
-        default: 0
-        description: default:"0" is not working
-        type: integer
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+        default: "0"
       age:
         maximum: 120
         minimum: 1
         type: integer
+      bmi:
+        default: 0
+        type: number
+      bmr:
+        default: 0
+        type: number
       created_at:
         default: "null"
         type: string
       email:
         type: string
       gender:
-        type: string
+        $ref: '#/definitions/authEnums.GenderType'
       goal:
+        allOf:
+        - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
         default: maintain
-        type: string
       height:
         default: 0
-        description: default:"0" is not working
         type: number
       hip:
         default: 0
-        description: default:"0" is not working
         type: number
       id:
         type: string
       is_first_login:
         default: true
         type: boolean
+      macronutrients:
+        $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
       neck:
         default: 0
-        description: default:"0" is not working
         type: number
       oauth_id:
         type: string
@@ -661,11 +680,9 @@ definitions:
         type: string
       waist:
         default: 0
-        description: default:"0" is not working
         type: number
       weight:
         default: 0
-        description: default:"0" is not working
         type: number
     required:
     - age
@@ -688,13 +705,6 @@ definitions:
     - ActivityModerate
     - ActivityVeryActive
     - ActivityExtraActive
-  userFitnessPreferenceEnums.CalPerActivity:
-    properties:
-      activityName:
-        type: string
-      calories:
-        type: number
-    type: object
   userFitnessPreferenceEnums.CarbPreferenceType:
     enum:
     - moderate_carb
@@ -707,14 +717,12 @@ definitions:
     - CarbHigh
   userFitnessPreferenceEnums.EnergyConsumptionPlan:
     properties:
-      activityLevel:
+      activity_level:
         $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
-      allActivityCaloriesPerDay:
-        items:
-          $ref: '#/definitions/userFitnessPreferenceEnums.CalPerActivity'
-        type: array
       bmr:
         type: number
+      goal:
+        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       macronutrients:
         items:
           $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
@@ -734,14 +742,12 @@ definitions:
     properties:
       calories:
         type: number
-      carbPreference:
+      carb_preference:
         $ref: '#/definitions/userFitnessPreferenceEnums.CarbPreferenceType'
       carbs:
         type: number
       fat:
         type: number
-      goal:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       protein:
         type: number
     type: object
@@ -908,6 +914,26 @@ info:
   title: GymsBro API
   version: "1.0"
 paths:
+  /auth/genders:
+    get:
+      consumes:
+      - application/json
+      description: Get all genders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/authEnums.GenderType'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all genders
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -1020,6 +1046,158 @@ paths:
       summary: Create an exercise
       tags:
       - exercises
+  /exercise-log:
+    get:
+      consumes:
+      - application/json
+      description: Get all exercise logs for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseLog.ExerciseLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get user logs
+      tags:
+      - exerciseLogs
+    post:
+      consumes:
+      - application/json
+      description: Log a completed exercise
+      parameters:
+      - description: Exercise Log
+        in: body
+        name: log
+        required: true
+        schema:
+          $ref: '#/definitions/exerciseLog.CreateExerciseLogDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/exerciseLog.ExerciseLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Create exercise log
+      tags:
+      - exerciseLogs
+  /exercise-log/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exercise log
+      parameters:
+      - description: Log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Delete exercise log
+      tags:
+      - exerciseLogs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing exercise log
+      parameters:
+      - description: Log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Log
+        in: body
+        name: log
+        required: true
+        schema:
+          $ref: '#/definitions/exerciseLog.UpdateExerciseLogDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exerciseLog.ExerciseLog'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update exercise log
+      tags:
+      - exerciseLogs
+  /exercise-log/exercise/{exerciseId}:
+    get:
+      consumes:
+      - application/json
+      description: Get logs for a specific exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: exerciseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseLog.ExerciseLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get exercise logs
+      tags:
+      - exerciseLogs
+  /exercise-log/range:
+    get:
+      consumes:
+      - application/json
+      description: Get exercise logs within a date range
+      parameters:
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseLog.ExerciseLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get logs by date range
+      tags:
+      - exerciseLogs
   /exercise/{id}:
     delete:
       consumes:
@@ -1526,158 +1704,6 @@ paths:
       summary: Get ingredients by user
       tags:
       - ingredient
-  /log:
-    get:
-      consumes:
-      - application/json
-      description: Get all exercise logs for a user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exerciseLog.ExerciseLog'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get user logs
-      tags:
-      - exerciseLogs
-    post:
-      consumes:
-      - application/json
-      description: Log a completed exercise
-      parameters:
-      - description: Exercise Log
-        in: body
-        name: log
-        required: true
-        schema:
-          $ref: '#/definitions/exerciseLog.CreateExerciseLogDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/exerciseLog.ExerciseLog'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Create exercise log
-      tags:
-      - exerciseLogs
-  /log/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete an exercise log
-      parameters:
-      - description: Log ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Delete exercise log
-      tags:
-      - exerciseLogs
-    put:
-      consumes:
-      - application/json
-      description: Update an existing exercise log
-      parameters:
-      - description: Log ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Updated Log
-        in: body
-        name: log
-        required: true
-        schema:
-          $ref: '#/definitions/exerciseLog.UpdateExerciseLogDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/exerciseLog.ExerciseLog'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Update exercise log
-      tags:
-      - exerciseLogs
-  /log/exercise/{exerciseId}:
-    get:
-      consumes:
-      - application/json
-      description: Get logs for a specific exercise
-      parameters:
-      - description: Exercise ID
-        in: path
-        name: exerciseId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exerciseLog.ExerciseLog'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get exercise logs
-      tags:
-      - exerciseLogs
-  /log/range:
-    get:
-      consumes:
-      - application/json
-      description: Get exercise logs within a date range
-      parameters:
-      - description: Start Date (YYYY-MM-DD)
-        in: query
-        name: startDate
-        required: true
-        type: string
-      - description: End Date (YYYY-MM-DD)
-        in: query
-        name: endDate
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/exerciseLog.ExerciseLog'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get logs by date range
-      tags:
-      - exerciseLogs
   /meal:
     post:
       consumes:

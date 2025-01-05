@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
+	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,6 +33,10 @@ type IUserService interface {
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 	model := CreateUserModel(user)
+
+	// Calculate BMR if possible
+	calculateAndUpdateBMR(model)
+
 	find := bson.D{{Key: "email", Value: user.Email}}
 	check, err := us.DB.Collection("users").CountDocuments(context.Background(), find)
 	if err != nil {
@@ -103,27 +107,8 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*userFitnessPreferen
 		return nil, err
 	}
 
-	var missingFields []string
-	if user.Weight == 0 {
-		missingFields = append(missingFields, "Weight")
-	}
-	if user.Height == 0 {
-		missingFields = append(missingFields, "Height")
-	}
-	if user.Age == 0 {
-		missingFields = append(missingFields, "Age")
-	}
-	if user.Gender == "" {
-		missingFields = append(missingFields, "Gender")
-	}
-	if user.ActivityLevel == 0 {
-		missingFields = append(missingFields, "ActivityLevel")
-	}
-	if user.Goal == "" {
-		missingFields = append(missingFields, "Goal")
-	}
-	if len(missingFields) > 0 {
-		return nil, errors.New("missing fields for energy consume plan calculation: " + strings.Join(missingFields, ", "))
+	if err := validateUserForEnergyPlan(user); err != nil {
+		return nil, err
 	}
 
 	return userFitnessPreferenceEnums.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
@@ -189,12 +174,24 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	filter := bson.D{{Key: "_id", Value: oid}}
 	user, err := us.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(user.Weight, "(", doc.Weight, ")")
+
+	// Create a temporary user with the updated values to check if BMR and BMI can be calculated
+	tempUser := &User{
+		Weight: function.Coalesce(doc.Weight, user.Weight).(float64),
+		Height: function.Coalesce(doc.Height, user.Height).(float64),
+		Age:    function.Coalesce(doc.Age, user.Age).(int),
+		Gender: function.Coalesce(doc.Gender, user.Gender).(authEnums.GenderType),
+	}
+
+	// Calculate new BMR and BMI if possible
+	calculateAndUpdateBMIAndBMR(tempUser)
+
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "weight", Value: function.Coalesce(doc.Weight, user.Weight)},
@@ -205,20 +202,23 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 			{Key: "waist", Value: function.Coalesce(doc.Waist, user.Waist)},
 			{Key: "hip", Value: function.Coalesce(doc.Hip, user.Hip)},
 			{Key: "activitylevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
+			{Key: "goal", Value: function.Coalesce(doc.Goal, user.Goal)},
+			{Key: "macronutrients", Value: function.Coalesce(doc.Macronutrients, user.Macronutrients)},
+			{Key: "bmr", Value: tempUser.BMR}, // Use the newly calculated BMR
+			{Key: "bmi", Value: tempUser.BMI}, // Use the newly calculated BMI
 			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
+
 	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if any document was modified
 	if result.ModifiedCount == 0 {
 		return nil, errors.New("no user found for the given ID")
 	}
 
-	// Retrieve the updated document
 	filter = bson.D{{Key: "_id", Value: oid}}
 	UpdatedUser := &User{}
 	updatedRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
@@ -253,4 +253,66 @@ func (us *UserService) UpdateFirstLoginStatus(id string) error {
 	}
 
 	return nil
+}
+
+func validateUserForEnergyPlan(user *User) error {
+	var missingFields []string
+	if user.Weight == 0 {
+		missingFields = append(missingFields, "Weight")
+	}
+	if user.Height == 0 {
+		missingFields = append(missingFields, "Height")
+	}
+	if user.Age == 0 {
+		missingFields = append(missingFields, "Age")
+	}
+	if user.Gender == "" {
+		missingFields = append(missingFields, "Gender")
+	}
+	if user.ActivityLevel == "" {
+		missingFields = append(missingFields, "ActivityLevel")
+	}
+	if user.Goal == "" {
+		missingFields = append(missingFields, "Goal")
+	}
+	if len(missingFields) > 0 {
+		return errors.New("missing fields for energy consume plan calculation: " + strings.Join(missingFields, ", "))
+	}
+	return nil
+}
+
+func canCalculateBMR(user *User) bool {
+	return user.Weight > 0 &&
+		user.Height > 0 &&
+		user.Age > 0 &&
+		(user.Gender == "male" || user.Gender == "female")
+}
+
+func calculateAndUpdateBMR(user *User) {
+	if canCalculateBMR(user) {
+		user.BMR = userFitnessPreferenceEnums.CalculateBMR(
+			user.Weight,
+			user.Height,
+			user.Age,
+			user.Gender,
+		)
+	}
+}
+
+func calculateAndUpdateBMIAndBMR(user *User) {
+	if canCalculateBMR(user) {
+		user.BMR = userFitnessPreferenceEnums.CalculateBMR(
+			user.Weight,
+			user.Height,
+			user.Age,
+			user.Gender,
+		)
+	}
+
+	if user.Weight > 0 && user.Height > 0 {
+		user.BMI = userFitnessPreferenceEnums.CalculateBMI(
+			user.Weight,
+			user.Height,
+		)
+	}
 }
