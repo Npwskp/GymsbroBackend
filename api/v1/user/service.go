@@ -274,8 +274,9 @@ func (us *UserService) UpdateUserPicture(c *fiber.Ctx, id string, file io.Reader
 	}
 
 	ext := strings.ToLower(filepath.Ext(filename))
-	// Generate unique filename using user ID and timestamp
-	objectName := fmt.Sprintf("users/%s/profile%s", id, ext)
+	// Generate unique filename using user ID, timestamp, and a random component
+	timestamp := time.Now().UnixNano()
+	objectName := fmt.Sprintf("users/%s/profile_%d%s", id, timestamp, ext)
 
 	// Upload to MinIO
 	err = us.MinioService.UploadFile(c.Context(), file, UserPictureBucketName, objectName, contentType)
