@@ -237,7 +237,7 @@ func (uc *UserController) UpdateBody(c *fiber.Ctx) error {
 // @Produce     json
 // @Success     204
 // @Failure     400 {object} Error
-// @Router      /user/first-login [put]
+// @Router      /user/first-login [patch]
 func (uc *UserController) UpdateFirstLoginStatus(c *fiber.Ctx) error {
 	id := function.GetUserIDFromContext(c)
 	err := uc.Service.UpdateFirstLoginStatus(id)
