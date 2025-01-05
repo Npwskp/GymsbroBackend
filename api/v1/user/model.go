@@ -20,7 +20,7 @@ type User struct {
 	Neck           float64                                      `json:"neck" default:"0"`
 	Waist          float64                                      `json:"waist" default:"0"`
 	Hip            float64                                      `json:"hip" default:"0"`
-	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"0"`
+	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"sedentary"`
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal" default:"maintain"`
 	Macronutrients *userFitnessPreferenceEnums.Macronutrients   `json:"macronutrients" bson:"macronutrients"`
 	BMR            float64                                      `json:"bmr" default:"0"`
