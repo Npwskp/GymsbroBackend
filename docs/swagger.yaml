@@ -304,6 +304,17 @@ definitions:
     required:
     - date
     type: object
+  foodlog.DailyNutrientResponse:
+    properties:
+      calories:
+        type: number
+      date:
+        type: string
+      nutrients:
+        items:
+          $ref: '#/definitions/types.Nutrient'
+        type: array
+    type: object
   foodlog.FoodLog:
     properties:
       created_at:
@@ -537,7 +548,7 @@ definitions:
       activityLevel:
         allOf:
         - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
-        default: "0"
+        default: sedentary
       age:
         maximum: 120
         minimum: 1
@@ -625,7 +636,7 @@ definitions:
       activitylevel:
         allOf:
         - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
-        default: "0"
+        default: sedentary
       age:
         maximum: 120
         minimum: 1
@@ -1474,6 +1485,33 @@ paths:
           description: Bad Request
           schema: {}
       summary: Update a food log
+      tags:
+      - foodlog
+  /foodlog/nutrients/{date}:
+    get:
+      consumes:
+      - application/json
+      description: Calculate total nutrients and calories for a specific date
+      parameters:
+      - description: Date (YYYY-MM-DD)
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/foodlog.DailyNutrientResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Calculate daily nutrients
       tags:
       - foodlog
   /foodlog/user:

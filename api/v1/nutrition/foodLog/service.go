@@ -2,8 +2,12 @@ package foodlog
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,6 +24,7 @@ type IFoodLogService interface {
 	GetFoodLogByUserDate(userid string, date string) (*FoodLog, error)
 	DeleteFoodLog(id string, userid string) error
 	UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid string) (*FoodLog, error)
+	CalculateDailyNutrients(date string, userid string) (*DailyNutrientResponse, error)
 }
 
 func (fs *FoodLogService) AddMealToFoodLog(foodlog *AddMealToFoodLogDto, userid string) (*FoodLog, error) {
@@ -156,4 +161,66 @@ func (fs *FoodLogService) UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid
 		return nil, err
 	}
 	return foodlog, nil
+}
+
+func (fs *FoodLogService) CalculateDailyNutrients(date string, userid string) (*DailyNutrientResponse, error) {
+	// Get food log for the specified date
+	foodLog, err := fs.GetFoodLogByUserDate(userid, date)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Return zero values if no food log exists
+			return &DailyNutrientResponse{
+				Date:      date,
+				Calories:  0,
+				Nutrients: []types.Nutrient{},
+			}, nil
+		}
+		return nil, fmt.Errorf("error fetching food log: %w", err)
+	}
+
+	// Initialize meal service
+	mealService := &meal.MealService{DB: fs.DB}
+
+	totalCalories := 0.0
+	totalNutrients := make(map[string]types.Nutrient)
+
+	// Calculate nutrients for each meal in the food log
+	for _, mealID := range foodLog.Meals {
+		meal, err := mealService.GetMeal(mealID, userid)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching meal %s: %w", mealID, err)
+		}
+
+		// Add calories
+		totalCalories += meal.Calories
+
+		// Combine nutrients
+		for _, nutrient := range meal.Nutrients {
+			if existing, ok := totalNutrients[nutrient.Name]; ok {
+				// Update existing nutrient
+				roundedAmount, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", existing.Amount+nutrient.Amount), 64)
+				existing.Amount = roundedAmount
+				totalNutrients[nutrient.Name] = existing
+			} else {
+				// Add new nutrient
+				totalNutrients[nutrient.Name] = types.Nutrient{
+					Name:   nutrient.Name,
+					Amount: nutrient.Amount,
+					Unit:   nutrient.Unit,
+				}
+			}
+		}
+	}
+
+	// Convert nutrients map to slice
+	nutrientValues := make([]types.Nutrient, 0, len(totalNutrients))
+	for _, nutrient := range totalNutrients {
+		nutrientValues = append(nutrientValues, nutrient)
+	}
+
+	return &DailyNutrientResponse{
+		Date:      date,
+		Calories:  totalCalories,
+		Nutrients: nutrientValues,
+	}, nil
 }

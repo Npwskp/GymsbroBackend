@@ -64,6 +64,14 @@ func (m *MockFoodLogService) UpdateFoodLog(doc *foodlog.UpdateFoodLogDto, id str
 	return args.Get(0).(*foodlog.FoodLog), args.Error(1)
 }
 
+func (m *MockFoodLogService) CalculateDailyNutrients(date string, userid string) (*foodlog.DailyNutrientResponse, error) {
+	args := m.Called(date, userid)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*foodlog.DailyNutrientResponse), args.Error(1)
+}
+
 func setupTest() (*fiber.App, *MockFoodLogService) {
 	app := fiber.New()
 	mockService := new(MockFoodLogService)
