@@ -2038,7 +2038,7 @@ paths:
       tags:
       - users
   /user/first-login:
-    put:
+    patch:
       consumes:
       - application/json
       description: Mark user as not first time login
@@ -2104,6 +2104,28 @@ paths:
           description: Bad Request
           schema: {}
       summary: Get a user
+      tags:
+      - users
+  /user/picture:
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Upload and update user's profile picture
+      parameters:
+      - description: Profile picture (jpeg/png)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Update user profile picture
       tags:
       - users
   /user/usepass:

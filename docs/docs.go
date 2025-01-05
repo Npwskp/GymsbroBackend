@@ -1691,7 +1691,7 @@ const docTemplate = `{
             }
         },
         "/user/first-login": {
-            "put": {
+            "patch": {
                 "description": "Mark user as not first time login",
                 "consumes": [
                     "application/json"
@@ -1782,6 +1782,39 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Delete a user",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/user/picture": {
+            "patch": {
+                "description": "Upload and update user's profile picture",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user profile picture",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Profile picture (jpeg/png)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"

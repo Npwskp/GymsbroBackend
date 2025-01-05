@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"log"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/auth"
 	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
+	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
@@ -17,6 +20,12 @@ import (
 
 func InjectApp(app *fiber.App, db *mongo.Database) {
 	api := app.Group("/api/v1")
+
+	// Initialize MinIO dependencies
+	minioDeps, err := minio.InjectDependencies()
+	if err != nil {
+		log.Fatalf("Failed to inject MinIO dependencies: %v", err)
+	}
 
 	// Public routes group (no auth required)
 	public := api.Group("")
@@ -30,7 +39,7 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	protected.Use(middleware.ExtractUserContext())
 
 	// All protected controllers
-	userService := user.UserService{DB: db}
+	userService := user.UserService{DB: db, MinioService: minioDeps.MinioService}
 	userController := user.UserController{Instance: protected, Service: &userService}
 	userController.Handle()
 

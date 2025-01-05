@@ -1,6 +1,11 @@
 package user
 
 import (
+	"bytes"
+	"io"
+	"path/filepath"
+	"strings"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"github.com/go-playground/validator"
@@ -249,6 +254,85 @@ func (uc *UserController) UpdateFirstLoginStatus(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// @Summary     Update user profile picture
+// @Description Upload and update user's profile picture
+// @Tags        users
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       file formData file true "Profile picture (jpeg/png)"
+// @Success     204
+// @Failure     400 {object} Error
+// @Router      /user/picture [patch]
+func (uc *UserController) UpdateUserPicture(c *fiber.Ctx) error {
+	id := function.GetUserIDFromContext(c)
+
+	// Get the file from the request
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "No file uploaded",
+		})
+	}
+
+	// Validate file type (optional but recommended)
+	contentType := file.Header.Get("Content-Type")
+	if contentType != "image/jpeg" && contentType != "image/png" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Only JPEG and PNG files are allowed",
+		})
+	}
+
+	// Validate file size (e.g., max 5MB)
+	if file.Size > 5*1024*1024 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "File size exceeds 5MB limit",
+		})
+	}
+
+	// Open and read the file
+	fileHandle, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Failed to process uploaded file",
+		})
+	}
+	defer fileHandle.Close()
+
+	// Read file contents
+	fileBytes, err := io.ReadAll(fileHandle)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Failed to read file contents",
+		})
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowedExtensions := map[string]string{
+		".jpg":  "image/jpeg",
+		".jpeg": "image/jpeg",
+		".png":  "image/png",
+		".gif":  "image/gif",
+		".webp": "image/webp",
+	}
+
+	contentType, isAllowed := allowedExtensions[ext]
+	if !isAllowed {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Unsupported image format. Allowed formats: JPG, PNG, GIF, WEBP",
+		})
+	}
+
+	// Update the user picture
+	user, err := uc.Service.UpdateUserPicture(c, id, bytes.NewReader(fileBytes), file.Filename, contentType)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(user)
+}
+
 func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/user")
 
@@ -263,4 +347,5 @@ func (uc *UserController) Handle() {
 	g.Patch("/body", uc.UpdateBody)
 	g.Patch("/usepass", uc.UpdateUsernamePassword)
 	g.Patch("/first-login", uc.UpdateFirstLoginStatus)
+	g.Patch("/picture", uc.UpdateUserPicture)
 }

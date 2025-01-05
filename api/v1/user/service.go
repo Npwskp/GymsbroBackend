@@ -3,20 +3,30 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
+	"path/filepath"
 	"strings"
 	"time"
 
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
+	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserService struct {
-	DB *mongo.Database
+	DB           *mongo.Database
+	MinioService minio.MinioService
 }
+
+const (
+	UserPictureBucketName = "user-profile-image"
+)
 
 type IUserService interface {
 	CreateUser(user *CreateUserDto) (*User, error)
@@ -29,6 +39,7 @@ type IUserService interface {
 	UpdateUsernamePassword(doc *UpdateUsernamePasswordDto, id string) (*User, error)
 	UpdateBody(doc *UpdateBodyDto, id string) (*User, error)
 	UpdateFirstLoginStatus(id string) error
+	UpdateUserPicture(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string) (*User, error)
 }
 
 func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
@@ -253,6 +264,57 @@ func (us *UserService) UpdateFirstLoginStatus(id string) error {
 	}
 
 	return nil
+}
+
+func (us *UserService) UpdateUserPicture(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string) (*User, error) {
+	// Get user first to verify existence
+	_, err := us.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	// Generate unique filename using user ID and timestamp
+	objectName := fmt.Sprintf("users/%s/profile%s", id, ext)
+
+	// Upload to MinIO
+	err = us.MinioService.UploadFile(c.Context(), file, UserPictureBucketName, objectName, contentType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload picture: %v", err)
+	}
+
+	// Get the URL of the uploaded file
+	url, err := us.MinioService.GetFileURL(c.Context(), UserPictureBucketName, objectName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get picture URL: %v", err)
+	}
+
+	// Update user's picture URL in database
+	oid, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{Key: "_id", Value: oid}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "picture", Value: url},
+			{Key: "updated_at", Value: time.Now()},
+		}},
+	}
+
+	result, err := us.DB.Collection("users").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.ModifiedCount == 0 {
+		return nil, errors.New("no user found for the given ID")
+	}
+
+	// Get updated user
+	updatedUser := &User{}
+	if err := us.DB.Collection("users").FindOne(context.Background(), filter).Decode(updatedUser); err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
 }
 
 func validateUserForEnergyPlan(user *User) error {
