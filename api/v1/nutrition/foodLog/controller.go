@@ -1,6 +1,8 @@
 package foodlog
 
 import (
+	"time"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -111,6 +113,38 @@ func (fc *FoodLogController) GetFoodLogByUserDate(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(foodlog)
 }
 
+// @Summary     Calculate daily nutrients
+// @Description Calculate total nutrients and calories for a specific date
+// @Tags        foodlog
+// @Accept      json
+// @Produce     json
+// @Param       date path string true "Date (YYYY-MM-DD)"
+// @Success     200  {object} DailyNutrientResponse
+// @Failure     400  {object} Error
+// @Failure     500  {object} Error
+// @Router      /foodlog/nutrients/{date} [get]
+func (fc *FoodLogController) CalculateDailyNutrients(c *fiber.Ctx) error {
+	date := c.Params("date")
+	userid := function.GetUserIDFromContext(c)
+
+	// Validate date format (YYYY-MM-DD)
+	_, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid date format. Please use YYYY-MM-DD",
+		})
+	}
+
+	nutrients, err := fc.Service.CalculateDailyNutrients(date, userid)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(nutrients)
+}
+
 // @Summary		Delete a food log
 // @Description	Delete a food log
 // @Tags		foodlog
@@ -171,6 +205,7 @@ func (fc *FoodLogController) Handle() {
 	g.Get("/user", fc.GetFoodLogByUser)
 	g.Get("/:id", fc.GetFoodLog)
 	g.Get("/user/:date", fc.GetFoodLogByUserDate)
+	g.Get("/nutrients/:date", fc.CalculateDailyNutrients)
 	g.Delete("/:id", fc.DeleteFoodLog)
 	g.Put("/:id", fc.UpdateFoodLog)
 }

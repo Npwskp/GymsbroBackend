@@ -737,6 +737,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/foodlog/nutrients/{date}": {
+            "get": {
+                "description": "Calculate total nutrients and calories for a specific date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "foodlog"
+                ],
+                "summary": "Calculate daily nutrients",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Date (YYYY-MM-DD)",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/foodlog.DailyNutrientResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/foodlog/user": {
             "get": {
                 "description": "Get a food log by user",
@@ -1691,7 +1731,7 @@ const docTemplate = `{
             }
         },
         "/user/first-login": {
-            "put": {
+            "patch": {
                 "description": "Mark user as not first time login",
                 "consumes": [
                     "application/json"
@@ -1782,6 +1822,39 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Delete a user",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/user/picture": {
+            "patch": {
+                "description": "Upload and update user's profile picture",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user profile picture",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Profile picture (jpeg/png)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -2714,6 +2787,23 @@ const docTemplate = `{
                 }
             }
         },
+        "foodlog.DailyNutrientResponse": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "nutrients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Nutrient"
+                    }
+                }
+            }
+        },
         "foodlog.FoodLog": {
             "type": "object",
             "required": [
@@ -3066,7 +3156,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "activityLevel": {
-                    "default": "0",
+                    "default": "sedentary",
                     "allOf": [
                         {
                             "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
@@ -3197,7 +3287,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "activitylevel": {
-                    "default": "0",
+                    "default": "sedentary",
                     "allOf": [
                         {
                             "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
