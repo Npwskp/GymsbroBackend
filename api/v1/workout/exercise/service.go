@@ -96,7 +96,14 @@ func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto, u
 }
 
 func (es *ExerciseService) GetAllExercises(userId string) ([]*Exercise, error) {
-	filter := bson.D{{Key: "userid", Value: userId}}
+	filter := bson.D{
+		{"$or", bson.A{
+			bson.D{{Key: "userid", Value: userId}},
+			bson.D{{Key: "userid", Value: nil}},
+			bson.D{{Key: "userid", Value: ""}},
+		}},
+	}
+
 	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err

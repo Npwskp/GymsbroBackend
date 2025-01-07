@@ -1954,7 +1954,7 @@ paths:
           schema: {}
       summary: Update meal image
       tags:
-      - meal
+      - meals
   /meal/calculate:
     post:
       consumes:

@@ -1643,7 +1643,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "meal"
+                    "meals"
                 ],
                 "summary": "Update meal image",
                 "parameters": [
