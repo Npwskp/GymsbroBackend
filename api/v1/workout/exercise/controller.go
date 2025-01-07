@@ -1,6 +1,8 @@
 package exercise
 
 import (
+	"strings"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/go-playground/validator"
@@ -227,6 +229,55 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(updatedExercise)
 }
 
+// @Summary Update exercise image
+// @Description Update an exercise's image
+// @Tags exercises
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path string true "Exercise ID"
+// @Param file formData file true "Image file"
+// @Success 200 {object} Exercise
+// @Failure 400 {object} Error
+// @Failure 404 {object} Error
+// @Router /exercise/{id}/image [put]
+func (ec *ExerciseController) UpdateExerciseImageHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userId := function.GetUserIDFromContext(c)
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No file uploaded",
+		})
+	}
+
+	// Check file type
+	contentType := file.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "File must be an image",
+		})
+	}
+
+	// Open the file
+	fileContent, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to process file",
+		})
+	}
+	defer fileContent.Close()
+
+	exercise, err := ec.Service.UpdateExerciseImage(c, id, fileContent, file.Filename, contentType, userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(exercise)
+}
+
 func (ec *ExerciseController) Handle() {
 	g := ec.Instance.Group("/exercise")
 
@@ -239,4 +290,5 @@ func (ec *ExerciseController) Handle() {
 	g.Get("/type/:type", ec.GetExerciseByTypeHandler)
 	g.Delete("/:id", ec.DeleteExerciseHandler)
 	g.Put("/:id", ec.UpdateExerciseHandler)
+	g.Put("/:id/image", ec.UpdateExerciseImageHandler)
 }

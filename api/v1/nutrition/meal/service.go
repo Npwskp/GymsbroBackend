@@ -2,7 +2,10 @@ package meal
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -14,11 +17,18 @@ import (
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
+	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	"github.com/Npwskp/GymsbroBackend/api/v1/unit"
+	"github.com/gofiber/fiber/v2"
+)
+
+const (
+	MealImageBucketName = "meal-image"
 )
 
 type MealService struct {
-	DB *mongo.Database
+	DB           *mongo.Database
+	MinioService minio.MinioService
 }
 
 type IMealService interface {
@@ -29,6 +39,7 @@ type IMealService interface {
 	DeleteMeal(id string, userid string) error
 	UpdateMeal(doc *UpdateMealDto, id string, userid string) (*Meal, error)
 	SearchFilteredMeals(filters SearchFilters) ([]*Meal, error)
+	UpdateMealImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Meal, error)
 }
 
 func (ns *MealService) CreateMeal(meal *CreateMealDto, userid string) (*Meal, error) {
@@ -322,4 +333,64 @@ func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, erro
 
 	// Combine both results
 	return append(publicMeals, userMeals...), nil
+}
+
+func (ns *MealService) UpdateMealImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Meal, error) {
+	// Get meal first to verify existence and get current image URL
+	meal, err := ns.GetMeal(id, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	oldImageURL := meal.Image
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	// Generate unique filename
+	timestamp := time.Now().UnixNano()
+	objectName := fmt.Sprintf("meals/%s/image_%d%s", id, timestamp, ext)
+
+	// Upload to MinIO
+	err = ns.MinioService.UploadFile(c.Context(), file, MealImageBucketName, objectName, contentType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload image: %v", err)
+	}
+
+	// Get the URL of the uploaded file
+	url, err := ns.MinioService.GetFileURL(c.Context(), MealImageBucketName, objectName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get image URL: %v", err)
+	}
+
+	// Update meal's image URL in database
+	oid, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userId}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "image", Value: url},
+			{Key: "updated_at", Value: time.Now()},
+		}},
+	}
+
+	result, err := ns.DB.Collection("meal").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.ModifiedCount == 0 {
+		return nil, errors.New("no meal found for the given ID")
+	}
+
+	// Delete old image after successful upload and update
+	if oldImageURL != "" {
+		baseURL := strings.Split(oldImageURL, "?")[0]
+		urlParts := strings.Split(baseURL, ns.MinioService.GetFullBucketName(MealImageBucketName)+"/")
+		if len(urlParts) > 1 {
+			oldObjectName := urlParts[1]
+			if err := ns.MinioService.DeleteFile(c.Context(), MealImageBucketName, oldObjectName); err != nil {
+				fmt.Printf("Warning: Failed to delete old meal image: %v\n", err)
+			}
+		}
+	}
+
+	return ns.GetMeal(id, userId)
 }

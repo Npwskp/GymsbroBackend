@@ -3,6 +3,7 @@ package ingredient_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http/httptest"
 	"testing"
 
@@ -70,6 +71,14 @@ func (m *MockIngredientService) SearchFilteredIngredients(filters ingredient.Sea
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]*ingredient.Ingredient), args.Error(1)
+}
+
+func (m *MockIngredientService) UpdateIngredientImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*ingredient.Ingredient, error) {
+	args := m.Called(c, id, file, filename, contentType, userId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*ingredient.Ingredient), args.Error(1)
 }
 
 func setupTest() (*fiber.App, *MockIngredientService) {

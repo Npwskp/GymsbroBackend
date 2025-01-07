@@ -2,18 +2,28 @@ package ingredient
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"path/filepath"
 	"strings"
 	"time"
 
+	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	IngredientImageBucketName = "ingredient-image"
+)
+
 type IngredientService struct {
-	DB *mongo.Database
+	DB           *mongo.Database
+	MinioService minio.MinioService
 }
 
 type IIngredientService interface {
@@ -23,6 +33,7 @@ type IIngredientService interface {
 	DeleteIngredient(id string, userId string) error
 	UpdateIngredient(doc *UpdateIngredientDto, id string, userId string) (*Ingredient, error)
 	SearchFilteredIngredients(filters SearchFilters) ([]*Ingredient, error)
+	UpdateIngredientImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Ingredient, error)
 }
 
 func (is *IngredientService) CreateIngredient(ingredient *CreateIngredientDto, userId string) (*Ingredient, error) {
@@ -210,4 +221,64 @@ func (is *IngredientService) SearchFilteredIngredients(filters SearchFilters) ([
 
 	// Combine both results
 	return append(publicIngredients, userIngredients...), nil
+}
+
+func (is *IngredientService) UpdateIngredientImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Ingredient, error) {
+	// Get ingredient first to verify existence and get current image URL
+	ingredient, err := is.GetIngredient(id, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	oldImageURL := ingredient.Image
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	// Generate unique filename
+	timestamp := time.Now().UnixNano()
+	objectName := fmt.Sprintf("ingredients/%s/image_%d%s", id, timestamp, ext)
+
+	// Upload to MinIO
+	err = is.MinioService.UploadFile(c.Context(), file, IngredientImageBucketName, objectName, contentType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload image: %v", err)
+	}
+
+	// Get the URL of the uploaded file
+	url, err := is.MinioService.GetFileURL(c.Context(), IngredientImageBucketName, objectName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get image URL: %v", err)
+	}
+
+	// Update ingredient's image URL in database
+	oid, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userId}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "image", Value: url},
+			{Key: "updated_at", Value: time.Now()},
+		}},
+	}
+
+	result, err := is.DB.Collection("ingredient").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.ModifiedCount == 0 {
+		return nil, errors.New("no ingredient found for the given ID")
+	}
+
+	// Delete old image after successful upload and update
+	if oldImageURL != "" {
+		baseURL := strings.Split(oldImageURL, "?")[0]
+		urlParts := strings.Split(baseURL, is.MinioService.GetFullBucketName(IngredientImageBucketName)+"/")
+		if len(urlParts) > 1 {
+			oldObjectName := urlParts[1]
+			if err := is.MinioService.DeleteFile(c.Context(), IngredientImageBucketName, oldObjectName); err != nil {
+				fmt.Printf("Warning: Failed to delete old ingredient image: %v\n", err)
+			}
+		}
+	}
+
+	return is.GetIngredient(id, userId)
 }

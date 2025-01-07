@@ -43,15 +43,15 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	userController := user.UserController{Instance: protected, Service: &userService}
 	userController.Handle()
 
-	exerciseService := exercise.ExerciseService{DB: db}
+	exerciseService := exercise.ExerciseService{DB: db, MinioService: minioDeps.MinioService}
 	exerciseController := exercise.ExerciseController{Instance: protected, Service: &exerciseService}
 	exerciseController.Handle()
 
-	ingredientService := ingredient.IngredientService{DB: db}
+	ingredientService := ingredient.IngredientService{DB: db, MinioService: minioDeps.MinioService}
 	ingredientController := ingredient.IngredientController{Instance: protected, Service: &ingredientService}
 	ingredientController.Handle()
 
-	mealService := meal.MealService{DB: db}
+	mealService := meal.MealService{DB: db, MinioService: minioDeps.MinioService}
 	mealController := meal.MealController{Instance: protected, Service: &mealService}
 	mealController.Handle()
 
