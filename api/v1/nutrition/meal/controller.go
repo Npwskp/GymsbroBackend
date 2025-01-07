@@ -217,7 +217,7 @@ func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 
 // @Summary Update meal image
 // @Description Update a meal's image
-// @Tags meal
+// @Tags meals
 // @Accept multipart/form-data
 // @Produce json
 // @Param id path string true "Meal ID"
