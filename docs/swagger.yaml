@@ -444,6 +444,9 @@ definitions:
         items:
           $ref: '#/definitions/types.Ingredient'
         type: array
+      isQuickAdd:
+        default: false
+        type: boolean
       name:
         type: string
       nutrients:
@@ -478,6 +481,9 @@ definitions:
         items:
           $ref: '#/definitions/types.Ingredient'
         type: array
+      isQuickAdd:
+        default: false
+        type: boolean
       name:
         type: string
       nutrients:

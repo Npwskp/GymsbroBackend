@@ -3145,6 +3145,10 @@
                         "$ref": "#/definitions/types.Ingredient"
                     }
                 },
+                "isQuickAdd": {
+                    "type": "boolean",
+                    "default": false
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3194,6 +3198,10 @@
                     "items": {
                         "$ref": "#/definitions/types.Ingredient"
                     }
+                },
+                "isQuickAdd": {
+                    "type": "boolean",
+                    "default": false
                 },
                 "name": {
                     "type": "string"

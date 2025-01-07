@@ -3147,6 +3147,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/types.Ingredient"
                     }
                 },
+                "isQuickAdd": {
+                    "type": "boolean",
+                    "default": false
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3196,6 +3200,10 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/types.Ingredient"
                     }
+                },
+                "isQuickAdd": {
+                    "type": "boolean",
+                    "default": false
                 },
                 "name": {
                     "type": "string"

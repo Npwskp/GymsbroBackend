@@ -299,6 +299,7 @@ func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, erro
 	if filters.UserID != "" {
 		userQuery = bson.D{{Key: "$and", Value: append(baseConditions, bson.D{
 			{Key: "userid", Value: filters.UserID},
+			{Key: "is_quick_add", Value: false},
 		})}}
 	}
 
