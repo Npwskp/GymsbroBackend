@@ -120,7 +120,7 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 		servingRatio := amountInGrams / 100.0
 
 		// Calculate calories based on the actual amount in grams
-		totalCalories, _ = strconv.ParseFloat(fmt.Sprintf("%.5f", fullIngredient.Calories*servingRatio), 64)
+		totalCalories, _ = strconv.ParseFloat(fmt.Sprintf("%.5f", totalCalories+fullIngredient.Calories*servingRatio), 64)
 
 		// Calculate nutrients based on the actual amount in grams
 		if fullIngredient.Nutrients != nil {

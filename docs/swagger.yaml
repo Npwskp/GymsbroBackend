@@ -1284,6 +1284,38 @@ paths:
       summary: Update an exercise
       tags:
       - exercises
+  /exercise/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an exercise's image
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Update exercise image
+      tags:
+      - exercises
   /exercise/many:
     post:
       consumes:
@@ -1681,6 +1713,38 @@ paths:
       summary: Update an ingredient
       tags:
       - ingredient
+  /ingredient/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an ingredient's image
+      parameters:
+      - description: Ingredient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ingredient.Ingredient'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Update ingredient image
+      tags:
+      - ingredient
   /ingredient/search:
     get:
       consumes:
@@ -1859,6 +1923,38 @@ paths:
       summary: Update a meal
       tags:
       - meals
+  /meal/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update a meal's image
+      parameters:
+      - description: Meal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meal.Meal'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Update meal image
+      tags:
+      - meal
   /meal/calculate:
     post:
       consumes:
