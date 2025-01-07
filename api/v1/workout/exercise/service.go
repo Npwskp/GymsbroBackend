@@ -11,6 +11,7 @@ import (
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
+	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,10 +40,10 @@ type IExerciseService interface {
 
 func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto, userId string) (*Exercise, error) {
 	if exercise.Type == nil {
-		exercise.Type = []string{}
+		exercise.Type = []exerciseEnums.ExerciseType{}
 	}
 	if exercise.Muscle == nil {
-		exercise.Muscle = []string{}
+		exercise.Muscle = []exerciseEnums.MuscleGroup{}
 	}
 
 	// Create exercise with userId
@@ -72,12 +73,21 @@ func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto, u
 	var result []interface{}
 	for _, exercise := range *exercises {
 		if exercise.Type == nil {
-			exercise.Type = []string{}
+			exercise.Type = []exerciseEnums.ExerciseType{}
 		}
 		if exercise.Muscle == nil {
-			exercise.Muscle = []string{}
+			exercise.Muscle = []exerciseEnums.MuscleGroup{}
 		}
-		result = append(result, exercise)
+
+		exerciseDoc := Exercise{
+			UserID:      userId,
+			Name:        exercise.Name,
+			Description: exercise.Description,
+			Type:        exercise.Type,
+			Muscle:      exercise.Muscle,
+			Image:       exercise.Image,
+		}
+		result = append(result, exerciseDoc)
 	}
 	if _, err := es.DB.Collection("exercises").InsertMany(context.Background(), result); err != nil {
 		return nil, err
@@ -132,7 +142,13 @@ func (es *ExerciseService) GetExercise(id string, userId string) (*Exercise, err
 }
 
 func (es *ExerciseService) GetExerciseByType(exerciseType string, userId string) ([]*Exercise, error) {
-	filter := bson.M{"type": bson.M{"$in": []string{exerciseType}}, "userid": userId}
+	// Parse the exercise type string to enum
+	typeEnum, err := exerciseEnums.ParseExerciseType(exerciseType)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"type": bson.M{"$in": []exerciseEnums.ExerciseType{typeEnum}}, "userid": userId}
 	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err

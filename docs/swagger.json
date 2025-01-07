@@ -2605,7 +2605,7 @@
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2614,7 +2614,7 @@
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 }
             }
@@ -2645,7 +2645,7 @@
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2654,7 +2654,7 @@
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 },
                 "updated_at": {
@@ -2677,7 +2677,7 @@
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2686,7 +2686,7 @@
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 }
             }

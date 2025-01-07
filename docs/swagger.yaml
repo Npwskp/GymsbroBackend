@@ -62,13 +62,13 @@ definitions:
         type: string
       muscle:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.MuscleGroup'
         type: array
       name:
         type: string
       type:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.ExerciseType'
         type: array
     required:
     - description
@@ -89,13 +89,13 @@ definitions:
         type: string
       muscle:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.MuscleGroup'
         type: array
       name:
         type: string
       type:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.ExerciseType'
         type: array
       updated_at:
         type: string
@@ -117,13 +117,13 @@ definitions:
         type: string
       muscle:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.MuscleGroup'
         type: array
       name:
         type: string
       type:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.ExerciseType'
         type: array
     type: object
   exerciseEnums.ExerciseType:

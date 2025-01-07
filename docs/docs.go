@@ -2607,7 +2607,7 @@ const docTemplate = `{
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2616,7 +2616,7 @@ const docTemplate = `{
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 }
             }
@@ -2647,7 +2647,7 @@ const docTemplate = `{
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2656,7 +2656,7 @@ const docTemplate = `{
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 },
                 "updated_at": {
@@ -2679,7 +2679,7 @@ const docTemplate = `{
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2688,7 +2688,7 @@ const docTemplate = `{
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 }
             }

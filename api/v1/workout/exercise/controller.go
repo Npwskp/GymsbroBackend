@@ -37,12 +37,12 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
 	for _, t := range exercise.Type {
-		if _, err := exerciseEnums.ParseExerciseType(t); err != nil {
+		if _, err := exerciseEnums.ParseExerciseType(string(t)); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 		}
 	}
 	for _, m := range exercise.Muscle {
-		if _, err := exerciseEnums.ParseMuscleGroup(m); err != nil {
+		if _, err := exerciseEnums.ParseMuscleGroup(string(m)); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
@@ -75,12 +75,12 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 		}
 		for _, t := range exercise.Type {
-			if _, err := exerciseEnums.ParseExerciseType(t); err != nil {
+			if _, err := exerciseEnums.ParseExerciseType(string(t)); err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 			}
 		}
 		for _, m := range exercise.Muscle {
-			if _, err := exerciseEnums.ParseMuscleGroup(m); err != nil {
+			if _, err := exerciseEnums.ParseMuscleGroup(string(m)); err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 			}
 		}
@@ -213,12 +213,12 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
 	for _, t := range exercise.Type {
-		if _, err := exerciseEnums.ParseExerciseType(t); err != nil {
+		if _, err := exerciseEnums.ParseExerciseType(string(t)); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
 		}
 	}
 	for _, m := range exercise.Muscle {
-		if _, err := exerciseEnums.ParseMuscleGroup(m); err != nil {
+		if _, err := exerciseEnums.ParseMuscleGroup(string(m)); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
 		}
 	}
