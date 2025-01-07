@@ -130,12 +130,22 @@ func (es *ExerciseService) GetExercise(id string, userId string) (*Exercise, err
 	if err != nil {
 		return nil, err
 	}
+
+	// Allow access to both user-specific exercises and public exercises (empty or nil userID)
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"userid": userId},
+			{"userid": ""},
+			{"userid": nil},
+		}},
 	}
+
 	exercise := &Exercise{}
 	if err := es.DB.Collection("exercises").FindOne(context.Background(), filter).Decode(exercise); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("exercise not found")
+		}
 		return nil, err
 	}
 	return exercise, nil

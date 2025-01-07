@@ -121,10 +121,19 @@ func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
+
 	exercise, err := ec.Service.GetExercise(id, userId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		if err.Error() == "exercise not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "Exercise not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
+
 	return c.Status(fiber.StatusOK).JSON(exercise)
 }
 
