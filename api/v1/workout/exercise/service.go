@@ -97,10 +97,10 @@ func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto, u
 
 func (es *ExerciseService) GetAllExercises(userId string) ([]*Exercise, error) {
 	filter := bson.D{
-		{"$or", bson.A{
-			bson.D{{Key: "userid", Value: userId}},
-			bson.D{{Key: "userid", Value: nil}},
-			bson.D{{Key: "userid", Value: ""}},
+		{Key: "$or", Value: []bson.M{
+			{"userid": userId},
+			{"userid": ""},
+			{"userid": nil},
 		}},
 	}
 
