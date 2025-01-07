@@ -3,6 +3,7 @@ package meal_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http/httptest"
 	"testing"
 
@@ -71,6 +72,14 @@ func (m *MockMealService) SearchFilteredMeals(filters meal.SearchFilters) ([]*me
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]*meal.Meal), args.Error(1)
+}
+
+func (m *MockMealService) UpdateMealImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*meal.Meal, error) {
+	args := m.Called(c, id, file, filename, contentType, userId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*meal.Meal), args.Error(1)
 }
 
 func setupTest() (*fiber.App, *MockMealService) {

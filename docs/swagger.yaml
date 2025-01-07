@@ -62,13 +62,13 @@ definitions:
         type: string
       muscle:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.MuscleGroup'
         type: array
       name:
         type: string
       type:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.ExerciseType'
         type: array
     required:
     - description
@@ -89,13 +89,13 @@ definitions:
         type: string
       muscle:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.MuscleGroup'
         type: array
       name:
         type: string
       type:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.ExerciseType'
         type: array
       updated_at:
         type: string
@@ -117,13 +117,13 @@ definitions:
         type: string
       muscle:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.MuscleGroup'
         type: array
       name:
         type: string
       type:
         items:
-          type: string
+          $ref: '#/definitions/exerciseEnums.ExerciseType'
         type: array
     type: object
   exerciseEnums.ExerciseType:
@@ -1284,6 +1284,38 @@ paths:
       summary: Update an exercise
       tags:
       - exercises
+  /exercise/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an exercise's image
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/exercise.Exercise'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Update exercise image
+      tags:
+      - exercises
   /exercise/many:
     post:
       consumes:
@@ -1333,16 +1365,19 @@ paths:
       summary: Get all muscle groups
       tags:
       - exercises
-  /exercise/type/{type}:
+  /exercise/search:
     get:
       consumes:
       - application/json
-      description: Get exercises by type
+      description: Search exercises by types and muscle groups
       parameters:
-      - description: Exercise Type
-        in: path
-        name: type
-        required: true
+      - description: Exercise types (comma-separated)
+        in: query
+        name: types
+        type: string
+      - description: Muscle groups (comma-separated)
+        in: query
+        name: muscles
         type: string
       produces:
       - application/json
@@ -1356,7 +1391,7 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      summary: Get exercises by type
+      summary: Search and filter exercises
       tags:
       - exercises
   /exercise/types:
@@ -1681,6 +1716,38 @@ paths:
       summary: Update an ingredient
       tags:
       - ingredient
+  /ingredient/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an ingredient's image
+      parameters:
+      - description: Ingredient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ingredient.Ingredient'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Update ingredient image
+      tags:
+      - ingredient
   /ingredient/search:
     get:
       consumes:
@@ -1857,6 +1924,38 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Update a meal
+      tags:
+      - meals
+  /meal/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update a meal's image
+      parameters:
+      - description: Meal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meal.Meal'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Update meal image
       tags:
       - meals
   /meal/calculate:

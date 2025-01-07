@@ -515,9 +515,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercise/type/{type}": {
+        "/exercise/search": {
             "get": {
-                "description": "Get exercises by type",
+                "description": "Search exercises by types and muscle groups",
                 "consumes": [
                     "application/json"
                 ],
@@ -527,14 +527,19 @@ const docTemplate = `{
                 "tags": [
                     "exercises"
                 ],
-                "summary": "Get exercises by type",
+                "summary": "Search and filter exercises",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Exercise Type",
-                        "name": "type",
-                        "in": "path",
-                        "required": true
+                        "description": "Exercise types (comma-separated)",
+                        "name": "types",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Muscle groups (comma-separated)",
+                        "name": "muscles",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -690,6 +695,53 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise/{id}/image": {
+            "put": {
+                "description": "Update an exercise's image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Update exercise image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/exercise.Exercise"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {}
                     }
                 }
@@ -1233,6 +1285,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/ingredient/{id}/image": {
+            "put": {
+                "description": "Update an ingredient's image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredient"
+                ],
+                "summary": "Update ingredient image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Ingredient ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ingredient.Ingredient"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/meal": {
             "post": {
                 "description": "Create a meal",
@@ -1534,6 +1633,53 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/meal/{id}/image": {
+            "put": {
+                "description": "Update a meal's image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meals"
+                ],
+                "summary": "Update meal image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/meal.Meal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {}
                     }
                 }
@@ -2466,7 +2612,7 @@ const docTemplate = `{
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2475,7 +2621,7 @@ const docTemplate = `{
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 }
             }
@@ -2506,7 +2652,7 @@ const docTemplate = `{
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2515,7 +2661,7 @@ const docTemplate = `{
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 },
                 "updated_at": {
@@ -2538,7 +2684,7 @@ const docTemplate = `{
                 "muscle": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
                     }
                 },
                 "name": {
@@ -2547,7 +2693,7 @@ const docTemplate = `{
                 "type": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
                     }
                 }
             }

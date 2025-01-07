@@ -1,6 +1,8 @@
 package ingredient
 
 import (
+	"strings"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -182,6 +184,55 @@ func (ic *IngredientController) SearchFilteredIngredients(c *fiber.Ctx) error {
 	return c.JSON(ingredients)
 }
 
+// @Summary Update ingredient image
+// @Description Update an ingredient's image
+// @Tags ingredient
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path string true "Ingredient ID"
+// @Param file formData file true "Image file"
+// @Success 200 {object} Ingredient
+// @Failure 400 {object} Error
+// @Failure 404 {object} Error
+// @Router /ingredient/{id}/image [put]
+func (ic *IngredientController) UpdateIngredientImageHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userId := function.GetUserIDFromContext(c)
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No file uploaded",
+		})
+	}
+
+	// Check file type
+	contentType := file.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "File must be an image",
+		})
+	}
+
+	// Open the file
+	fileContent, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to process file",
+		})
+	}
+	defer fileContent.Close()
+
+	ingredient, err := ic.Service.UpdateIngredientImage(c, id, fileContent, file.Filename, contentType, userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(ingredient)
+}
+
 func (ic *IngredientController) Handle() {
 	g := ic.Instance.Group("/ingredient")
 
@@ -191,4 +242,5 @@ func (ic *IngredientController) Handle() {
 	g.Get("/:id", ic.GetIngredient)
 	g.Delete("/:id", ic.DeleteIngredient)
 	g.Put("/:id", ic.UpdateIngredient)
+	g.Put("/:id/image", ic.UpdateIngredientImageHandler)
 }

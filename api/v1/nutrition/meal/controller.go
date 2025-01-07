@@ -1,6 +1,8 @@
 package meal
 
 import (
+	"strings"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
@@ -213,6 +215,55 @@ func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 	return c.JSON(meals)
 }
 
+// @Summary Update meal image
+// @Description Update a meal's image
+// @Tags meals
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path string true "Meal ID"
+// @Param file formData file true "Image file"
+// @Success 200 {object} Meal
+// @Failure 400 {object} Error
+// @Failure 404 {object} Error
+// @Router /meal/{id}/image [put]
+func (mc *MealController) UpdateMealImageHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userId := function.GetUserIDFromContext(c)
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No file uploaded",
+		})
+	}
+
+	// Check file type
+	contentType := file.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "File must be an image",
+		})
+	}
+
+	// Open the file
+	fileContent, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to process file",
+		})
+	}
+	defer fileContent.Close()
+
+	meal, err := mc.Service.UpdateMealImage(c, id, fileContent, file.Filename, contentType, userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(meal)
+}
+
 func (nc *MealController) Handle() {
 	g := nc.Instance.Group("/meal")
 
@@ -223,4 +274,5 @@ func (nc *MealController) Handle() {
 	g.Get("/:id", nc.GetMealHandler)
 	g.Delete("/:id", nc.DeleteMealHandler)
 	g.Put("/:id", nc.UpdateMealHandler)
+	g.Put("/:id/image", nc.UpdateMealImageHandler)
 }
