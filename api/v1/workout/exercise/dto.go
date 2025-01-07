@@ -19,3 +19,9 @@ type UpdateExerciseDto struct {
 	Muscle      []exerciseEnums.MuscleGroup  `json:"muscle"`
 	Image       string                       `json:"image"`
 }
+
+type SearchExerciseFilters struct {
+	Types   string `query:"types"`   // Comma-separated exercise types
+	Muscles string `query:"muscles"` // Comma-separated muscle groups
+	UserID  string
+}

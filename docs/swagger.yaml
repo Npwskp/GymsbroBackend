@@ -1365,16 +1365,19 @@ paths:
       summary: Get all muscle groups
       tags:
       - exercises
-  /exercise/type/{type}:
+  /exercise/search:
     get:
       consumes:
       - application/json
-      description: Get exercises by type
+      description: Search exercises by types and muscle groups
       parameters:
-      - description: Exercise Type
-        in: path
-        name: type
-        required: true
+      - description: Exercise types (comma-separated)
+        in: query
+        name: types
+        type: string
+      - description: Muscle groups (comma-separated)
+        in: query
+        name: muscles
         type: string
       produces:
       - application/json
@@ -1388,7 +1391,7 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      summary: Get exercises by type
+      summary: Search and filter exercises
       tags:
       - exercises
   /exercise/types:

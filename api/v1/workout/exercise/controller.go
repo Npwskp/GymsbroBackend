@@ -128,25 +128,6 @@ func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(exercise)
 }
 
-// @Summary		Get exercises by type
-// @Description	Get exercises by type
-// @Tags		exercises
-// @Accept		json
-// @Produce		json
-// @Param		type path string true "Exercise Type"
-// @Success		200	{object} []Exercise
-// @Failure		400	{object} Error
-// @Router		/exercise/type/{type} [get]
-func (ec *ExerciseController) GetExerciseByTypeHandler(c *fiber.Ctx) error {
-	t := c.Params("type")
-	userId := function.GetUserIDFromContext(c)
-	exercises, err := ec.Service.GetExerciseByType(t, userId)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
-	}
-	return c.Status(fiber.StatusOK).JSON(exercises)
-}
-
 // @Summary		Get all exercise types
 // @Description	Get all exercise types
 // @Tags		exercises
@@ -278,6 +259,49 @@ func (ec *ExerciseController) UpdateExerciseImageHandler(c *fiber.Ctx) error {
 	return c.JSON(exercise)
 }
 
+// @Summary     Search and filter exercises
+// @Description Search exercises by types and muscle groups
+// @Tags        exercises
+// @Accept      json
+// @Produce     json
+// @Param       types query string false "Exercise types (comma-separated)"
+// @Param       muscles query string false "Muscle groups (comma-separated)"
+// @Success     200 {array} Exercise
+// @Failure     400 {object} Error
+// @Router      /exercise/search [get]
+func (ec *ExerciseController) SearchAndFilterExerciseHandler(c *fiber.Ctx) error {
+	filters := SearchExerciseFilters{
+		Types:   c.Query("types"),
+		Muscles: c.Query("muscles"),
+		UserID:  function.GetUserIDFromContext(c),
+	}
+
+	// Convert comma-separated strings to slices
+	var typesList []string
+	var musclesList []string
+
+	if filters.Types != "" {
+		typesList = strings.Split(filters.Types, ",")
+	}
+	if filters.Muscles != "" {
+		musclesList = strings.Split(filters.Muscles, ",")
+	}
+
+	exercises, err := ec.Service.SearchAndFilterExercise(typesList, musclesList, filters.UserID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// Initialize empty slice if exercises is nil
+	if exercises == nil {
+		exercises = []*Exercise{}
+	}
+
+	return c.JSON(exercises)
+}
+
 func (ec *ExerciseController) Handle() {
 	g := ec.Instance.Group("/exercise")
 
@@ -286,8 +310,8 @@ func (ec *ExerciseController) Handle() {
 	g.Get("/", ec.GetExercisesHandler)
 	g.Get("/types", ec.GetAllExerciseTypesHandler)
 	g.Get("/muscles", ec.GetAllMuscleGroupsHandler)
+	g.Get("/search", ec.SearchAndFilterExerciseHandler)
 	g.Get("/:id", ec.GetExerciseHandler)
-	g.Get("/type/:type", ec.GetExerciseByTypeHandler)
 	g.Delete("/:id", ec.DeleteExerciseHandler)
 	g.Put("/:id", ec.UpdateExerciseHandler)
 	g.Put("/:id/image", ec.UpdateExerciseImageHandler)

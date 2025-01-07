@@ -515,9 +515,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercise/type/{type}": {
+        "/exercise/search": {
             "get": {
-                "description": "Get exercises by type",
+                "description": "Search exercises by types and muscle groups",
                 "consumes": [
                     "application/json"
                 ],
@@ -527,14 +527,19 @@ const docTemplate = `{
                 "tags": [
                     "exercises"
                 ],
-                "summary": "Get exercises by type",
+                "summary": "Search and filter exercises",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Exercise Type",
-                        "name": "type",
-                        "in": "path",
-                        "required": true
+                        "description": "Exercise types (comma-separated)",
+                        "name": "types",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Muscle groups (comma-separated)",
+                        "name": "muscles",
+                        "in": "query"
                     }
                 ],
                 "responses": {

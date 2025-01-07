@@ -32,10 +32,10 @@ type IExerciseService interface {
 	CreateManyExercises(exercises *[]CreateExerciseDto, userId string) ([]*Exercise, error)
 	GetAllExercises(userId string) ([]*Exercise, error)
 	GetExercise(id string, userId string) (*Exercise, error)
-	GetExerciseByType(exerciseType string, userId string) ([]*Exercise, error)
 	DeleteExercise(id string, userId string) error
 	UpdateExercise(doc *UpdateExerciseDto, id string, userId string) (*Exercise, error)
 	UpdateExerciseImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Exercise, error)
+	SearchAndFilterExercise(exerciseTypes []string, muscleGroups []string, userId string) ([]*Exercise, error)
 }
 
 func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto, userId string) (*Exercise, error) {
@@ -141,25 +141,6 @@ func (es *ExerciseService) GetExercise(id string, userId string) (*Exercise, err
 	return exercise, nil
 }
 
-func (es *ExerciseService) GetExerciseByType(exerciseType string, userId string) ([]*Exercise, error) {
-	// Parse the exercise type string to enum
-	typeEnum, err := exerciseEnums.ParseExerciseType(exerciseType)
-	if err != nil {
-		return nil, err
-	}
-
-	filter := bson.M{"type": bson.M{"$in": []exerciseEnums.ExerciseType{typeEnum}}, "userid": userId}
-	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	var exercises []*Exercise
-	if err := cursor.All(context.Background(), &exercises); err != nil {
-		return nil, err
-	}
-	return exercises, nil
-}
-
 func (es *ExerciseService) DeleteExercise(id string, userId string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -262,4 +243,64 @@ func (es *ExerciseService) UpdateExerciseImage(c *fiber.Ctx, id string, file io.
 	}
 
 	return es.GetExercise(id, userId)
+}
+
+func (es *ExerciseService) SearchAndFilterExercise(exerciseTypes []string, muscleGroups []string, userId string) ([]*Exercise, error) {
+	// Convert string arrays to enums
+	var typeEnums []exerciseEnums.ExerciseType
+	var muscleEnums []exerciseEnums.MuscleGroup
+
+	// Parse exercise types
+	for _, exerciseType := range exerciseTypes {
+		if exerciseType != "" {
+			typeEnum, err := exerciseEnums.ParseExerciseType(exerciseType)
+			if err != nil {
+				return nil, fmt.Errorf("invalid exercise type: %s", exerciseType)
+			}
+			typeEnums = append(typeEnums, typeEnum)
+		}
+	}
+
+	// Parse muscle groups
+	for _, muscleGroup := range muscleGroups {
+		if muscleGroup != "" {
+			muscleEnum, err := exerciseEnums.ParseMuscleGroup(muscleGroup)
+			if err != nil {
+				return nil, fmt.Errorf("invalid muscle group: %s", muscleGroup)
+			}
+			muscleEnums = append(muscleEnums, muscleEnum)
+		}
+	}
+
+	// Build filter based on provided parameters
+	filter := bson.M{
+		"$or": []bson.M{
+			{"userid": userId},
+			{"userid": ""},
+			{"userid": nil},
+		},
+	}
+
+	// Add type filter if types were provided
+	if len(typeEnums) > 0 {
+		filter["type"] = bson.M{"$in": typeEnums}
+	}
+
+	// Add muscle filter if muscle groups were provided
+	if len(muscleEnums) > 0 {
+		filter["muscle"] = bson.M{"$in": muscleEnums}
+	}
+
+	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var exercises []*Exercise
+	if err := cursor.All(context.Background(), &exercises); err != nil {
+		return nil, err
+	}
+
+	return exercises, nil
 }
