@@ -269,10 +269,11 @@ func (ec *ExerciseController) UpdateExerciseImageHandler(c *fiber.Ctx) error {
 }
 
 // @Summary     Search and filter exercises
-// @Description Search exercises by types and muscle groups
+// @Description Search exercises by name, types and muscle groups
 // @Tags        exercises
 // @Accept      json
 // @Produce     json
+// @Param       query query string false "Search query for exercise name"
 // @Param       types query string false "Exercise types (comma-separated)"
 // @Param       muscles query string false "Muscle groups (comma-separated)"
 // @Success     200 {array} Exercise
@@ -282,6 +283,7 @@ func (ec *ExerciseController) SearchAndFilterExerciseHandler(c *fiber.Ctx) error
 	filters := SearchExerciseFilters{
 		Types:   c.Query("types"),
 		Muscles: c.Query("muscles"),
+		Query:   c.Query("query"),
 		UserID:  function.GetUserIDFromContext(c),
 	}
 
@@ -296,7 +298,7 @@ func (ec *ExerciseController) SearchAndFilterExerciseHandler(c *fiber.Ctx) error
 		musclesList = strings.Split(filters.Muscles, ",")
 	}
 
-	exercises, err := ec.Service.SearchAndFilterExercise(typesList, musclesList, filters.UserID)
+	exercises, err := ec.Service.SearchAndFilterExercise(typesList, musclesList, filters.Query, filters.UserID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),

@@ -517,7 +517,7 @@ const docTemplate = `{
         },
         "/exercise/search": {
             "get": {
-                "description": "Search exercises by types and muscle groups",
+                "description": "Search exercises by name, types and muscle groups",
                 "consumes": [
                     "application/json"
                 ],
@@ -529,6 +529,12 @@ const docTemplate = `{
                 ],
                 "summary": "Search and filter exercises",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query for exercise name",
+                        "name": "query",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "description": "Exercise types (comma-separated)",

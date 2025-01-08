@@ -1375,8 +1375,12 @@ paths:
     get:
       consumes:
       - application/json
-      description: Search exercises by types and muscle groups
+      description: Search exercises by name, types and muscle groups
       parameters:
+      - description: Search query for exercise name
+        in: query
+        name: query
+        type: string
       - description: Exercise types (comma-separated)
         in: query
         name: types

@@ -23,5 +23,6 @@ type UpdateExerciseDto struct {
 type SearchExerciseFilters struct {
 	Types   string `query:"types"`   // Comma-separated exercise types
 	Muscles string `query:"muscles"` // Comma-separated muscle groups
+	Query   string `query:"query"`   // Search query for exercise name
 	UserID  string
 }
