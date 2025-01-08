@@ -707,7 +707,7 @@ const docTemplate = `{
             }
         },
         "/exercise/{id}/image": {
-            "put": {
+            "patch": {
                 "description": "Update an exercise's image",
                 "consumes": [
                     "multipart/form-data"
@@ -1292,7 +1292,7 @@ const docTemplate = `{
             }
         },
         "/ingredient/{id}/image": {
-            "put": {
+            "patch": {
                 "description": "Update an ingredient's image",
                 "consumes": [
                     "multipart/form-data"
@@ -1645,7 +1645,7 @@ const docTemplate = `{
             }
         },
         "/meal/{id}/image": {
-            "put": {
+            "patch": {
                 "description": "Update a meal's image",
                 "consumes": [
                     "multipart/form-data"

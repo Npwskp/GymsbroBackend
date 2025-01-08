@@ -225,7 +225,7 @@ func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 // @Success 200 {object} Meal
 // @Failure 400 {object} Error
 // @Failure 404 {object} Error
-// @Router /meal/{id}/image [put]
+// @Router /meal/{id}/image [patch]
 func (mc *MealController) UpdateMealImageHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -274,5 +274,5 @@ func (nc *MealController) Handle() {
 	g.Get("/:id", nc.GetMealHandler)
 	g.Delete("/:id", nc.DeleteMealHandler)
 	g.Put("/:id", nc.UpdateMealHandler)
-	g.Put("/:id/image", nc.UpdateMealImageHandler)
+	g.Patch("/:id/image", nc.UpdateMealImageHandler)
 }

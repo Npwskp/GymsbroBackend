@@ -194,7 +194,7 @@ func (ic *IngredientController) SearchFilteredIngredients(c *fiber.Ctx) error {
 // @Success 200 {object} Ingredient
 // @Failure 400 {object} Error
 // @Failure 404 {object} Error
-// @Router /ingredient/{id}/image [put]
+// @Router /ingredient/{id}/image [patch]
 func (ic *IngredientController) UpdateIngredientImageHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -242,5 +242,5 @@ func (ic *IngredientController) Handle() {
 	g.Get("/:id", ic.GetIngredient)
 	g.Delete("/:id", ic.DeleteIngredient)
 	g.Put("/:id", ic.UpdateIngredient)
-	g.Put("/:id/image", ic.UpdateIngredientImageHandler)
+	g.Patch("/:id/image", ic.UpdateIngredientImageHandler)
 }

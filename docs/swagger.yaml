@@ -1295,7 +1295,7 @@ paths:
       tags:
       - exercises
   /exercise/{id}/image:
-    put:
+    patch:
       consumes:
       - multipart/form-data
       description: Update an exercise's image
@@ -1731,7 +1731,7 @@ paths:
       tags:
       - ingredient
   /ingredient/{id}/image:
-    put:
+    patch:
       consumes:
       - multipart/form-data
       description: Update an ingredient's image
@@ -1941,7 +1941,7 @@ paths:
       tags:
       - meals
   /meal/{id}/image:
-    put:
+    patch:
       consumes:
       - multipart/form-data
       description: Update a meal's image

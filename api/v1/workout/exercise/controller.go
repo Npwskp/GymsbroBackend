@@ -229,7 +229,7 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 // @Success 200 {object} Exercise
 // @Failure 400 {object} Error
 // @Failure 404 {object} Error
-// @Router /exercise/{id}/image [put]
+// @Router /exercise/{id}/image [patch]
 func (ec *ExerciseController) UpdateExerciseImageHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -325,5 +325,5 @@ func (ec *ExerciseController) Handle() {
 	g.Get("/:id", ec.GetExerciseHandler)
 	g.Delete("/:id", ec.DeleteExerciseHandler)
 	g.Put("/:id", ec.UpdateExerciseHandler)
-	g.Put("/:id/image", ec.UpdateExerciseImageHandler)
+	g.Patch("/:id/image", ec.UpdateExerciseImageHandler)
 }
