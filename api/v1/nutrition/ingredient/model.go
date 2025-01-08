@@ -18,6 +18,7 @@ type Ingredient struct {
 	Nutrients   []types.Nutrient   `json:"nutrients,omitempty"`
 	CreatedAt   time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 	UpdateAt    time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	DeletedAt   time.Time          `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
 func CreateIngredientModel(dto *CreateIngredientDto) *Ingredient {

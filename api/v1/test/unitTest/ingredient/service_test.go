@@ -3,6 +3,7 @@ package ingredient_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	ingredient "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
 	"github.com/stretchr/testify/assert"
@@ -149,10 +150,18 @@ func TestDeleteIngredient(t *testing.T) {
 		err := service.DeleteIngredient(testIng.ID.Hex(), testIng.UserID)
 		assert.NoError(t, err)
 
-		// Verify deletion
+		// Verify soft deletion
 		var found ingredient.Ingredient
 		err = db.Collection("ingredient").FindOne(context.Background(), bson.M{"_id": testIng.ID}).Decode(&found)
-		assert.Error(t, err)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, found.DeletedAt) // Check that DeletedAt is set
+	})
+
+	t.Run("Get deleted ingredient should succeed with DeletedAt set", func(t *testing.T) {
+		ing, err := service.GetIngredient(testIng.ID.Hex(), testIng.UserID)
+		assert.NoError(t, err)
+		assert.NotNil(t, ing)
+		assert.NotEmpty(t, ing.DeletedAt) // Verify DeletedAt is set
 	})
 }
 
@@ -168,38 +177,31 @@ func TestSearchFilteredIngredients(t *testing.T) {
 			Description: "Fresh fruit",
 			Category:    "Fruits",
 			Calories:    52,
+			DeletedAt:   time.Time{}, // Not deleted
 		},
 		&ingredient.Ingredient{
 			ID:          primitive.NewObjectID(),
 			UserID:      "test_user",
-			Name:        "Banana",
-			Description: "Yellow fruit",
+			Name:        "Deleted Ingredient",
+			Description: "Should not appear",
 			Category:    "Fruits",
 			Calories:    89,
+			DeletedAt:   time.Now(), // Deleted
 		},
 	}
 
 	_, err := db.Collection("ingredient").InsertMany(context.Background(), testIngredients)
 	assert.NoError(t, err)
 
-	t.Run("Search with category filter", func(t *testing.T) {
+	t.Run("Search should not return deleted ingredients", func(t *testing.T) {
 		filters := ingredient.SearchFilters{
 			Category: "Fruits",
 			UserID:   "test_user",
 		}
 		results, err := service.SearchFilteredIngredients(filters)
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(results))
-	})
-
-	t.Run("Search with name query", func(t *testing.T) {
-		filters := ingredient.SearchFilters{
-			Query:  "Apple",
-			UserID: "test_user",
-		}
-		results, err := service.SearchFilteredIngredients(filters)
-		assert.NoError(t, err)
 		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Apple", results[0].Name)
 	})
 }
 

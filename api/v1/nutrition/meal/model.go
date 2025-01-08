@@ -24,6 +24,7 @@ type Meal struct {
 	IsQuickAdd      bool               `json:"isQuickAdd" bson:"is_quick_add" default:"false"`
 	CreatedAt       time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
 	UpdatedAt       time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
+	DeletedAt       time.Time          `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
 func CreateMealModel(dto *CreateMealDto) *Meal {

@@ -3049,6 +3049,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "deleted_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -3188,6 +3191,9 @@
                 "created_at": {
                     "type": "string",
                     "default": "null"
+                },
+                "deleted_at": {
+                    "type": "string"
                 },
                 "description": {
                     "type": "string"

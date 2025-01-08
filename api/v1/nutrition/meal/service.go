@@ -183,14 +183,19 @@ func (ns *MealService) GetMeal(id string, userid string) (*Meal, error) {
 	return meal, nil
 }
 
-func (ns *MealService) GetMealByUser(userid string) ([]*Meal, error) {
-	filter := bson.D{{Key: "userid", Value: userid}}
+func (ns *MealService) GetMealByUser(userId string) ([]*Meal, error) {
+	filter := bson.D{
+		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+	}
+
 	cursor, err := ns.DB.Collection("meal").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(context.Background())
-
 	var meals []*Meal
 	if err := cursor.All(context.Background(), &meals); err != nil {
 		return nil, err
@@ -198,15 +203,38 @@ func (ns *MealService) GetMealByUser(userid string) ([]*Meal, error) {
 	return meals, nil
 }
 
-func (ns *MealService) DeleteMeal(id string, userid string) error {
+func (ns *MealService) DeleteMeal(id string, userId string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
-	if _, err := ns.DB.Collection("meal").DeleteOne(context.Background(), filter); err != nil {
+
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+	}
+
+	now := time.Now()
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "deleted_at", Value: now},
+			{Key: "updated_at", Value: now},
+		}},
+	}
+
+	result, err := ns.DB.Collection("meal").UpdateOne(context.Background(), filter, update)
+	if err != nil {
 		return err
 	}
+
+	if result.ModifiedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
 	return nil
 }
 
@@ -234,8 +262,13 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string, userid string) 
 }
 
 func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, error) {
-	// Common filter conditions
-	baseConditions := []bson.D{}
+	// Add not-deleted condition to base conditions
+	baseConditions := []bson.D{
+		{{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}}},
+	}
 
 	// Add name search if query is provided
 	if filters.Query != "" {

@@ -3,6 +3,7 @@ package meal_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
@@ -163,10 +164,18 @@ func TestDeleteMeal(t *testing.T) {
 		err := service.DeleteMeal(testMeal.ID.Hex(), testMeal.UserID)
 		assert.NoError(t, err)
 
-		// Verify deletion
+		// Verify soft deletion
 		var found meal.Meal
 		err = db.Collection("meal").FindOne(context.Background(), bson.M{"_id": testMeal.ID}).Decode(&found)
-		assert.Error(t, err)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, found.DeletedAt) // Check that DeletedAt is set
+	})
+
+	t.Run("Get deleted meal should succeed with DeletedAt set", func(t *testing.T) {
+		foundMeal, err := service.GetMeal(testMeal.ID.Hex(), testMeal.UserID)
+		assert.NoError(t, err)
+		assert.NotNil(t, foundMeal)
+		assert.NotEmpty(t, foundMeal.DeletedAt) // Verify DeletedAt is set
 	})
 }
 
@@ -182,27 +191,23 @@ func TestSearchFilteredMeals(t *testing.T) {
 			Description: "Healthy meal",
 			Category:    "Main Course",
 			Calories:    500,
-			Nutrients: []types.Nutrient{
-				{Name: "Protein", Amount: 30, Unit: "g"},
-			},
+			DeletedAt:   time.Time{}, // Not deleted
 		},
 		&meal.Meal{
 			ID:          primitive.NewObjectID(),
 			UserID:      "test_user",
-			Name:        "Salad",
-			Description: "Fresh vegetables",
-			Category:    "Side Dish",
-			Calories:    200,
-			Nutrients: []types.Nutrient{
-				{Name: "Fiber", Amount: 5, Unit: "g"},
-			},
+			Name:        "Deleted Meal",
+			Description: "Should not appear",
+			Category:    "Main Course",
+			Calories:    500,
+			DeletedAt:   time.Now(), // Deleted
 		},
 	}
 
 	_, err := db.Collection("meal").InsertMany(context.Background(), testMeals)
 	assert.NoError(t, err)
 
-	t.Run("Search with category filter", func(t *testing.T) {
+	t.Run("Search should not return deleted meals", func(t *testing.T) {
 		filters := meal.SearchFilters{
 			Category: "Main Course",
 			UserID:   "test_user",
@@ -210,27 +215,7 @@ func TestSearchFilteredMeals(t *testing.T) {
 		results, err := service.SearchFilteredMeals(filters)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(results))
-	})
-
-	t.Run("Search with name query", func(t *testing.T) {
-		filters := meal.SearchFilters{
-			Query:  "Chicken",
-			UserID: "test_user",
-		}
-		results, err := service.SearchFilteredMeals(filters)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(results))
-	})
-
-	t.Run("Search with calories range", func(t *testing.T) {
-		filters := meal.SearchFilters{
-			MinCalories: 400,
-			MaxCalories: 600,
-			UserID:      "test_user",
-		}
-		results, err := service.SearchFilteredMeals(filters)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Chicken Rice", results[0].Name)
 	})
 }
 

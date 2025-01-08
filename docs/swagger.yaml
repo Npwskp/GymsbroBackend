@@ -376,6 +376,8 @@ definitions:
         type: string
       created_at:
         type: string
+      deleted_at:
+        type: string
       description:
         type: string
       id:
@@ -469,6 +471,8 @@ definitions:
         type: string
       created_at:
         default: "null"
+        type: string
+      deleted_at:
         type: string
       description:
         type: string
