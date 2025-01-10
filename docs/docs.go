@@ -174,6 +174,10 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
                     }
                 }
             },
@@ -209,6 +213,10 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {}
                     }
                 }
@@ -441,6 +449,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/exercise/bodypart": {
+            "get": {
+                "description": "Get all body parts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get all body parts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exerciseEnums.BodyPart"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise/equipment": {
+            "get": {
+                "description": "Get all equipment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get all equipment",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exerciseEnums.Equipment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise/force": {
+            "get": {
+                "description": "Get all force",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get all force",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exerciseEnums.Force"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/exercise/many": {
             "post": {
                 "description": "Create many exercises",
@@ -481,13 +591,17 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
                     }
                 }
             }
         },
-        "/exercise/muscles": {
+        "/exercise/mechanics": {
             "get": {
-                "description": "Get all muscle groups",
+                "description": "Get all mechanics",
                 "consumes": [
                     "application/json"
                 ],
@@ -497,19 +611,23 @@ const docTemplate = `{
                 "tags": [
                     "exercises"
                 ],
-                "summary": "Get all muscle groups",
+                "summary": "Get all mechanics",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/exerciseEnums.MuscleGroup"
+                                "$ref": "#/definitions/exerciseEnums.Mechanics"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {}
                     }
                 }
@@ -537,14 +655,32 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Exercise types (comma-separated)",
-                        "name": "types",
+                        "description": "Equipment types (comma-separated)",
+                        "name": "equipment",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Muscle groups (comma-separated)",
-                        "name": "muscles",
+                        "description": "Mechanics types (comma-separated)",
+                        "name": "mechanics",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Force types (comma-separated)",
+                        "name": "force",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Body parts (comma-separated)",
+                        "name": "body_part",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Target muscles (comma-separated)",
+                        "name": "target_muscle",
                         "in": "query"
                     }
                 ],
@@ -561,13 +697,17 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
                     }
                 }
             }
         },
-        "/exercise/types": {
+        "/exercise/targetmuscle": {
             "get": {
-                "description": "Get all exercise types",
+                "description": "Get all target muscles",
                 "consumes": [
                     "application/json"
                 ],
@@ -577,19 +717,23 @@ const docTemplate = `{
                 "tags": [
                     "exercises"
                 ],
-                "summary": "Get all exercise types",
+                "summary": "Get all target muscles",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/exerciseEnums.ExerciseType"
+                                "$ref": "#/definitions/exerciseEnums.TargetMuscle"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {}
                     }
                 }
@@ -626,6 +770,14 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {}
                     }
                 }
@@ -670,6 +822,14 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
                     }
                 }
             },
@@ -701,6 +861,14 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {}
                     }
                 }
@@ -744,6 +912,10 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {}
                     },
                     "404": {
@@ -2602,32 +2774,53 @@ const docTemplate = `{
         "exercise.CreateExerciseDto": {
             "type": "object",
             "required": [
-                "description",
-                "image",
-                "muscle",
+                "body_part",
+                "equipment",
+                "execution",
+                "force",
+                "mechanics",
                 "name",
-                "type"
+                "preparation",
+                "target_muscle"
             ],
             "properties": {
-                "description": {
-                    "type": "string"
+                "body_part": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exerciseEnums.BodyPart"
+                    }
+                },
+                "equipment": {
+                    "$ref": "#/definitions/exerciseEnums.Equipment"
+                },
+                "execution": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "force": {
+                    "$ref": "#/definitions/exerciseEnums.Force"
                 },
                 "image": {
                     "type": "string"
                 },
-                "muscle": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
-                    }
+                "mechanics": {
+                    "$ref": "#/definitions/exerciseEnums.Mechanics"
                 },
                 "name": {
                     "type": "string"
                 },
-                "type": {
+                "preparation": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
+                        "type": "string"
+                    }
+                },
+                "target_muscle": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exerciseEnums.TargetMuscle"
                     }
                 }
             }
@@ -2635,19 +2828,37 @@ const docTemplate = `{
         "exercise.Exercise": {
             "type": "object",
             "required": [
-                "description",
-                "image",
-                "muscle",
+                "body_part",
+                "equipment",
+                "execution",
+                "force",
+                "mechanics",
                 "name",
-                "type",
+                "preparation",
+                "target_muscle",
                 "userid"
             ],
             "properties": {
+                "body_part": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exerciseEnums.BodyPart"
+                    }
+                },
                 "created_at": {
                     "type": "string"
                 },
-                "description": {
-                    "type": "string"
+                "equipment": {
+                    "$ref": "#/definitions/exerciseEnums.Equipment"
+                },
+                "execution": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "force": {
+                    "$ref": "#/definitions/exerciseEnums.Force"
                 },
                 "id": {
                     "type": "string"
@@ -2655,19 +2866,22 @@ const docTemplate = `{
                 "image": {
                     "type": "string"
                 },
-                "muscle": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
-                    }
+                "mechanics": {
+                    "$ref": "#/definitions/exerciseEnums.Mechanics"
                 },
                 "name": {
                     "type": "string"
                 },
-                "type": {
+                "preparation": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
+                        "type": "string"
+                    }
+                },
+                "target_muscle": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exerciseEnums.TargetMuscle"
                     }
                 },
                 "updated_at": {
@@ -2681,95 +2895,232 @@ const docTemplate = `{
         "exercise.UpdateExerciseDto": {
             "type": "object",
             "properties": {
-                "description": {
-                    "type": "string"
+                "body_part": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exerciseEnums.BodyPart"
+                    }
+                },
+                "equipment": {
+                    "$ref": "#/definitions/exerciseEnums.Equipment"
+                },
+                "execution": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "force": {
+                    "$ref": "#/definitions/exerciseEnums.Force"
                 },
                 "image": {
                     "type": "string"
                 },
-                "muscle": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/exerciseEnums.MuscleGroup"
-                    }
+                "mechanics": {
+                    "$ref": "#/definitions/exerciseEnums.Mechanics"
                 },
                 "name": {
                     "type": "string"
                 },
-                "type": {
+                "preparation": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/exerciseEnums.ExerciseType"
+                        "type": "string"
+                    }
+                },
+                "target_muscle": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exerciseEnums.TargetMuscle"
                     }
                 }
             }
         },
-        "exerciseEnums.ExerciseType": {
+        "exerciseEnums.BodyPart": {
             "type": "string",
             "enum": [
-                "Rest",
-                "Push",
-                "Pull",
-                "Chest",
                 "Back",
-                "Legs",
-                "Shoulders",
-                "Arms",
-                "Abs"
+                "Calves",
+                "Chest",
+                "Forearm",
+                "Hips",
+                "Neck",
+                "Shoulder",
+                "Thighs",
+                "Upper Arms"
             ],
             "x-enum-varnames": [
-                "Rest",
-                "Push",
-                "Pull",
-                "Chest",
                 "Back",
-                "Legs",
-                "Shoulders",
-                "Arms",
-                "Abs"
+                "Calves",
+                "Chest",
+                "Forearm",
+                "Hips",
+                "Neck",
+                "Shoulder",
+                "Thighs",
+                "UpperArms"
             ]
         },
-        "exerciseEnums.MuscleGroup": {
+        "exerciseEnums.Equipment": {
             "type": "string",
             "enum": [
-                "Triceps",
-                "Biceps",
-                "Forearms",
-                "Upper Chest",
-                "Middle Chest",
-                "Lower Chest",
-                "Latissimus",
-                "Trapezius",
-                "Lower Back",
-                "Front Shoulders",
-                "Side Shoulders",
-                "Rear Shoulders",
-                "Abdominal",
-                "Side Abs",
-                "Quads",
-                "Hamstrings",
-                "Calves",
-                "Glutes"
+                "Assisted",
+                "Assisted (machine)",
+                "Assisted (partner)",
+                "Band Resistive",
+                "Band-assisted",
+                "Barbell",
+                "Body Weight",
+                "Cable",
+                "Cable Standing Fly",
+                "Cable (pull side)",
+                "Dumbbell",
+                "Isometric",
+                "Lever",
+                "Lever (plate loaded)",
+                "Lever (selectorized)",
+                "Plyometric",
+                "Self-assisted",
+                "Sled",
+                "Sled (plate loaded)",
+                "Sled (selectorized)",
+                "Smith",
+                "Suspended",
+                "Suspension",
+                "Weighted",
+                "Weighted Chest Dip"
             ],
             "x-enum-varnames": [
-                "Triceps",
-                "Biceps",
-                "Forearms",
-                "UpperChest",
-                "MiddleChest",
-                "LowerChest",
-                "Latissimus",
-                "Trapezius",
-                "LowerBack",
-                "FrontShoulders",
-                "SideShoulders",
-                "RearShoulders",
-                "Abdominal",
-                "SideAbs",
-                "Quads",
+                "Assisted",
+                "AssistedMachine",
+                "AssistedPartner",
+                "BandResistive",
+                "BandAssisted",
+                "Barbell",
+                "BodyWeight",
+                "Cable",
+                "CableStandingFly",
+                "CablePullSide",
+                "Dumbbell",
+                "Isometric",
+                "Lever",
+                "LeverPlateLoaded",
+                "LeverSelectorized",
+                "Plyometric",
+                "SelfAssisted",
+                "Sled",
+                "SledPlateLoaded",
+                "SledSelectorized",
+                "Smith",
+                "Suspended",
+                "Suspension",
+                "Weighted",
+                "WeightedChestDip"
+            ]
+        },
+        "exerciseEnums.Force": {
+            "type": "string",
+            "enum": [
+                "Push",
+                "Pull",
+                "Push \u0026 Pull"
+            ],
+            "x-enum-varnames": [
+                "Push",
+                "Pull",
+                "PushAndPull"
+            ]
+        },
+        "exerciseEnums.Mechanics": {
+            "type": "string",
+            "enum": [
+                "Compound",
+                "Isolated"
+            ],
+            "x-enum-varnames": [
+                "Compound",
+                "Isolated"
+            ]
+        },
+        "exerciseEnums.TargetMuscle": {
+            "type": "string",
+            "enum": [
+                "Adductors",
+                "Anterior Deltoid",
+                "Biceps Brachii",
+                "Brachialis",
+                "Brachioradialis",
+                "Erector Spinae",
+                "Gastrocnemius",
+                "Gluteus Maximus",
                 "Hamstrings",
-                "Calves",
-                "Glutes"
+                "Hip Flexors",
+                "Iliopsoas",
+                "Infraspinatus",
+                "Lateral Deltoid",
+                "Latissimus Dorsi",
+                "Levator Scapulae",
+                "Lower Trapezius",
+                "Middle Trapezius",
+                "Obliques",
+                "Pectoralis Major Clavicular",
+                "Pectoralis Major Sternal",
+                "Pectoralis Minor",
+                "Posterior Deltoid",
+                "Quadratus Lumborum",
+                "Quadriceps",
+                "Rectus Abdominis",
+                "Rhomboids",
+                "Serratus Anterior",
+                "Soleus",
+                "Splenius",
+                "Sternocleidomastoid",
+                "Subscapularis",
+                "Supraspinatus",
+                "Teres Minor",
+                "Tibialis Anterior",
+                "Trapezius",
+                "Triceps Brachii",
+                "Upper Trapezius"
+            ],
+            "x-enum-varnames": [
+                "Adductors",
+                "AnteriorDeltoid",
+                "BicepsBrachii",
+                "Brachialis",
+                "Brachioradialis",
+                "ErectorSpinae",
+                "Gastrocnemius",
+                "GluteusMaximus",
+                "Hamstrings",
+                "HipFlexors",
+                "Iliopsoas",
+                "Infraspinatus",
+                "LateralDeltoid",
+                "LatissimusDorsi",
+                "LevatorScapulae",
+                "LowerTrapezius",
+                "MiddleTrapezius",
+                "Obliques",
+                "PectoralisMajorClav",
+                "PectoralisMajorSternal",
+                "PectoralisMinor",
+                "PosteriorDeltoid",
+                "QuadratusLumborum",
+                "Quadriceps",
+                "RectusAbdominis",
+                "Rhomboids",
+                "SerratusAnterior",
+                "Soleus",
+                "Splenius",
+                "Sternocleidomastoid",
+                "Subscapularis",
+                "Supraspinatus",
+                "TeresMinor",
+                "TibialisAnterior",
+                "Trapezius",
+                "TricepsBrachii",
+                "UpperTrapezius"
             ]
         },
         "exerciseLog.CreateExerciseLogDto": {
