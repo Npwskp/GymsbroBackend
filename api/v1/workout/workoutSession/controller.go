@@ -49,6 +49,42 @@ func (c *WorkoutSessionController) StartSessionHandler(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(session)
 }
 
+// @Summary     Log custom session
+// @Description Create a new workout session with custom start and end times
+// @Tags        workoutSessions
+// @Accept      json
+// @Produce     json
+// @Param       session body LoggedSessionDto true "Logged Session"
+// @Success     201 {object} WorkoutSession
+// @Failure     400 {object} Error
+// @Router      /workout-session/log [post]
+func (c *WorkoutSessionController) LogSessionHandler(ctx *fiber.Ctx) error {
+	userId := function.GetUserIDFromContext(ctx)
+	validate := validator.New()
+	dto := new(LoggedSessionDto)
+
+	if err := ctx.BodyParser(dto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if err := validate.Struct(dto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	session, err := c.Service.LogSession(dto, userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(session)
+}
+
 // @Summary     End workout session
 // @Description End an active workout session
 // @Tags        workoutSessions
@@ -220,6 +256,7 @@ func (c *WorkoutSessionController) Handle() {
 	g := c.Instance.Group("/workout-session")
 
 	g.Post("/", c.StartSessionHandler)
+	g.Post("/log", c.LogSessionHandler)
 	g.Post("/:id/exercise/:exerciseId", c.LogExerciseHandler)
 	g.Get("/", c.GetUserSessionsHandler)
 	g.Get("/:id", c.GetSessionHandler)

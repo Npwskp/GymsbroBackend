@@ -27,6 +27,7 @@ type IWorkoutSessionService interface {
 	GetUserSessions(userId string) ([]*WorkoutSession, error)
 	DeleteSession(id string, userId string) error
 	ReorderExercises(sessionId string, dto *ReorderExercisesDto, userId string) (*WorkoutSession, error)
+	LogSession(dto *LoggedSessionDto, userId string) (*WorkoutSession, error)
 }
 
 func (s *WorkoutSessionService) StartSession(dto *CreateWorkoutSessionDto, userId string) (*WorkoutSession, error) {
@@ -352,4 +353,58 @@ func (s *WorkoutSessionService) ReorderExercises(sessionId string, dto *ReorderE
 	}
 
 	return result, nil
+}
+
+func (s *WorkoutSessionService) LogSession(dto *LoggedSessionDto, userId string) (*WorkoutSession, error) {
+	session := &WorkoutSession{
+		ID:        primitive.NewObjectID(),
+		UserID:    userId,
+		WorkoutID: dto.WorkoutID,
+		Type:      LoggedSession,
+		StartTime: dto.StartTime,
+		EndTime:   dto.EndTime,
+		Status:    dto.Status,
+		Exercises: dto.Exercises,
+		Notes:     dto.Notes,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	// Calculate duration in minutes
+	duration := int(dto.EndTime.Sub(dto.StartTime).Minutes())
+	if duration < 0 {
+		return nil, errors.New("end time must be after start time")
+	}
+	session.Duration = duration
+
+	// Calculate total volume if exercises are provided
+	var totalVolume float64
+	for _, exercise := range dto.Exercises {
+		// Fetch exercise log to get volume
+		if exercise.ExerciseLogID != "" {
+			logOid, err := primitive.ObjectIDFromHex(exercise.ExerciseLogID)
+			if err != nil {
+				return nil, err
+			}
+
+			exerciseLog := &exerciseLog.ExerciseLog{}
+			err = s.DB.Collection("exerciseLog").FindOne(context.Background(), bson.D{
+				{Key: "_id", Value: logOid},
+				{Key: "userId", Value: userId},
+			}).Decode(exerciseLog)
+			if err != nil {
+				return nil, err
+			}
+
+			totalVolume += exerciseLog.TotalVolume
+		}
+	}
+	session.TotalVolume = totalVolume
+
+	_, err := s.DB.Collection("workoutSession").InsertOne(context.Background(), session)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
 }
