@@ -56,138 +56,292 @@ definitions:
     - GenderFemale
   exercise.CreateExerciseDto:
     properties:
-      description:
-        type: string
+      body_part:
+        items:
+          $ref: '#/definitions/exerciseEnums.BodyPart'
+        type: array
+      equipment:
+        $ref: '#/definitions/exerciseEnums.Equipment'
+      execution:
+        items:
+          type: string
+        type: array
+      force:
+        $ref: '#/definitions/exerciseEnums.Force'
       image:
         type: string
-      muscle:
-        items:
-          $ref: '#/definitions/exerciseEnums.MuscleGroup'
-        type: array
+      mechanics:
+        $ref: '#/definitions/exerciseEnums.Mechanics'
       name:
         type: string
-      type:
+      preparation:
         items:
-          $ref: '#/definitions/exerciseEnums.ExerciseType'
+          type: string
+        type: array
+      target_muscle:
+        items:
+          $ref: '#/definitions/exerciseEnums.TargetMuscle'
         type: array
     required:
-    - description
-    - image
-    - muscle
+    - body_part
+    - equipment
+    - execution
+    - force
+    - mechanics
     - name
-    - type
+    - preparation
+    - target_muscle
     type: object
   exercise.Exercise:
     properties:
+      body_part:
+        items:
+          $ref: '#/definitions/exerciseEnums.BodyPart'
+        type: array
       created_at:
         type: string
-      description:
+      deleted_at:
         type: string
+      equipment:
+        $ref: '#/definitions/exerciseEnums.Equipment'
+      execution:
+        items:
+          type: string
+        type: array
+      force:
+        $ref: '#/definitions/exerciseEnums.Force'
       id:
         type: string
       image:
         type: string
-      muscle:
-        items:
-          $ref: '#/definitions/exerciseEnums.MuscleGroup'
-        type: array
+      mechanics:
+        $ref: '#/definitions/exerciseEnums.Mechanics'
       name:
         type: string
-      type:
+      preparation:
         items:
-          $ref: '#/definitions/exerciseEnums.ExerciseType'
+          type: string
+        type: array
+      target_muscle:
+        items:
+          $ref: '#/definitions/exerciseEnums.TargetMuscle'
         type: array
       updated_at:
         type: string
       userid:
         type: string
     required:
-    - description
-    - image
-    - muscle
+    - body_part
+    - equipment
+    - execution
+    - force
+    - mechanics
     - name
-    - type
+    - preparation
+    - target_muscle
     - userid
     type: object
   exercise.UpdateExerciseDto:
     properties:
-      description:
-        type: string
+      body_part:
+        items:
+          $ref: '#/definitions/exerciseEnums.BodyPart'
+        type: array
+      equipment:
+        $ref: '#/definitions/exerciseEnums.Equipment'
+      execution:
+        items:
+          type: string
+        type: array
+      force:
+        $ref: '#/definitions/exerciseEnums.Force'
       image:
         type: string
-      muscle:
-        items:
-          $ref: '#/definitions/exerciseEnums.MuscleGroup'
-        type: array
+      mechanics:
+        $ref: '#/definitions/exerciseEnums.Mechanics'
       name:
         type: string
-      type:
+      preparation:
         items:
-          $ref: '#/definitions/exerciseEnums.ExerciseType'
+          type: string
+        type: array
+      target_muscle:
+        items:
+          $ref: '#/definitions/exerciseEnums.TargetMuscle'
         type: array
     type: object
-  exerciseEnums.ExerciseType:
+  exerciseEnums.BodyPart:
     enum:
-    - Rest
-    - Push
-    - Pull
-    - Chest
     - Back
-    - Legs
-    - Shoulders
-    - Arms
-    - Abs
+    - Calves
+    - Chest
+    - Forearm
+    - Hips
+    - Neck
+    - Shoulder
+    - Thighs
+    - Upper Arms
     type: string
     x-enum-varnames:
-    - Rest
-    - Push
-    - Pull
-    - Chest
     - Back
-    - Legs
-    - Shoulders
-    - Arms
-    - Abs
-  exerciseEnums.MuscleGroup:
-    enum:
-    - Triceps
-    - Biceps
-    - Forearms
-    - Upper Chest
-    - Middle Chest
-    - Lower Chest
-    - Latissimus
-    - Trapezius
-    - Lower Back
-    - Front Shoulders
-    - Side Shoulders
-    - Rear Shoulders
-    - Abdominal
-    - Side Abs
-    - Quads
-    - Hamstrings
     - Calves
-    - Glutes
+    - Chest
+    - Forearm
+    - Hips
+    - Neck
+    - Shoulder
+    - Thighs
+    - UpperArms
+  exerciseEnums.Equipment:
+    enum:
+    - Assisted
+    - Assisted (machine)
+    - Assisted (partner)
+    - Band Resistive
+    - Band-assisted
+    - Barbell
+    - Body Weight
+    - Cable
+    - Cable Standing Fly
+    - Cable (pull side)
+    - Dumbbell
+    - Isometric
+    - Lever
+    - Lever (plate loaded)
+    - Lever (selectorized)
+    - Plyometric
+    - Self-assisted
+    - Sled
+    - Sled (plate loaded)
+    - Sled (selectorized)
+    - Smith
+    - Suspended
+    - Suspension
+    - Weighted
+    - Weighted Chest Dip
     type: string
     x-enum-varnames:
-    - Triceps
-    - Biceps
-    - Forearms
-    - UpperChest
-    - MiddleChest
-    - LowerChest
-    - Latissimus
-    - Trapezius
-    - LowerBack
-    - FrontShoulders
-    - SideShoulders
-    - RearShoulders
-    - Abdominal
-    - SideAbs
-    - Quads
+    - Assisted
+    - AssistedMachine
+    - AssistedPartner
+    - BandResistive
+    - BandAssisted
+    - Barbell
+    - BodyWeight
+    - Cable
+    - CableStandingFly
+    - CablePullSide
+    - Dumbbell
+    - Isometric
+    - Lever
+    - LeverPlateLoaded
+    - LeverSelectorized
+    - Plyometric
+    - SelfAssisted
+    - Sled
+    - SledPlateLoaded
+    - SledSelectorized
+    - Smith
+    - Suspended
+    - Suspension
+    - Weighted
+    - WeightedChestDip
+  exerciseEnums.Force:
+    enum:
+    - Push
+    - Pull
+    - Push & Pull
+    type: string
+    x-enum-varnames:
+    - Push
+    - Pull
+    - PushAndPull
+  exerciseEnums.Mechanics:
+    enum:
+    - Compound
+    - Isolated
+    type: string
+    x-enum-varnames:
+    - Compound
+    - Isolated
+  exerciseEnums.TargetMuscle:
+    enum:
+    - Adductors
+    - Anterior Deltoid
+    - Biceps Brachii
+    - Brachialis
+    - Brachioradialis
+    - Erector Spinae
+    - Gastrocnemius
+    - Gluteus Maximus
     - Hamstrings
-    - Calves
-    - Glutes
+    - Hip Flexors
+    - Iliopsoas
+    - Infraspinatus
+    - Lateral Deltoid
+    - Latissimus Dorsi
+    - Levator Scapulae
+    - Lower Trapezius
+    - Middle Trapezius
+    - Obliques
+    - Pectoralis Major Clavicular
+    - Pectoralis Major Sternal
+    - Pectoralis Minor
+    - Posterior Deltoid
+    - Quadratus Lumborum
+    - Quadriceps
+    - Rectus Abdominis
+    - Rhomboids
+    - Serratus Anterior
+    - Soleus
+    - Splenius
+    - Sternocleidomastoid
+    - Subscapularis
+    - Supraspinatus
+    - Teres Minor
+    - Tibialis Anterior
+    - Trapezius
+    - Triceps Brachii
+    - Upper Trapezius
+    type: string
+    x-enum-varnames:
+    - Adductors
+    - AnteriorDeltoid
+    - BicepsBrachii
+    - Brachialis
+    - Brachioradialis
+    - ErectorSpinae
+    - Gastrocnemius
+    - GluteusMaximus
+    - Hamstrings
+    - HipFlexors
+    - Iliopsoas
+    - Infraspinatus
+    - LateralDeltoid
+    - LatissimusDorsi
+    - LevatorScapulae
+    - LowerTrapezius
+    - MiddleTrapezius
+    - Obliques
+    - PectoralisMajorClav
+    - PectoralisMajorSternal
+    - PectoralisMinor
+    - PosteriorDeltoid
+    - QuadratusLumborum
+    - Quadriceps
+    - RectusAbdominis
+    - Rhomboids
+    - SerratusAnterior
+    - Soleus
+    - Splenius
+    - Sternocleidomastoid
+    - Subscapularis
+    - Supraspinatus
+    - TeresMinor
+    - TibialisAnterior
+    - Trapezius
+    - TricepsBrachii
+    - UpperTrapezius
   exerciseLog.CreateExerciseLogDto:
     properties:
       exerciseId:
@@ -376,6 +530,8 @@ definitions:
         type: string
       created_at:
         type: string
+      deleted_at:
+        type: string
       description:
         type: string
       id:
@@ -444,6 +600,9 @@ definitions:
         items:
           $ref: '#/definitions/types.Ingredient'
         type: array
+      isQuickAdd:
+        default: false
+        type: boolean
       name:
         type: string
       nutrients:
@@ -467,6 +626,8 @@ definitions:
       created_at:
         default: "null"
         type: string
+      deleted_at:
+        type: string
       description:
         type: string
       id:
@@ -478,6 +639,9 @@ definitions:
         items:
           $ref: '#/definitions/types.Ingredient'
         type: array
+      isQuickAdd:
+        default: false
+        type: boolean
       name:
         type: string
       nutrients:
@@ -842,6 +1006,31 @@ definitions:
     required:
     - type
     type: object
+  workoutSession.LoggedSessionDto:
+    properties:
+      endTime:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/workoutSession.SessionExercise'
+        type: array
+      notes:
+        type: string
+      startTime:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/workoutSession.SessionStatus'
+        enum:
+        - completed
+        - cancelled
+      workoutId:
+        type: string
+    required:
+    - endTime
+    - startTime
+    - status
+    type: object
   workoutSession.SessionExercise:
     properties:
       exerciseid:
@@ -869,10 +1058,12 @@ definitions:
     enum:
     - planned
     - custom
+    - logged
     type: string
     x-enum-varnames:
     - PlannedSession
     - CustomSession
+    - LoggedSession
   workoutSession.UpdateWorkoutSessionDto:
     properties:
       exercises:
@@ -1030,6 +1221,9 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
       summary: Get all exercises
       tags:
       - exercises
@@ -1053,6 +1247,9 @@ paths:
             $ref: '#/definitions/exercise.Exercise'
         "400":
           description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
           schema: {}
       summary: Create an exercise
       tags:
@@ -1229,6 +1426,12 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
       summary: Delete an exercise
       tags:
       - exercises
@@ -1251,6 +1454,12 @@ paths:
             $ref: '#/definitions/exercise.Exercise'
         "400":
           description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+        "404":
+          description: Not Found
           schema: {}
       summary: Get an exercise
       tags:
@@ -1281,11 +1490,17 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
       summary: Update an exercise
       tags:
       - exercises
   /exercise/{id}/image:
-    put:
+    patch:
       consumes:
       - multipart/form-data
       description: Update an exercise's image
@@ -1310,10 +1525,82 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
         "404":
           description: Not Found
           schema: {}
       summary: Update exercise image
+      tags:
+      - exercises
+  /exercise/bodypart:
+    get:
+      consumes:
+      - application/json
+      description: Get all body parts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseEnums.BodyPart'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Get all body parts
+      tags:
+      - exercises
+  /exercise/equipment:
+    get:
+      consumes:
+      - application/json
+      description: Get all equipment
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseEnums.Equipment'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Get all equipment
+      tags:
+      - exercises
+  /exercise/force:
+    get:
+      consumes:
+      - application/json
+      description: Get all force
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exerciseEnums.Force'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Get all force
       tags:
       - exercises
   /exercise/many:
@@ -1342,14 +1629,17 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
       summary: Create many exercises
       tags:
       - exercises
-  /exercise/muscles:
+  /exercise/mechanics:
     get:
       consumes:
       - application/json
-      description: Get all muscle groups
+      description: Get all mechanics
       produces:
       - application/json
       responses:
@@ -1357,27 +1647,46 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/exerciseEnums.MuscleGroup'
+              $ref: '#/definitions/exerciseEnums.Mechanics'
             type: array
         "400":
           description: Bad Request
           schema: {}
-      summary: Get all muscle groups
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Get all mechanics
       tags:
       - exercises
   /exercise/search:
     get:
       consumes:
       - application/json
-      description: Search exercises by types and muscle groups
+      description: Search exercises by name, types and muscle groups
       parameters:
-      - description: Exercise types (comma-separated)
+      - description: Search query for exercise name
         in: query
-        name: types
+        name: query
         type: string
-      - description: Muscle groups (comma-separated)
+      - description: Equipment types (comma-separated)
         in: query
-        name: muscles
+        name: equipment
+        type: string
+      - description: Mechanics types (comma-separated)
+        in: query
+        name: mechanics
+        type: string
+      - description: Force types (comma-separated)
+        in: query
+        name: force
+        type: string
+      - description: Body parts (comma-separated)
+        in: query
+        name: body_part
+        type: string
+      - description: Target muscles (comma-separated)
+        in: query
+        name: target_muscle
         type: string
       produces:
       - application/json
@@ -1391,14 +1700,17 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
       summary: Search and filter exercises
       tags:
       - exercises
-  /exercise/types:
+  /exercise/targetmuscle:
     get:
       consumes:
       - application/json
-      description: Get all exercise types
+      description: Get all target muscles
       produces:
       - application/json
       responses:
@@ -1406,12 +1718,15 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/exerciseEnums.ExerciseType'
+              $ref: '#/definitions/exerciseEnums.TargetMuscle'
             type: array
         "400":
           description: Bad Request
           schema: {}
-      summary: Get all exercise types
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Get all target muscles
       tags:
       - exercises
   /foodlog:
@@ -1717,7 +2032,7 @@ paths:
       tags:
       - ingredient
   /ingredient/{id}/image:
-    put:
+    patch:
       consumes:
       - multipart/form-data
       description: Update an ingredient's image
@@ -1927,7 +2242,7 @@ paths:
       tags:
       - meals
   /meal/{id}/image:
-    put:
+    patch:
       consumes:
       - multipart/form-data
       description: Update a meal's image
@@ -2515,6 +2830,31 @@ paths:
           description: Bad Request
           schema: {}
       summary: Log exercise completion
+      tags:
+      - workoutSessions
+  /workout-session/log:
+    post:
+      consumes:
+      - application/json
+      description: Create a new workout session with custom start and end times
+      parameters:
+      - description: Logged Session
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/workoutSession.LoggedSessionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Log custom session
       tags:
       - workoutSessions
   /workout/{id}:

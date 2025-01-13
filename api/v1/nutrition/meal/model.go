@@ -21,8 +21,10 @@ type Meal struct {
 	BrandName       string             `json:"brandName" bson:"brand_name"`
 	ServingSize     float64            `json:"servingSize" bson:"serving_size"`
 	ServingSizeUnit string             `json:"servingSizeUnit" bson:"serving_size_unit"`
+	IsQuickAdd      bool               `json:"isQuickAdd" bson:"is_quick_add" default:"false"`
 	CreatedAt       time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty" default:"null"`
 	UpdatedAt       time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty" default:"null"`
+	DeletedAt       time.Time          `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
 func CreateMealModel(dto *CreateMealDto) *Meal {
@@ -35,6 +37,7 @@ func CreateMealModel(dto *CreateMealDto) *Meal {
 		Calories:    dto.Calories,
 		Nutrients:   dto.Nutrients,
 		Ingredients: dto.Ingredients,
+		IsQuickAdd:  dto.IsQuickAdd,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}

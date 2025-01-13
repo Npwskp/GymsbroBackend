@@ -69,7 +69,13 @@ func (is *IngredientService) GetIngredient(id string, userId string) (*Ingredien
 }
 
 func (is *IngredientService) GetIngredientByUser(userId string) ([]*Ingredient, error) {
-	filter := bson.D{{Key: "userid", Value: userId}}
+	filter := bson.D{
+		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+	}
 	cursor, err := is.DB.Collection("ingredient").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
@@ -86,11 +92,33 @@ func (is *IngredientService) DeleteIngredient(id string, userId string) error {
 	if err != nil {
 		return err
 	}
-	filter := bson.D{{Key: "_id", Value: objectID}}
-	_, err = is.DB.Collection("ingredient").DeleteOne(context.Background(), filter)
+
+	filter := bson.D{
+		{Key: "_id", Value: objectID},
+		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+	}
+
+	now := time.Now()
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "deleted_at", Value: now},
+			{Key: "updated_at", Value: now},
+		}},
+	}
+
+	result, err := is.DB.Collection("ingredient").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return err
 	}
+
+	if result.ModifiedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
 	return nil
 }
 
@@ -122,8 +150,13 @@ func (is *IngredientService) UpdateIngredient(doc *UpdateIngredientDto, id strin
 }
 
 func (is *IngredientService) SearchFilteredIngredients(filters SearchFilters) ([]*Ingredient, error) {
-	// Common filter conditions
-	baseConditions := []bson.D{}
+	// Add not-deleted condition to base conditions
+	baseConditions := []bson.D{
+		{{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}}},
+	}
 
 	// Add name search if query is provided
 	if filters.Query != "" {

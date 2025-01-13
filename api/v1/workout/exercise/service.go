@@ -35,25 +35,32 @@ type IExerciseService interface {
 	DeleteExercise(id string, userId string) error
 	UpdateExercise(doc *UpdateExerciseDto, id string, userId string) (*Exercise, error)
 	UpdateExerciseImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Exercise, error)
-	SearchAndFilterExercise(exerciseTypes []string, muscleGroups []string, userId string) ([]*Exercise, error)
+	SearchAndFilterExercise(equipment []exerciseEnums.Equipment, mechanics []exerciseEnums.Mechanics, force []exerciseEnums.Force, bodyPart []exerciseEnums.BodyPart, targetMuscle []exerciseEnums.TargetMuscle, query string, userID string) ([]*Exercise, error)
 }
 
 func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto, userId string) (*Exercise, error) {
-	if exercise.Type == nil {
-		exercise.Type = []exerciseEnums.ExerciseType{}
+	if exercise.BodyPart == nil {
+		exercise.BodyPart = []exerciseEnums.BodyPart{}
 	}
-	if exercise.Muscle == nil {
-		exercise.Muscle = []exerciseEnums.MuscleGroup{}
+	if exercise.TargetMuscle == nil {
+		exercise.TargetMuscle = []exerciseEnums.TargetMuscle{}
 	}
 
 	// Create exercise with userId
 	exerciseDoc := &Exercise{
-		UserID:      userId,
-		Name:        exercise.Name,
-		Description: exercise.Description,
-		Type:        exercise.Type,
-		Muscle:      exercise.Muscle,
-		Image:       exercise.Image,
+		UserID:       userId,
+		Name:         exercise.Name,
+		Equipment:    exercise.Equipment,
+		Mechanics:    exercise.Mechanics,
+		Force:        exercise.Force,
+		Preparation:  exercise.Preparation,
+		Execution:    exercise.Execution,
+		Image:        exercise.Image,
+		BodyPart:     exercise.BodyPart,
+		TargetMuscle: exercise.TargetMuscle,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		DeletedAt:    time.Time{},
 	}
 
 	result, err := es.DB.Collection("exercises").InsertOne(context.Background(), exerciseDoc)
@@ -72,20 +79,27 @@ func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto, userId st
 func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto, userId string) ([]*Exercise, error) {
 	var result []interface{}
 	for _, exercise := range *exercises {
-		if exercise.Type == nil {
-			exercise.Type = []exerciseEnums.ExerciseType{}
+		if exercise.BodyPart == nil {
+			exercise.BodyPart = []exerciseEnums.BodyPart{}
 		}
-		if exercise.Muscle == nil {
-			exercise.Muscle = []exerciseEnums.MuscleGroup{}
+		if exercise.TargetMuscle == nil {
+			exercise.TargetMuscle = []exerciseEnums.TargetMuscle{}
 		}
 
 		exerciseDoc := Exercise{
-			UserID:      userId,
-			Name:        exercise.Name,
-			Description: exercise.Description,
-			Type:        exercise.Type,
-			Muscle:      exercise.Muscle,
-			Image:       exercise.Image,
+			UserID:       userId,
+			Name:         exercise.Name,
+			Equipment:    exercise.Equipment,
+			Mechanics:    exercise.Mechanics,
+			Force:        exercise.Force,
+			Preparation:  exercise.Preparation,
+			Execution:    exercise.Execution,
+			Image:        exercise.Image,
+			BodyPart:     exercise.BodyPart,
+			TargetMuscle: exercise.TargetMuscle,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+			DeletedAt:    time.Time{},
 		}
 		result = append(result, exerciseDoc)
 	}
@@ -107,6 +121,10 @@ func (es *ExerciseService) CreateManyExercises(exercises *[]CreateExerciseDto, u
 
 func (es *ExerciseService) GetAllExercises(userId string) ([]*Exercise, error) {
 	filter := bson.D{
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
 		{Key: "$or", Value: []bson.M{
 			{"userid": userId},
 			{"userid": ""},
@@ -159,9 +177,26 @@ func (es *ExerciseService) DeleteExercise(id string, userId string) error {
 	filter := bson.D{
 		{Key: "_id", Value: oid},
 		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
 	}
-	if _, err := es.DB.Collection("exercises").DeleteOne(context.Background(), filter); err != nil {
+
+	now := time.Now()
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "deleted_at", Value: now},
+			{Key: "updated_at", Value: now},
+		}},
+	}
+
+	result, err := es.DB.Collection("exercises").UpdateOne(context.Background(), filter, update)
+	if err != nil {
 		return err
+	}
+	if result.MatchedCount == 0 {
+		return errors.New("exercise not found or already deleted")
 	}
 	return nil
 }
@@ -179,16 +214,23 @@ func (es *ExerciseService) UpdateExercise(doc *UpdateExerciseDto, id string, use
 	if err := es.DB.Collection("exercises").FindOne(context.Background(), filter).Decode(exercise); err != nil {
 		return nil, err
 	}
-	fmt.Println(exercise, "(", doc.Image, ")")
+
+	// Create update document
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "name", Value: function.Coalesce(doc.Name, exercise.Name)},
-			{Key: "description", Value: function.Coalesce(doc.Description, exercise.Description)},
-			{Key: "type", Value: function.Coalesce(doc.Type, exercise.Type)},
-			{Key: "muscle", Value: function.Coalesce(doc.Muscle, exercise.Muscle)},
 			{Key: "image", Value: function.Coalesce(doc.Image, exercise.Image)},
+			{Key: "equipment", Value: function.Coalesce(doc.Equipment, exercise.Equipment)},
+			{Key: "mechanics", Value: function.Coalesce(doc.Mechanics, exercise.Mechanics)},
+			{Key: "force", Value: function.Coalesce(doc.Force, exercise.Force)},
+			{Key: "preparation", Value: function.Coalesce(doc.Preparation, exercise.Preparation)},
+			{Key: "execution", Value: function.Coalesce(doc.Execution, exercise.Execution)},
+			{Key: "body_part", Value: function.Coalesce(doc.BodyPart, exercise.BodyPart)},
+			{Key: "target_muscle", Value: function.Coalesce(doc.TargetMuscle, exercise.TargetMuscle)},
+			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
+
 	if _, err := es.DB.Collection("exercises").UpdateOne(context.Background(), filter, update); err != nil {
 		return nil, err
 	}
@@ -221,9 +263,16 @@ func (es *ExerciseService) UpdateExerciseImage(c *fiber.Ctx, id string, file io.
 		return nil, fmt.Errorf("failed to get image URL: %v", err)
 	}
 
-	// Update exercise's image URL in database
+	// Update exercise's image URL in database - removed deleted_at filter
 	oid, _ := primitive.ObjectIDFromHex(id)
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userId}}
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userid", Value: userId},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+	}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "image", Value: url},
@@ -255,50 +304,81 @@ func (es *ExerciseService) UpdateExerciseImage(c *fiber.Ctx, id string, file io.
 	return es.GetExercise(id, userId)
 }
 
-func (es *ExerciseService) SearchAndFilterExercise(exerciseTypes []string, muscleGroups []string, userId string) ([]*Exercise, error) {
-	// Convert string arrays to enums
-	var typeEnums []exerciseEnums.ExerciseType
-	var muscleEnums []exerciseEnums.MuscleGroup
+func (es *ExerciseService) SearchAndFilterExercise(
+	equipment []exerciseEnums.Equipment,
+	mechanics []exerciseEnums.Mechanics,
+	force []exerciseEnums.Force,
+	bodyPart []exerciseEnums.BodyPart,
+	targetMuscle []exerciseEnums.TargetMuscle,
+	query string, userID string) ([]*Exercise, error) {
 
-	// Parse exercise types
-	for _, exerciseType := range exerciseTypes {
-		if exerciseType != "" {
-			typeEnum, err := exerciseEnums.ParseExerciseType(exerciseType)
-			if err != nil {
-				return nil, fmt.Errorf("invalid exercise type: %s", exerciseType)
-			}
-			typeEnums = append(typeEnums, typeEnum)
-		}
-	}
-
-	// Parse muscle groups
-	for _, muscleGroup := range muscleGroups {
-		if muscleGroup != "" {
-			muscleEnum, err := exerciseEnums.ParseMuscleGroup(muscleGroup)
-			if err != nil {
-				return nil, fmt.Errorf("invalid muscle group: %s", muscleGroup)
-			}
-			muscleEnums = append(muscleEnums, muscleEnum)
-		}
-	}
-
-	// Build filter based on provided parameters
-	filter := bson.M{
-		"$or": []bson.M{
-			{"userid": userId},
+	// Base filter for non-deleted records and user access
+	filter := bson.D{
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+		{Key: "$or", Value: []bson.M{
+			{"userid": userID},
 			{"userid": ""},
 			{"userid": nil},
-		},
+		}},
 	}
 
-	// Add type filter if types were provided
-	if len(typeEnums) > 0 {
-		filter["type"] = bson.M{"$in": typeEnums}
+	// Add search conditions if query is provided
+	if query != "" {
+		filter = append(filter, bson.E{
+			Key: "name",
+			Value: bson.M{
+				"$regex":   fmt.Sprintf(".*%s.*", query),
+				"$options": "i",
+			},
+		})
 	}
 
-	// Add muscle filter if muscle groups were provided
-	if len(muscleEnums) > 0 {
-		filter["muscle"] = bson.M{"$in": muscleEnums}
+	// Add equipment filter if provided
+	if len(equipment) > 0 {
+		equipmentStrings := make([]string, len(equipment))
+		for i, eq := range equipment {
+			equipmentStrings[i] = string(eq)
+		}
+		filter = append(filter, bson.E{Key: "equipment", Value: bson.M{"$in": equipmentStrings}})
+	}
+
+	// Add mechanics filter if provided
+	if len(mechanics) > 0 {
+		mechanicsStrings := make([]string, len(mechanics))
+		for i, m := range mechanics {
+			mechanicsStrings[i] = string(m)
+		}
+		filter = append(filter, bson.E{Key: "mechanics", Value: bson.M{"$in": mechanicsStrings}})
+	}
+
+	// Add force filter if provided
+	if len(force) > 0 {
+		forceStrings := make([]string, len(force))
+		for i, f := range force {
+			forceStrings[i] = string(f)
+		}
+		filter = append(filter, bson.E{Key: "force", Value: bson.M{"$in": forceStrings}})
+	}
+
+	// Add body part filter if provided
+	if len(bodyPart) > 0 {
+		bodyPartStrings := make([]string, len(bodyPart))
+		for i, bp := range bodyPart {
+			bodyPartStrings[i] = string(bp)
+		}
+		filter = append(filter, bson.E{Key: "body_part", Value: bson.M{"$in": bodyPartStrings}})
+	}
+
+	// Add target muscle filter if provided
+	if len(targetMuscle) > 0 {
+		targetMuscleStrings := make([]string, len(targetMuscle))
+		for i, tm := range targetMuscle {
+			targetMuscleStrings[i] = string(tm)
+		}
+		filter = append(filter, bson.E{Key: "target_muscle", Value: bson.M{"$in": targetMuscleStrings}})
 	}
 
 	cursor, err := es.DB.Collection("exercises").Find(context.Background(), filter)
@@ -311,6 +391,5 @@ func (es *ExerciseService) SearchAndFilterExercise(exerciseTypes []string, muscl
 	if err := cursor.All(context.Background(), &exercises); err != nil {
 		return nil, err
 	}
-
 	return exercises, nil
 }

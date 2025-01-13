@@ -1,6 +1,7 @@
 package exercise
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
@@ -24,6 +25,7 @@ type ExerciseController struct {
 // @Param		exercise body CreateExerciseDto true "Create Exercise"
 // @Success		201	{object} Exercise
 // @Failure		400	{object} Error
+// @Failure		401	{object} Error
 // @Router		/exercise [post]
 func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 	validate := validator.New()
@@ -35,16 +37,6 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 	}
 	if err := validate.Struct(*exercise); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
-	}
-	for _, t := range exercise.Type {
-		if _, err := exerciseEnums.ParseExerciseType(string(t)); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
-		}
-	}
-	for _, m := range exercise.Muscle {
-		if _, err := exerciseEnums.ParseMuscleGroup(string(m)); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
-		}
 	}
 	createdExercise, err := ec.Service.CreateExercise(exercise, userId)
 	if err != nil {
@@ -59,8 +51,9 @@ func (ec *ExerciseController) PostExerciseHandler(c *fiber.Ctx) error {
 // @Accept		json
 // @Produce		json
 // @Param		exercises body []CreateExerciseDto true "Create Exercises"
-// @Success		201	{object} []Exercise
+// @Success		201	{array} Exercise
 // @Failure		400	{object} Error
+// @Failure		401	{object} Error
 // @Router		/exercise/many [post]
 func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 	validate := validator.New()
@@ -73,16 +66,6 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 	for _, exercise := range *exercises {
 		if err := validate.Struct(exercise); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
-		}
-		for _, t := range exercise.Type {
-			if _, err := exerciseEnums.ParseExerciseType(string(t)); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
-			}
-		}
-		for _, m := range exercise.Muscle {
-			if _, err := exerciseEnums.ParseMuscleGroup(string(m)); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
-			}
 		}
 	}
 	createdExercises, err := ec.Service.CreateManyExercises(exercises, userId)
@@ -97,8 +80,9 @@ func (ec *ExerciseController) PostManyExerciseHandler(c *fiber.Ctx) error {
 // @Tags		exercises
 // @Accept		json
 // @Produce		json
-// @Success		200	{object} []Exercise
+// @Success		200	{array} Exercise
 // @Failure		400	{object} Error
+// @Failure		401	{object} Error
 // @Router		/exercise [get]
 func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(c)
@@ -117,6 +101,8 @@ func (ec *ExerciseController) GetExercisesHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Exercise ID"
 // @Success		200	{object} Exercise
 // @Failure		400	{object} Error
+// @Failure		401	{object} Error
+// @Failure		404	{object} Error
 // @Router		/exercise/{id} [get]
 func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -137,30 +123,74 @@ func (ec *ExerciseController) GetExerciseHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(exercise)
 }
 
-// @Summary		Get all exercise types
-// @Description	Get all exercise types
+// @Summary		Get all equipment
+// @Description	Get all equipment
 // @Tags		exercises
 // @Accept		json
 // @Produce		json
-// @Success		200	{array}	exerciseEnums.ExerciseType
+// @Success		200	{array} exerciseEnums.Equipment
 // @Failure		400	{object} Error
-// @Router		/exercise/types [get]
-func (ec *ExerciseController) GetAllExerciseTypesHandler(c *fiber.Ctx) error {
-	types := exerciseEnums.GetAllExerciseTypes()
-	return c.Status(fiber.StatusOK).JSON(types)
+// @Failure		401	{object} Error
+// @Router		/exercise/equipment [get]
+func (ec *ExerciseController) GetAllEquipmentHandler(c *fiber.Ctx) error {
+	equipment := exerciseEnums.GetAllEquipment()
+	return c.Status(fiber.StatusOK).JSON(equipment)
 }
 
-// @Summary		Get all muscle groups
-// @Description	Get all muscle groups
+// @Summary		Get all mechanics
+// @Description	Get all mechanics
 // @Tags		exercises
 // @Accept		json
 // @Produce		json
-// @Success		200	{array}	exerciseEnums.MuscleGroup
+// @Success		200	{array} exerciseEnums.Mechanics
 // @Failure		400	{object} Error
-// @Router		/exercise/muscles [get]
-func (ec *ExerciseController) GetAllMuscleGroupsHandler(c *fiber.Ctx) error {
-	muscles := exerciseEnums.GetAllMuscleGroups()
-	return c.Status(fiber.StatusOK).JSON(muscles)
+// @Failure		401	{object} Error
+// @Router		/exercise/mechanics [get]
+func (ec *ExerciseController) GetAllMechanicsHandler(c *fiber.Ctx) error {
+	mechanics := exerciseEnums.GetAllMechanics()
+	return c.Status(fiber.StatusOK).JSON(mechanics)
+}
+
+// @Summary		Get all force
+// @Description	Get all force
+// @Tags		exercises
+// @Accept		json
+// @Produce		json
+// @Success		200	{array} exerciseEnums.Force
+// @Failure		400	{object} Error
+// @Failure		401	{object} Error
+// @Router		/exercise/force [get]
+func (ec *ExerciseController) GetAllForceHandler(c *fiber.Ctx) error {
+	force := exerciseEnums.GetAllForces()
+	return c.Status(fiber.StatusOK).JSON(force)
+}
+
+// @Summary		Get all body parts
+// @Description	Get all body parts
+// @Tags		exercises
+// @Accept		json
+// @Produce		json
+// @Success		200	{array} exerciseEnums.BodyPart
+// @Failure		400	{object} Error
+// @Failure		401	{object} Error
+// @Router		/exercise/bodypart [get]
+func (ec *ExerciseController) GetAllBodyPartHandler(c *fiber.Ctx) error {
+	bodyPart := exerciseEnums.GetAllBodyParts()
+	return c.Status(fiber.StatusOK).JSON(bodyPart)
+}
+
+// @Summary		Get all target muscles
+// @Description	Get all target muscles
+// @Tags		exercises
+// @Accept		json
+// @Produce		json
+// @Success		200	{array} exerciseEnums.TargetMuscle
+// @Failure		400	{object} Error
+// @Failure		401	{object} Error
+// @Router		/exercise/targetmuscle [get]
+func (ex *ExerciseController) GetAllTargetMusclesHandler(c *fiber.Ctx) error {
+	targetMuscle := exerciseEnums.GetAllTargetMuscles()
+	return c.Status(fiber.StatusOK).JSON(targetMuscle)
 }
 
 // @Summary		Delete an exercise
@@ -171,6 +201,8 @@ func (ec *ExerciseController) GetAllMuscleGroupsHandler(c *fiber.Ctx) error {
 // @Param		id path string true "Exercise ID"
 // @Success		204	{object} Error
 // @Failure		400	{object} Error
+// @Failure		401	{object} Error
+// @Failure		404	{object} Error
 // @Router		/exercise/{id} [delete]
 func (ec *ExerciseController) DeleteExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -190,6 +222,8 @@ func (ec *ExerciseController) DeleteExerciseHandler(c *fiber.Ctx) error {
 // @Param		exercise body UpdateExerciseDto true "Update Exercise"
 // @Success		200	{object} Exercise
 // @Failure		400	{object} Error
+// @Failure		401	{object} Error
+// @Failure		404	{object} Error
 // @Router		/exercise/{id} [put]
 func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -202,16 +236,6 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	if err := validate.Struct(*exercise); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 	}
-	for _, t := range exercise.Type {
-		if _, err := exerciseEnums.ParseExerciseType(string(t)); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Type of exercise is not valid"})
-		}
-	}
-	for _, m := range exercise.Muscle {
-		if _, err := exerciseEnums.ParseMuscleGroup(string(m)); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Muscle is not valid"})
-		}
-	}
 	updatedExercise, err := ec.Service.UpdateExercise(exercise, id, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
@@ -219,17 +243,18 @@ func (ec *ExerciseController) UpdateExerciseHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(updatedExercise)
 }
 
-// @Summary Update exercise image
+// @Summary     Update exercise image
 // @Description Update an exercise's image
-// @Tags exercises
-// @Accept multipart/form-data
-// @Produce json
-// @Param id path string true "Exercise ID"
-// @Param file formData file true "Image file"
-// @Success 200 {object} Exercise
-// @Failure 400 {object} Error
-// @Failure 404 {object} Error
-// @Router /exercise/{id}/image [put]
+// @Tags        exercises
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       id path string true "Exercise ID"
+// @Param       file formData file true "Image file"
+// @Success     200 {object} Exercise
+// @Failure     400 {object} Error
+// @Failure     401 {object} Error
+// @Failure     404 {object} Error
+// @Router      /exercise/{id}/image [patch]
 func (ec *ExerciseController) UpdateExerciseImageHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := function.GetUserIDFromContext(c)
@@ -269,41 +294,108 @@ func (ec *ExerciseController) UpdateExerciseImageHandler(c *fiber.Ctx) error {
 }
 
 // @Summary     Search and filter exercises
-// @Description Search exercises by types and muscle groups
+// @Description Search exercises by name, types and muscle groups
 // @Tags        exercises
 // @Accept      json
 // @Produce     json
-// @Param       types query string false "Exercise types (comma-separated)"
-// @Param       muscles query string false "Muscle groups (comma-separated)"
+// @Param       query query string false "Search query for exercise name"
+// @Param       equipment query string false "Equipment types (comma-separated)"
+// @Param       mechanics query string false "Mechanics types (comma-separated)"
+// @Param       force query string false "Force types (comma-separated)"
+// @Param       body_part query string false "Body parts (comma-separated)"
+// @Param       target_muscle query string false "Target muscles (comma-separated)"
 // @Success     200 {array} Exercise
 // @Failure     400 {object} Error
+// @Failure     401 {object} Error
 // @Router      /exercise/search [get]
 func (ec *ExerciseController) SearchAndFilterExerciseHandler(c *fiber.Ctx) error {
-	filters := SearchExerciseFilters{
-		Types:   c.Query("types"),
-		Muscles: c.Query("muscles"),
-		UserID:  function.GetUserIDFromContext(c),
+	var filters SearchExerciseFilters
+	if err := c.QueryParser(&filters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
 
-	// Convert comma-separated strings to slices
-	var typesList []string
-	var musclesList []string
+	userId := function.GetUserIDFromContext(c)
 
-	if filters.Types != "" {
-		typesList = strings.Split(filters.Types, ",")
-	}
-	if filters.Muscles != "" {
-		musclesList = strings.Split(filters.Muscles, ",")
+	var equipmentList []exerciseEnums.Equipment
+	var mechanicsList []exerciseEnums.Mechanics
+	var forceList []exerciseEnums.Force
+	var bodyPartList []exerciseEnums.BodyPart
+	var targetMuscleList []exerciseEnums.TargetMuscle
+
+	// Validate and convert equipment
+	if filters.Equipment != "" {
+		for _, eq := range strings.Split(strings.TrimSpace(filters.Equipment), ",") {
+			eq = strings.TrimSpace(eq)
+			if !exerciseEnums.IsValidEquipment(eq) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Invalid equipment value: %s", eq),
+				})
+			}
+			equipmentList = append(equipmentList, exerciseEnums.Equipment(eq))
+		}
 	}
 
-	exercises, err := ec.Service.SearchAndFilterExercise(typesList, musclesList, filters.UserID)
+	// Validate and convert mechanics
+	if filters.Mechanics != "" {
+		for _, m := range strings.Split(strings.TrimSpace(filters.Mechanics), ",") {
+			m = strings.TrimSpace(m)
+			if !exerciseEnums.IsValidMechanics(m) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Invalid mechanics value: %s", m),
+				})
+			}
+			mechanicsList = append(mechanicsList, exerciseEnums.Mechanics(m))
+		}
+	}
+
+	// Validate and convert force
+	if filters.Force != "" {
+		for _, f := range strings.Split(strings.TrimSpace(filters.Force), ",") {
+			f = strings.TrimSpace(f)
+			if !exerciseEnums.IsValidForce(f) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Invalid force value: %s", f),
+				})
+			}
+			forceList = append(forceList, exerciseEnums.Force(f))
+		}
+	}
+
+	// Validate and convert body parts
+	if filters.BodyPart != "" {
+		for _, bp := range strings.Split(strings.TrimSpace(filters.BodyPart), ",") {
+			bp = strings.TrimSpace(bp)
+			if !exerciseEnums.IsValidBodyPart(bp) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Invalid body part value: %s", bp),
+				})
+			}
+			bodyPartList = append(bodyPartList, exerciseEnums.BodyPart(bp))
+		}
+	}
+
+	// Validate and convert target muscles
+	if filters.TargetMuscle != "" {
+		for _, tm := range strings.Split(strings.TrimSpace(filters.TargetMuscle), ",") {
+			tm = strings.TrimSpace(tm)
+			if !exerciseEnums.IsValidTargetMuscle(tm) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Invalid target muscle value: %s", tm),
+				})
+			}
+			targetMuscleList = append(targetMuscleList, exerciseEnums.TargetMuscle(tm))
+		}
+	}
+
+	exercises, err := ec.Service.SearchAndFilterExercise(equipmentList, mechanicsList, forceList, bodyPartList, targetMuscleList, filters.Query, userId)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	// Initialize empty slice if exercises is nil
 	if exercises == nil {
 		exercises = []*Exercise{}
 	}
@@ -317,11 +409,14 @@ func (ec *ExerciseController) Handle() {
 	g.Post("/", ec.PostExerciseHandler)
 	g.Post("/many", ec.PostManyExerciseHandler)
 	g.Get("/", ec.GetExercisesHandler)
-	g.Get("/types", ec.GetAllExerciseTypesHandler)
-	g.Get("/muscles", ec.GetAllMuscleGroupsHandler)
+	g.Get("/equipment", ec.GetAllEquipmentHandler)
+	g.Get("/mechanics", ec.GetAllMechanicsHandler)
+	g.Get("/force", ec.GetAllForceHandler)
+	g.Get("/bodypart", ec.GetAllBodyPartHandler)
+	g.Get("/targetmuscle", ec.GetAllTargetMusclesHandler)
 	g.Get("/search", ec.SearchAndFilterExerciseHandler)
 	g.Get("/:id", ec.GetExerciseHandler)
 	g.Delete("/:id", ec.DeleteExerciseHandler)
 	g.Put("/:id", ec.UpdateExerciseHandler)
-	g.Put("/:id/image", ec.UpdateExerciseImageHandler)
+	g.Patch("/:id/image", ec.UpdateExerciseImageHandler)
 }

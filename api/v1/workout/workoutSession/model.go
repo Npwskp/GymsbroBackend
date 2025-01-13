@@ -27,6 +27,7 @@ type SessionType string
 const (
 	PlannedSession SessionType = "planned"
 	CustomSession  SessionType = "custom"
+	LoggedSession  SessionType = "logged"
 )
 
 type SessionExercise struct {

@@ -1,5 +1,7 @@
 package workoutSession
 
+import "time"
+
 type CreateWorkoutSessionDto struct {
 	WorkoutID string      `json:"workoutId"`
 	Type      SessionType `json:"type" validate:"required,oneof=planned custom"`
@@ -23,4 +25,13 @@ type ExerciseOrder struct {
 
 type CompleteExerciseDto struct {
 	ExerciseLogID string `json:"exerciseLogId" validate:"required"`
+}
+
+type LoggedSessionDto struct {
+	WorkoutID string            `json:"workoutId"`
+	StartTime time.Time         `json:"startTime" validate:"required"`
+	EndTime   time.Time         `json:"endTime" validate:"required"`
+	Status    SessionStatus     `json:"status" validate:"required,oneof=completed cancelled"`
+	Exercises []SessionExercise `json:"exercises"`
+	Notes     string            `json:"notes"`
 }

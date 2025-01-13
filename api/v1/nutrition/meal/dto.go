@@ -10,6 +10,7 @@ type CreateMealDto struct {
 	Calories    float64            `json:"calories"`
 	Nutrients   []types.Nutrient   `json:"nutrients"`
 	Ingredients []types.Ingredient `json:"ingredients"`
+	IsQuickAdd  bool               `json:"isQuickAdd" bson:"is_quick_add" default:"false"`
 }
 
 type UpdateMealDto struct {
