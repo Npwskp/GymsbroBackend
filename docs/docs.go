@@ -2368,6 +2368,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/workout-session/log": {
+            "post": {
+                "description": "Create a new workout session with custom start and end times",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workoutSessions"
+                ],
+                "summary": "Log custom session",
+                "parameters": [
+                    {
+                        "description": "Logged Session",
+                        "name": "session",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/workoutSession.LoggedSessionDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/workoutSession.WorkoutSession"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/workout-session/{id}": {
             "get": {
                 "description": "Get a workout session by ID",
@@ -2846,6 +2884,9 @@ const docTemplate = `{
                     }
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
                     "type": "string"
                 },
                 "equipment": {
@@ -4101,6 +4142,45 @@ const docTemplate = `{
                 }
             }
         },
+        "workoutSession.LoggedSessionDto": {
+            "type": "object",
+            "required": [
+                "endTime",
+                "startTime",
+                "status"
+            ],
+            "properties": {
+                "endTime": {
+                    "type": "string"
+                },
+                "exercises": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/workoutSession.SessionExercise"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "enum": [
+                        "completed",
+                        "cancelled"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/workoutSession.SessionStatus"
+                        }
+                    ]
+                },
+                "workoutId": {
+                    "type": "string"
+                }
+            }
+        },
         "workoutSession.SessionExercise": {
             "type": "object",
             "required": [
@@ -4137,11 +4217,13 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "planned",
-                "custom"
+                "custom",
+                "logged"
             ],
             "x-enum-varnames": [
                 "PlannedSession",
-                "CustomSession"
+                "CustomSession",
+                "LoggedSession"
             ]
         },
         "workoutSession.UpdateWorkoutSessionDto": {

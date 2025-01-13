@@ -100,6 +100,8 @@ definitions:
         type: array
       created_at:
         type: string
+      deleted_at:
+        type: string
       equipment:
         $ref: '#/definitions/exerciseEnums.Equipment'
       execution:
@@ -1004,6 +1006,31 @@ definitions:
     required:
     - type
     type: object
+  workoutSession.LoggedSessionDto:
+    properties:
+      endTime:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/workoutSession.SessionExercise'
+        type: array
+      notes:
+        type: string
+      startTime:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/workoutSession.SessionStatus'
+        enum:
+        - completed
+        - cancelled
+      workoutId:
+        type: string
+    required:
+    - endTime
+    - startTime
+    - status
+    type: object
   workoutSession.SessionExercise:
     properties:
       exerciseid:
@@ -1031,10 +1058,12 @@ definitions:
     enum:
     - planned
     - custom
+    - logged
     type: string
     x-enum-varnames:
     - PlannedSession
     - CustomSession
+    - LoggedSession
   workoutSession.UpdateWorkoutSessionDto:
     properties:
       exercises:
@@ -2801,6 +2830,31 @@ paths:
           description: Bad Request
           schema: {}
       summary: Log exercise completion
+      tags:
+      - workoutSessions
+  /workout-session/log:
+    post:
+      consumes:
+      - application/json
+      description: Create a new workout session with custom start and end times
+      parameters:
+      - description: Logged Session
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/workoutSession.LoggedSessionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Log custom session
       tags:
       - workoutSessions
   /workout/{id}:
