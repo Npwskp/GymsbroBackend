@@ -9,11 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Add this helper function at package level
-func debugType(v interface{}) string {
-	return fmt.Sprintf("%T", v)
-}
-
 type Exercise struct {
 	ID           string                       `json:"id,omitempty" bson:"_id,omitempty"`
 	UserID       string                       `json:"userid" bson:"userid" validate:"required"`
