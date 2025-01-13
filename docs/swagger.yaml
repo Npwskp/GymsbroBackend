@@ -94,6 +94,8 @@ definitions:
     type: object
   exercise.Exercise:
     properties:
+      _id:
+        type: string
       body_part:
         items:
           $ref: '#/definitions/exerciseEnums.BodyPart'
@@ -110,8 +112,6 @@ definitions:
         type: array
       force:
         $ref: '#/definitions/exerciseEnums.Force'
-      id:
-        type: string
       image:
         type: string
       mechanics:

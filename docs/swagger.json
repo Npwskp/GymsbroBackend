@@ -2875,6 +2875,9 @@
                 "userid"
             ],
             "properties": {
+                "_id": {
+                    "type": "string"
+                },
                 "body_part": {
                     "type": "array",
                     "items": {
@@ -2898,9 +2901,6 @@
                 },
                 "force": {
                     "$ref": "#/definitions/exerciseEnums.Force"
-                },
-                "id": {
-                    "type": "string"
                 },
                 "image": {
                     "type": "string"

@@ -2877,6 +2877,9 @@ const docTemplate = `{
                 "userid"
             ],
             "properties": {
+                "_id": {
+                    "type": "string"
+                },
                 "body_part": {
                     "type": "array",
                     "items": {
@@ -2900,9 +2903,6 @@ const docTemplate = `{
                 },
                 "force": {
                     "$ref": "#/definitions/exerciseEnums.Force"
-                },
-                "id": {
-                    "type": "string"
                 },
                 "image": {
                     "type": "string"

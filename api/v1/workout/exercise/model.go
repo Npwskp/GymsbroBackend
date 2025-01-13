@@ -10,7 +10,7 @@ import (
 )
 
 type Exercise struct {
-	ID           string                       `json:"id,omitempty" bson:"_id,omitempty"`
+	ID           primitive.ObjectID           `json:"_id,omitempty" bson:"_id,omitempty"`
 	UserID       string                       `json:"userid" bson:"userid" validate:"required"`
 	Name         string                       `json:"name" validate:"required"`
 	Equipment    exerciseEnums.Equipment      `json:"equipment" validate:"required"`
@@ -68,13 +68,13 @@ func (e *Exercise) UnmarshalBSON(data []byte) error {
 		return err
 	}
 
-	// Convert ID to string
-	if !temp.ID.IsZero() {
-		e.ID = temp.ID.Hex()
-	}
-
-	// Copy all other fields
+	// Copy all other fields first
 	*e = Exercise(temp.ExerciseAlias)
+
+	// Set ID after copying fields
+	if !temp.ID.IsZero() {
+		e.ID = temp.ID
+	}
 
 	// Handle BodyPart conversion
 	switch v := temp.BodyPart.(type) {
