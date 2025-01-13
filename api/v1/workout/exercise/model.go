@@ -1,12 +1,18 @@
 package exercise
 
 import (
+	"fmt"
 	"time"
 
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+// Add this helper function at package level
+func debugType(v interface{}) string {
+	return fmt.Sprintf("%T", v)
+}
 
 type Exercise struct {
 	ID           string                       `json:"id,omitempty" bson:"_id,omitempty"`
@@ -89,10 +95,19 @@ func (e *Exercise) UnmarshalBSON(data []byte) error {
 	case nil:
 		e.BodyPart = []exerciseEnums.BodyPart{}
 	default:
+		fmt.Printf("Unexpected type for BodyPart: %T\n", v)
+		e.BodyPart = []exerciseEnums.BodyPart{}
 	}
 
 	// Handle TargetMuscle conversion
 	switch v := temp.TargetMuscle.(type) {
+	case primitive.A: // Handle MongoDB array type directly
+		e.TargetMuscle = make([]exerciseEnums.TargetMuscle, len(v))
+		for i, item := range v {
+			if str, ok := item.(string); ok {
+				e.TargetMuscle[i] = exerciseEnums.TargetMuscle(str)
+			}
+		}
 	case []interface{}:
 		e.TargetMuscle = make([]exerciseEnums.TargetMuscle, len(v))
 		for i, item := range v {
@@ -105,6 +120,8 @@ func (e *Exercise) UnmarshalBSON(data []byte) error {
 	case nil:
 		e.TargetMuscle = []exerciseEnums.TargetMuscle{}
 	default:
+		fmt.Printf("Unexpected type for TargetMuscle: %T\n", v)
+		e.TargetMuscle = []exerciseEnums.TargetMuscle{}
 	}
 
 	return nil
