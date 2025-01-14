@@ -99,24 +99,24 @@ func (c *ExerciseLogController) GetExerciseLogsHandler(ctx *fiber.Ctx) error {
 // @Tags        exerciseLogs
 // @Accept      json
 // @Produce     json
-// @Param       startDate query string true "Start Date (YYYY-MM-DD)"
-// @Param       endDate query string true "End Date (YYYY-MM-DD)"
+// @Param       startDate query string true "Start Date (YYYY-MM-DD HH:mm:ss)"
+// @Param       endDate query string true "End Date (YYYY-MM-DD HH:mm:ss)"
 // @Success     200 {array} ExerciseLog
 // @Failure     400 {object} Error
 // @Router      /exercise-log/range [get]
 func (c *ExerciseLogController) GetLogsByDateRangeHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
-	startDate, err := time.Parse("2006-01-02", ctx.Query("startDate"))
+	startDate, err := time.Parse("2006-01-02 15:04:05", ctx.Query("startDate"))
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid start date format",
+			"message": "Invalid start date format. Expected format: YYYY-MM-DD HH:mm:ss",
 		})
 	}
 
-	endDate, err := time.Parse("2006-01-02", ctx.Query("endDate"))
+	endDate, err := time.Parse("2006-01-02 15:04:05", ctx.Query("endDate"))
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid end date format",
+			"message": "Invalid end date format. Expected format: YYYY-MM-DD HH:mm:ss",
 		})
 	}
 

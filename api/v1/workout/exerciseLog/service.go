@@ -39,8 +39,8 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 		CompletedSets:    completedSets,
 		TotalVolume:      totalVolume,
 		Notes:            dto.Notes,
-		TimeUsedInSec:    0, // This will be updated when the session ends
-		Date:             time.Now(),
+		Duration:         0, // This will be updated when the session ends
+		DateTime:         time.Now(),
 		Sets:             dto.Sets,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
@@ -86,7 +86,7 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 
 func (s *ExerciseLogService) GetLogsByUser(userId string) ([]*ExerciseLog, error) {
 	filter := bson.D{{Key: "userId", Value: userId}}
-	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "datetime", Value: -1}})
 
 	cursor, err := s.DB.Collection("exerciseLogs").Find(context.Background(), filter, opts)
 	if err != nil {
@@ -106,7 +106,7 @@ func (s *ExerciseLogService) GetLogsByExercise(exerciseId string, userId string)
 		{Key: "userId", Value: userId},
 		{Key: "exerciseId", Value: exerciseId},
 	}
-	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "datetime", Value: -1}})
 
 	cursor, err := s.DB.Collection("exerciseLogs").Find(context.Background(), filter, opts)
 	if err != nil {
@@ -124,12 +124,12 @@ func (s *ExerciseLogService) GetLogsByExercise(exerciseId string, userId string)
 func (s *ExerciseLogService) GetLogsByDateRange(userId string, startDate, endDate time.Time) ([]*ExerciseLog, error) {
 	filter := bson.D{
 		{Key: "userId", Value: userId},
-		{Key: "date", Value: bson.D{
+		{Key: "datetime", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
 		}},
 	}
-	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "datetime", Value: -1}})
 
 	cursor, err := s.DB.Collection("exerciseLogs").Find(context.Background(), filter, opts)
 	if err != nil {
