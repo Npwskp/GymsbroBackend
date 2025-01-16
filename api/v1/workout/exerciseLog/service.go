@@ -61,7 +61,7 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 		context.Background(),
 		bson.D{
 			{Key: "_id", Value: sessionOid},
-			{Key: "userId", Value: userId},
+			{Key: "userid", Value: userId},
 			{Key: "exercises.exerciseId", Value: dto.ExerciseID},
 		},
 		bson.D{{
@@ -85,7 +85,7 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 }
 
 func (s *ExerciseLogService) GetLogsByUser(userId string) ([]*ExerciseLog, error) {
-	filter := bson.D{{Key: "userId", Value: userId}}
+	filter := bson.D{{Key: "userid", Value: userId}}
 	opts := options.Find().SetSort(bson.D{{Key: "datetime", Value: -1}})
 
 	cursor, err := s.DB.Collection("exerciseLogs").Find(context.Background(), filter, opts)
@@ -103,7 +103,7 @@ func (s *ExerciseLogService) GetLogsByUser(userId string) ([]*ExerciseLog, error
 
 func (s *ExerciseLogService) GetLogsByExercise(exerciseId string, userId string) ([]*ExerciseLog, error) {
 	filter := bson.D{
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 		{Key: "exerciseId", Value: exerciseId},
 	}
 	opts := options.Find().SetSort(bson.D{{Key: "datetime", Value: -1}})
@@ -123,7 +123,7 @@ func (s *ExerciseLogService) GetLogsByExercise(exerciseId string, userId string)
 
 func (s *ExerciseLogService) GetLogsByDateRange(userId string, startDate, endDate time.Time) ([]*ExerciseLog, error) {
 	filter := bson.D{
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 		{Key: "datetime", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
@@ -152,7 +152,7 @@ func (s *ExerciseLogService) UpdateLog(id string, dto *UpdateExerciseLogDto, use
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	update := bson.D{{Key: "$set", Value: bson.D{
@@ -180,7 +180,7 @@ func (s *ExerciseLogService) DeleteLog(id string, userId string) error {
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	result, err := s.DB.Collection("exerciseLogs").DeleteOne(context.Background(), filter)

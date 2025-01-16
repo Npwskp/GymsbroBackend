@@ -55,7 +55,7 @@ func max(a, b int) int {
 
 func (s *DashboardService) GetDashboard(userId string) (*DashboardResponse, error) {
 	// Get workout sessions
-	sessionFilter := bson.D{{Key: "userId", Value: userId}}
+	sessionFilter := bson.D{{Key: "userid", Value: userId}}
 	cursor, err := s.DB.Collection("workoutSessions").Find(context.Background(), sessionFilter)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (s *DashboardService) GetDashboard(userId string) (*DashboardResponse, erro
 	}
 
 	// Get exercise logs
-	logFilter := bson.D{{Key: "userId", Value: userId}}
+	logFilter := bson.D{{Key: "userid", Value: userId}}
 	logCursor, err := s.DB.Collection("exerciseLogs").Find(context.Background(), logFilter)
 	if err != nil {
 		return nil, err
