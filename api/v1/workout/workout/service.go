@@ -55,7 +55,7 @@ func (ws *WorkoutService) GetWorkout(id string, userId string) (*Workout, error)
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	workout := &Workout{}
@@ -70,7 +70,7 @@ func (ws *WorkoutService) GetWorkout(id string, userId string) (*Workout, error)
 }
 
 func (ws *WorkoutService) GetWorkoutsByUser(userId string) ([]*Workout, error) {
-	filter := bson.D{{Key: "userId", Value: userId}}
+	filter := bson.D{{Key: "userid", Value: userId}}
 
 	cursor, err := ws.DB.Collection("workout").Find(context.Background(), filter)
 	if err != nil {
@@ -93,7 +93,7 @@ func (ws *WorkoutService) UpdateWorkout(id string, dto *UpdateWorkoutDto, userId
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	workout := &Workout{}
@@ -131,7 +131,7 @@ func (ws *WorkoutService) DeleteWorkout(id string, userId string) error {
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	result, err := ws.DB.Collection("workout").DeleteOne(context.Background(), filter)

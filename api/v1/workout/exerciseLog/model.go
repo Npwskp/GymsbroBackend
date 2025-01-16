@@ -14,8 +14,8 @@ type ExerciseLog struct {
 	CompletedSets    int                `json:"completed_sets" bson:"completed_sets"`
 	TotalVolume      float64            `json:"total_volume" bson:"total_volume"`
 	Notes            string             `json:"notes" bson:"notes"`
-	TimeUsedInSec    int                `json:"time_used_in_sec" bson:"time_used_in_sec"`
-	Date             time.Time          `json:"date" bson:"date"`
+	Duration         int                `json:"duration" bson:"duration"`
+	DateTime         time.Time          `json:"datetime" bson:"datetime"`
 	Sets             []SetLog           `json:"sets" validate:"dive"`
 	CreatedAt        time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt        time.Time          `json:"updated_at" bson:"updated_at"`
@@ -28,13 +28,11 @@ const (
 	WorkingSet SetType = "working"
 	DropSet    SetType = "drop"
 	FailureSet SetType = "failure"
-	BackOffSet SetType = "back_off"
 )
 
 type SetLog struct {
-	Weight    float64 `json:"weight" validate:"required,min=0"`
-	Reps      int     `json:"reps" validate:"required,min=0"`
+	Weight    float64 `json:"weight" validate:"required,min=1"`
+	Reps      int     `json:"reps" validate:"required,min=1"`
 	SetNumber int     `json:"setNumber" validate:"required,min=1"`
-	Type      SetType `json:"type" validate:"required,oneof=warm_up working drop failure back_off"`
-	RPE       *int    `json:"rpe" validate:"omitempty,min=1,max=10"`
+	Type      SetType `json:"type" validate:"required,oneof=warm_up working drop failure"`
 }

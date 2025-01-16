@@ -43,7 +43,7 @@ func (s *WorkoutSessionService) StartSession(dto *CreateWorkoutSessionDto, userI
 
 		err = s.DB.Collection("workout").FindOne(context.Background(), bson.D{
 			{Key: "_id", Value: workoutOid},
-			{Key: "userId", Value: userId},
+			{Key: "userid", Value: userId},
 		}).Decode(workout)
 		if err != nil {
 			return nil, err
@@ -94,7 +94,7 @@ func (s *WorkoutSessionService) EndSession(id string, userId string) (*WorkoutSe
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	session := &WorkoutSession{}
@@ -158,7 +158,7 @@ func (s *WorkoutSessionService) UpdateSession(id string, dto *UpdateWorkoutSessi
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	update := bson.D{{Key: "$set", Value: bson.D{
@@ -188,7 +188,7 @@ func (s *WorkoutSessionService) LogExercise(sessionId string, exerciseId string,
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 		{Key: "status", Value: StatusInProgress},
 	}
 
@@ -256,7 +256,7 @@ func (s *WorkoutSessionService) GetSession(id string, userId string) (*WorkoutSe
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	session := &WorkoutSession{}
@@ -268,7 +268,7 @@ func (s *WorkoutSessionService) GetSession(id string, userId string) (*WorkoutSe
 }
 
 func (s *WorkoutSessionService) GetUserSessions(userId string) ([]*WorkoutSession, error) {
-	filter := bson.D{{Key: "userId", Value: userId}}
+	filter := bson.D{{Key: "userid", Value: userId}}
 	opts := options.Find().SetSort(bson.D{{Key: "startTime", Value: -1}})
 
 	cursor, err := s.DB.Collection("workoutSessions").Find(context.Background(), filter, opts)
@@ -292,7 +292,7 @@ func (s *WorkoutSessionService) DeleteSession(id string, userId string) error {
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 	}
 
 	result, err := s.DB.Collection("workoutSessions").DeleteOne(context.Background(), filter)
@@ -315,7 +315,7 @@ func (s *WorkoutSessionService) ReorderExercises(sessionId string, dto *ReorderE
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userId", Value: userId},
+		{Key: "userid", Value: userId},
 		{Key: "status", Value: StatusInProgress}, // Only allow reordering in-progress sessions
 	}
 
@@ -390,7 +390,7 @@ func (s *WorkoutSessionService) LogSession(dto *LoggedSessionDto, userId string)
 			exerciseLog := &exerciseLog.ExerciseLog{}
 			err = s.DB.Collection("exerciseLog").FindOne(context.Background(), bson.D{
 				{Key: "_id", Value: logOid},
-				{Key: "userId", Value: userId},
+				{Key: "userid", Value: userId},
 			}).Decode(exerciseLog)
 			if err != nil {
 				return nil, err

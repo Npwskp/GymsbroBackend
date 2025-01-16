@@ -148,6 +148,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard": {
+            "get": {
+                "description": "Get workout frequency graph and analysis",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get workout dashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.DashboardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/exercise": {
             "get": {
                 "description": "Get all exercises",
@@ -343,14 +370,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Start Date (YYYY-MM-DD)",
+                        "description": "Start Date (YYYY-MM-DD HH:mm:ss)",
                         "name": "startDate",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "End Date (YYYY-MM-DD)",
+                        "description": "End Date (YYYY-MM-DD HH:mm:ss)",
                         "name": "endDate",
                         "in": "query",
                         "required": true
@@ -2729,6 +2756,126 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workoutPlan/byCyclicWorkout": {
+            "post": {
+                "description": "Create a workout plan by cycling through a list of workouts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workoutPlan"
+                ],
+                "summary": "Create workout plan by cyclic workouts",
+                "parameters": [
+                    {
+                        "description": "Create Workout Plan by Cycle",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/workoutPlan.CreatePlanByCyclicWorkoutDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/workoutPlan.WorkoutPlan"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/workoutPlan/byDaysOfWeek": {
+            "post": {
+                "description": "Create a workout plan with specific workouts for each day of the week",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workoutPlan"
+                ],
+                "summary": "Create workout plan by days of week",
+                "parameters": [
+                    {
+                        "description": "Create Workout Plan by Days",
+                        "name": "plan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/workoutPlan.CreatePlanByDaysOfWeekDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/workoutPlan.WorkoutPlan"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/workoutPlan/byUser": {
+            "get": {
+                "description": "Get all workout plans for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workoutPlan"
+                ],
+                "summary": "Get all workout plans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/workoutPlan.WorkoutPlan"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2809,6 +2956,86 @@ const docTemplate = `{
                 "GenderFemale"
             ]
         },
+        "dashboard.DashboardResponse": {
+            "type": "object",
+            "properties": {
+                "analysis": {
+                    "$ref": "#/definitions/dashboard.WorkoutAnalysis"
+                },
+                "frequency_graph": {
+                    "$ref": "#/definitions/dashboard.FrequencyGraphData"
+                }
+            }
+        },
+        "dashboard.FrequencyGraphData": {
+            "type": "object",
+            "properties": {
+                "labels": {
+                    "description": "Data points for last 30 days",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "trendline": {
+                    "description": "7-day moving average",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "values": {
+                    "description": "Number of exercises/workouts per day",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dashboard.WorkoutAnalysis": {
+            "type": "object",
+            "properties": {
+                "average_per_week": {
+                    "description": "Time-based Stats",
+                    "type": "number"
+                },
+                "best_streak": {
+                    "description": "Best consecutive days streak",
+                    "type": "integer"
+                },
+                "current_streak": {
+                    "description": "Current consecutive days streak",
+                    "type": "integer"
+                },
+                "last_month_count": {
+                    "description": "Workouts in last 30 days",
+                    "type": "integer"
+                },
+                "last_week_count": {
+                    "description": "Recent Trends",
+                    "type": "integer"
+                },
+                "most_active_day": {
+                    "description": "Pattern Analysis",
+                    "type": "string"
+                },
+                "most_active_time": {
+                    "description": "\"Morning\", \"Afternoon\", \"Evening\", \"Night\"",
+                    "type": "string"
+                },
+                "total_exercises": {
+                    "type": "integer"
+                },
+                "total_volume": {
+                    "type": "number"
+                },
+                "total_workouts": {
+                    "description": "General Stats",
+                    "type": "integer"
+                }
+            }
+        },
         "exercise.CreateExerciseDto": {
             "type": "object",
             "required": [
@@ -2877,6 +3104,9 @@ const docTemplate = `{
                 "userid"
             ],
             "properties": {
+                "_id": {
+                    "type": "string"
+                },
                 "body_part": {
                     "type": "array",
                     "items": {
@@ -2900,9 +3130,6 @@ const docTemplate = `{
                 },
                 "force": {
                     "$ref": "#/definitions/exerciseEnums.Force"
-                },
-                "id": {
-                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -3203,8 +3430,11 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "date": {
+                "datetime": {
                     "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
                 },
                 "exerciseid": {
                     "type": "string"
@@ -3220,9 +3450,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/exerciseLog.SetLog"
                     }
-                },
-                "time_used_in_sec": {
-                    "type": "integer"
                 },
                 "total_volume": {
                     "type": "number"
@@ -3249,11 +3476,6 @@ const docTemplate = `{
             "properties": {
                 "reps": {
                     "type": "integer",
-                    "minimum": 0
-                },
-                "rpe": {
-                    "type": "integer",
-                    "maximum": 10,
                     "minimum": 1
                 },
                 "setNumber": {
@@ -3265,8 +3487,7 @@ const docTemplate = `{
                         "warm_up",
                         "working",
                         "drop",
-                        "failure",
-                        "back_off"
+                        "failure"
                     ],
                     "allOf": [
                         {
@@ -3276,7 +3497,7 @@ const docTemplate = `{
                 },
                 "weight": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 1
                 }
             }
         },
@@ -3286,15 +3507,13 @@ const docTemplate = `{
                 "warm_up",
                 "working",
                 "drop",
-                "failure",
-                "back_off"
+                "failure"
             ],
             "x-enum-varnames": [
                 "WarmUpSet",
                 "WorkingSet",
                 "DropSet",
-                "FailureSet",
-                "BackOffSet"
+                "FailureSet"
             ]
         },
         "exerciseLog.UpdateExerciseLogDto": {
@@ -4022,7 +4241,6 @@ const docTemplate = `{
         "workout.CreateWorkoutDto": {
             "type": "object",
             "required": [
-                "exercises",
                 "name"
             ],
             "properties": {
@@ -4093,8 +4311,7 @@ const docTemplate = `{
         "workout.WorkoutExercise": {
             "type": "object",
             "required": [
-                "exerciseid",
-                "order"
+                "exerciseid"
             ],
             "properties": {
                 "exerciseid": {
@@ -4103,6 +4320,95 @@ const docTemplate = `{
                 "order": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "workoutPlan.CreatePlanByCyclicWorkoutDto": {
+            "type": "object",
+            "required": [
+                "weeksDuration",
+                "workoutIds"
+            ],
+            "properties": {
+                "weeksDuration": {
+                    "type": "integer"
+                },
+                "workoutIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "workoutPlan.CreatePlanByDaysOfWeekDto": {
+            "type": "object",
+            "required": [
+                "fridayWorkoutId",
+                "mondayWorkoutId",
+                "saturdayWorkoutId",
+                "sundayWorkoutId",
+                "thursdayWorkoutId",
+                "tuesdayWorkoutId",
+                "wednesdayWorkoutId",
+                "weeksDuration"
+            ],
+            "properties": {
+                "fridayWorkoutId": {
+                    "type": "string"
+                },
+                "mondayWorkoutId": {
+                    "type": "string"
+                },
+                "saturdayWorkoutId": {
+                    "type": "string"
+                },
+                "sundayWorkoutId": {
+                    "type": "string"
+                },
+                "thursdayWorkoutId": {
+                    "type": "string"
+                },
+                "tuesdayWorkoutId": {
+                    "type": "string"
+                },
+                "wednesdayWorkoutId": {
+                    "type": "string"
+                },
+                "weeksDuration": {
+                    "type": "integer"
+                }
+            }
+        },
+        "workoutPlan.WorkoutPlan": {
+            "type": "object",
+            "required": [
+                "dates",
+                "userid",
+                "workoutid"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "dates": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "userid": {
+                    "type": "string"
+                },
+                "workoutid": {
+                    "type": "string"
                 }
             }
         },

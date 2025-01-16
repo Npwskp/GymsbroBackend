@@ -54,6 +54,62 @@ definitions:
     x-enum-varnames:
     - GenderMale
     - GenderFemale
+  dashboard.DashboardResponse:
+    properties:
+      analysis:
+        $ref: '#/definitions/dashboard.WorkoutAnalysis'
+      frequency_graph:
+        $ref: '#/definitions/dashboard.FrequencyGraphData'
+    type: object
+  dashboard.FrequencyGraphData:
+    properties:
+      labels:
+        description: Data points for last 30 days
+        items:
+          type: string
+        type: array
+      trendline:
+        description: 7-day moving average
+        items:
+          type: number
+        type: array
+      values:
+        description: Number of exercises/workouts per day
+        items:
+          type: integer
+        type: array
+    type: object
+  dashboard.WorkoutAnalysis:
+    properties:
+      average_per_week:
+        description: Time-based Stats
+        type: number
+      best_streak:
+        description: Best consecutive days streak
+        type: integer
+      current_streak:
+        description: Current consecutive days streak
+        type: integer
+      last_month_count:
+        description: Workouts in last 30 days
+        type: integer
+      last_week_count:
+        description: Recent Trends
+        type: integer
+      most_active_day:
+        description: Pattern Analysis
+        type: string
+      most_active_time:
+        description: '"Morning", "Afternoon", "Evening", "Night"'
+        type: string
+      total_exercises:
+        type: integer
+      total_volume:
+        type: number
+      total_workouts:
+        description: General Stats
+        type: integer
+    type: object
   exercise.CreateExerciseDto:
     properties:
       body_part:
@@ -94,6 +150,8 @@ definitions:
     type: object
   exercise.Exercise:
     properties:
+      _id:
+        type: string
       body_part:
         items:
           $ref: '#/definitions/exerciseEnums.BodyPart'
@@ -110,8 +168,6 @@ definitions:
         type: array
       force:
         $ref: '#/definitions/exerciseEnums.Force'
-      id:
-        type: string
       image:
         type: string
       mechanics:
@@ -365,8 +421,10 @@ definitions:
         type: integer
       created_at:
         type: string
-      date:
+      datetime:
         type: string
+      duration:
+        type: integer
       exerciseid:
         type: string
       id:
@@ -377,8 +435,6 @@ definitions:
         items:
           $ref: '#/definitions/exerciseLog.SetLog'
         type: array
-      time_used_in_sec:
-        type: integer
       total_volume:
         type: number
       updated_at:
@@ -395,10 +451,6 @@ definitions:
   exerciseLog.SetLog:
     properties:
       reps:
-        minimum: 0
-        type: integer
-      rpe:
-        maximum: 10
         minimum: 1
         type: integer
       setNumber:
@@ -412,9 +464,8 @@ definitions:
         - working
         - drop
         - failure
-        - back_off
       weight:
-        minimum: 0
+        minimum: 1
         type: number
     required:
     - reps
@@ -428,14 +479,12 @@ definitions:
     - working
     - drop
     - failure
-    - back_off
     type: string
     x-enum-varnames:
     - WarmUpSet
     - WorkingSet
     - DropSet
     - FailureSet
-    - BackOffSet
   exerciseLog.UpdateExerciseLogDto:
     properties:
       notes:
@@ -937,7 +986,6 @@ definitions:
       name:
         type: string
     required:
-    - exercises
     - name
     type: object
   workout.UpdateWorkoutDto:
@@ -982,7 +1030,68 @@ definitions:
         type: integer
     required:
     - exerciseid
-    - order
+    type: object
+  workoutPlan.CreatePlanByCyclicWorkoutDto:
+    properties:
+      weeksDuration:
+        type: integer
+      workoutIds:
+        items:
+          type: string
+        type: array
+    required:
+    - weeksDuration
+    - workoutIds
+    type: object
+  workoutPlan.CreatePlanByDaysOfWeekDto:
+    properties:
+      fridayWorkoutId:
+        type: string
+      mondayWorkoutId:
+        type: string
+      saturdayWorkoutId:
+        type: string
+      sundayWorkoutId:
+        type: string
+      thursdayWorkoutId:
+        type: string
+      tuesdayWorkoutId:
+        type: string
+      wednesdayWorkoutId:
+        type: string
+      weeksDuration:
+        type: integer
+    required:
+    - fridayWorkoutId
+    - mondayWorkoutId
+    - saturdayWorkoutId
+    - sundayWorkoutId
+    - thursdayWorkoutId
+    - tuesdayWorkoutId
+    - wednesdayWorkoutId
+    - weeksDuration
+    type: object
+  workoutPlan.WorkoutPlan:
+    properties:
+      created_at:
+        type: string
+      dates:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      id:
+        type: string
+      updated_at:
+        type: string
+      userid:
+        type: string
+      workoutid:
+        type: string
+    required:
+    - dates
+    - userid
+    - workoutid
     type: object
   workoutSession.CompleteExerciseDto:
     properties:
@@ -1204,6 +1313,24 @@ paths:
       summary: Register
       tags:
       - auth
+  /dashboard:
+    get:
+      consumes:
+      - application/json
+      description: Get workout frequency graph and analysis
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.DashboardResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get workout dashboard
+      tags:
+      - dashboard
   /exercise:
     get:
       consumes:
@@ -1381,12 +1508,12 @@ paths:
       - application/json
       description: Get exercise logs within a date range
       parameters:
-      - description: Start Date (YYYY-MM-DD)
+      - description: Start Date (YYYY-MM-DD HH:mm:ss)
         in: query
         name: startDate
         required: true
         type: string
-      - description: End Date (YYYY-MM-DD)
+      - description: End Date (YYYY-MM-DD HH:mm:ss)
         in: query
         name: endDate
         required: true
@@ -2943,6 +3070,87 @@ paths:
       summary: Update a workout
       tags:
       - workouts
+  /workoutPlan/byCyclicWorkout:
+    post:
+      consumes:
+      - application/json
+      description: Create a workout plan by cycling through a list of workouts
+      parameters:
+      - description: Create Workout Plan by Cycle
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/workoutPlan.CreatePlanByCyclicWorkoutDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/workoutPlan.WorkoutPlan'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Create workout plan by cyclic workouts
+      tags:
+      - workoutPlan
+  /workoutPlan/byDaysOfWeek:
+    post:
+      consumes:
+      - application/json
+      description: Create a workout plan with specific workouts for each day of the
+        week
+      parameters:
+      - description: Create Workout Plan by Days
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/workoutPlan.CreatePlanByDaysOfWeekDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/workoutPlan.WorkoutPlan'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Create workout plan by days of week
+      tags:
+      - workoutPlan
+  /workoutPlan/byUser:
+    get:
+      consumes:
+      - application/json
+      description: Get all workout plans for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/workoutPlan.WorkoutPlan'
+            type: array
+        "401":
+          description: Unauthorized
+          schema: {}
+      summary: Get all workout plans
+      tags:
+      - workoutPlan
 schemes:
 - http
 - https

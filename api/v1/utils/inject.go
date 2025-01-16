@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/auth"
+	"github.com/Npwskp/GymsbroBackend/api/v1/dashboard"
 	"github.com/Npwskp/GymsbroBackend/api/v1/middleware"
 	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
@@ -13,6 +14,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workoutPlan"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workoutSession"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -70,4 +72,12 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	workoutSessionService := workoutSession.WorkoutSessionService{DB: db}
 	workoutSessionController := workoutSession.WorkoutSessionController{Instance: protected, Service: &workoutSessionService}
 	workoutSessionController.Handle()
+
+	workoutPlanService := workoutPlan.WorkoutPlanService{DB: db}
+	workoutPlanController := workoutPlan.WorkoutPlanController{Instance: protected, Service: &workoutPlanService}
+	workoutPlanController.Handle()
+
+	dashboardService := dashboard.DashboardService{DB: db}
+	dashboardController := dashboard.DashboardController{Instance: protected, Service: &dashboardService}
+	dashboardController.Handle()
 }
