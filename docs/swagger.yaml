@@ -453,10 +453,6 @@ definitions:
       reps:
         minimum: 1
         type: integer
-      rpe:
-        maximum: 10
-        minimum: 1
-        type: integer
       setNumber:
         minimum: 1
         type: integer
@@ -990,7 +986,6 @@ definitions:
       name:
         type: string
     required:
-    - exercises
     - name
     type: object
   workout.UpdateWorkoutDto:
@@ -1035,7 +1030,6 @@ definitions:
         type: integer
     required:
     - exerciseid
-    - order
     type: object
   workoutPlan.CreatePlanByCyclicWorkoutDto:
     properties:
@@ -3076,31 +3070,6 @@ paths:
       summary: Update a workout
       tags:
       - workouts
-  /workoutPlan/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a workout plan by ID
-      parameters:
-      - description: Workout Plan ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-      summary: Delete workout plan
-      tags:
-      - workoutPlan
   /workoutPlan/byCyclicWorkout:
     post:
       consumes:

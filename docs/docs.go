@@ -2876,43 +2876,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/workoutPlan/{id}": {
-            "delete": {
-                "description": "Delete a workout plan by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workoutPlan"
-                ],
-                "summary": "Delete workout plan",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workout Plan ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -3513,11 +3476,6 @@ const docTemplate = `{
             "properties": {
                 "reps": {
                     "type": "integer",
-                    "minimum": 1
-                },
-                "rpe": {
-                    "type": "integer",
-                    "maximum": 10,
                     "minimum": 1
                 },
                 "setNumber": {
@@ -4283,7 +4241,6 @@ const docTemplate = `{
         "workout.CreateWorkoutDto": {
             "type": "object",
             "required": [
-                "exercises",
                 "name"
             ],
             "properties": {
@@ -4354,8 +4311,7 @@ const docTemplate = `{
         "workout.WorkoutExercise": {
             "type": "object",
             "required": [
-                "exerciseid",
-                "order"
+                "exerciseid"
             ],
             "properties": {
                 "exerciseid": {
