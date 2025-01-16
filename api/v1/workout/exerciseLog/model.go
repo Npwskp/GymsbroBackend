@@ -35,5 +35,4 @@ type SetLog struct {
 	Reps      int     `json:"reps" validate:"required,min=1"`
 	SetNumber int     `json:"setNumber" validate:"required,min=1"`
 	Type      SetType `json:"type" validate:"required,oneof=warm_up working drop failure"`
-	RPE       *int    `json:"rpe" validate:"omitempty,min=1,max=10"`
 }
