@@ -33,7 +33,29 @@ func (c *DashboardController) GetDashboardHandler(ctx *fiber.Ctx) error {
 	return ctx.JSON(dashboard)
 }
 
+// @Summary     Get user strength standards
+// @Description Get user strength standards
+// @Tags        dashboard
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} UserStrengthStandards
+// @Failure     400 {object} Error
+// @Router      /dashboard/strength-standards [get]
+func (c *DashboardController) GetUserStrengthStandardsHandler(ctx *fiber.Ctx) error {
+	userId := function.GetUserIDFromContext(ctx)
+
+	strengthStandards, err := c.Service.GetUserStrengthStandards(userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(strengthStandards)
+}
+
 func (c *DashboardController) Handle() {
 	g := c.Instance.Group("/dashboard")
 	g.Get("/", c.GetDashboardHandler)
+	g.Get("/strength-standards", c.GetUserStrengthStandardsHandler)
 }

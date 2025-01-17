@@ -79,6 +79,43 @@ definitions:
           type: integer
         type: array
     type: object
+  dashboard.UserStrengthStandardPerExercise:
+    properties:
+      equipment:
+        $ref: '#/definitions/exerciseEnums.Equipment'
+      exercise:
+        type: string
+      lastPerformed:
+        type: string
+      relativeStrength:
+        type: number
+      repmax:
+        type: number
+      score:
+        type: number
+      strengthLevel:
+        $ref: '#/definitions/dashboardEnums.StrengthType'
+    type: object
+  dashboard.UserStrengthStandardPerMuscleGroup:
+    properties:
+      score:
+        type: number
+      strength_level:
+        $ref: '#/definitions/dashboardEnums.StrengthType'
+      target_muscle:
+        $ref: '#/definitions/exerciseEnums.TargetMuscle'
+    type: object
+  dashboard.UserStrengthStandards:
+    properties:
+      exerciseStandards:
+        items:
+          $ref: '#/definitions/dashboard.UserStrengthStandardPerExercise'
+        type: array
+      muscleGroupStrengths:
+        items:
+          $ref: '#/definitions/dashboard.UserStrengthStandardPerMuscleGroup'
+        type: array
+    type: object
   dashboard.WorkoutAnalysis:
     properties:
       average_per_week:
@@ -110,6 +147,29 @@ definitions:
         description: General Stats
         type: integer
     type: object
+  dashboardEnums.StrengthType:
+    enum:
+    - untrained
+    - beginner
+    - novice
+    - intermediate
+    - advanced
+    - elite
+    type: string
+    x-enum-comments:
+      StrengthTypeAdvanced: Score 75-112.5
+      StrengthTypeBeginner: Score < 30
+      StrengthTypeElite: Score > 112.5
+      StrengthTypeIntermediate: Score 45-75
+      StrengthTypeNovice: Score 30-45
+      StrengthTypeUntrained: Score = 0
+    x-enum-varnames:
+    - StrengthTypeUntrained
+    - StrengthTypeBeginner
+    - StrengthTypeNovice
+    - StrengthTypeIntermediate
+    - StrengthTypeAdvanced
+    - StrengthTypeElite
   exercise.CreateExerciseDto:
     properties:
       body_part:
@@ -1329,6 +1389,24 @@ paths:
           description: Bad Request
           schema: {}
       summary: Get workout dashboard
+      tags:
+      - dashboard
+  /dashboard/strength-standards:
+    get:
+      consumes:
+      - application/json
+      description: Get user strength standards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.UserStrengthStandards'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get user strength standards
       tags:
       - dashboard
   /exercise:

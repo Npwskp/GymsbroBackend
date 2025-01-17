@@ -1,0 +1,361 @@
+Gender,ExerciseName,Unit,Bodyweight,Beginner,Novice,Intermediate,Advanced,Elite
+Male,Squat,kg,50,33,52,76,104,136
+Male,Squat,kg,55,40,60,86,116,149
+Male,Squat,kg,60,47,68,95,127,161
+Male,Squat,kg,65,53,76,104,137,173
+Male,Squat,kg,70,59,83,113,147,184
+Male,Squat,kg,75,66,91,122,157,195
+Male,Squat,kg,80,72,98,130,166,205
+Male,Squat,kg,85,78,105,138,175,215
+Male,Squat,kg,90,83,112,146,184,225
+Male,Squat,kg,95,89,118,153,192,234
+Male,Squat,kg,100,95,125,160,201,243
+Male,Squat,kg,105,100,131,168,209,252
+Male,Squat,kg,110,106,137,174,216,260
+Male,Squat,kg,115,111,143,181,224,269
+Male,Squat,kg,120,116,149,188,231,277
+Male,Squat,kg,125,121,155,194,238,284
+Male,Squat,kg,130,126,160,201,245,292
+Male,Squat,kg,135,131,166,207,252,299
+Male,Squat,kg,140,136,171,213,259,307
+Male,Bench Press,kg,50,24,38,57,79,103
+Male,Bench Press,kg,55,29,45,64,87,113
+Male,Bench Press,kg,60,34,51,72,96,123
+Male,Bench Press,kg,65,39,57,79,104,132
+Male,Bench Press,kg,70,44,62,85,112,141
+Male,Bench Press,kg,75,49,68,92,119,149
+Male,Bench Press,kg,80,53,74,98,127,157
+Male,Bench Press,kg,85,58,79,105,134,165
+Male,Bench Press,kg,90,62,84,111,141,172
+Male,Bench Press,kg,95,67,89,116,147,180
+Male,Bench Press,kg,100,71,94,122,153,187
+Male,Bench Press,kg,105,75,99,128,160,194
+Male,Bench Press,kg,110,80,104,133,166,200
+Male,Bench Press,kg,115,84,109,138,172,207
+Male,Bench Press,kg,120,88,113,143,177,213
+Male,Bench Press,kg,125,92,118,148,183,219
+Male,Bench Press,kg,130,95,122,153,188,225
+Male,Bench Press,kg,135,99,126,158,194,231
+Male,Bench Press,kg,140,103,130,163,199,236
+Male,Deadlift,kg,50,44,65,93,125,160
+Male,Deadlift,kg,55,51,74,103,137,174
+Male,Deadlift,kg,60,58,83,114,149,187
+Male,Deadlift,kg,65,66,92,124,160,200
+Male,Deadlift,kg,70,73,100,133,171,212
+Male,Deadlift,kg,75,79,108,142,182,224
+Male,Deadlift,kg,80,86,116,151,192,235
+Male,Deadlift,kg,85,93,123,160,201,245
+Male,Deadlift,kg,90,99,131,168,211,256
+Male,Deadlift,kg,95,105,138,176,220,266
+Male,Deadlift,kg,100,111,145,184,228,275
+Male,Deadlift,kg,105,117,151,192,237,284
+Male,Deadlift,kg,110,123,158,199,245,293
+Male,Deadlift,kg,115,129,164,206,253,302
+Male,Deadlift,kg,120,134,171,213,261,311
+Male,Deadlift,kg,125,140,177,220,268,319
+Male,Deadlift,kg,130,145,183,227,276,327
+Male,Deadlift,kg,135,150,188,233,283,335
+Male,Deadlift,kg,140,155,194,240,290,342
+Male,Shoulder Press,kg,50,15,25,38,53,71
+Male,Shoulder Press,kg,55,18,29,42,59,77
+Male,Shoulder Press,kg,60,21,32,47,64,84
+Male,Shoulder Press,kg,65,24,36,52,70,90
+Male,Shoulder Press,kg,70,27,40,56,75,95
+Male,Shoulder Press,kg,75,30,43,60,80,101
+Male,Shoulder Press,kg,80,33,47,64,84,106
+Male,Shoulder Press,kg,85,36,50,68,89,111
+Male,Shoulder Press,kg,90,39,54,72,93,116
+Male,Shoulder Press,kg,95,41,57,76,97,121
+Male,Shoulder Press,kg,100,44,60,79,102,125
+Male,Shoulder Press,kg,105,47,63,83,106,130
+Male,Shoulder Press,kg,110,49,66,86,109,134
+Male,Shoulder Press,kg,115,52,69,90,113,138
+Male,Shoulder Press,kg,120,54,72,93,117,142
+Male,Shoulder Press,kg,125,57,75,96,120,146
+Male,Shoulder Press,kg,130,59,77,99,124,150
+Male,Shoulder Press,kg,135,61,80,102,127,154
+Male,Shoulder Press,kg,140,64,83,105,131,157
+Male,Dumbbell Bench Press,kg,50,8,15,26,39,54
+Male,Dumbbell Bench Press,kg,55,10,18,29,42,58
+Male,Dumbbell Bench Press,kg,60,11,20,32,46,62
+Male,Dumbbell Bench Press,kg,65,13,22,34,49,66
+Male,Dumbbell Bench Press,kg,70,15,24,37,52,69
+Male,Dumbbell Bench Press,kg,75,16,26,39,55,73
+Male,Dumbbell Bench Press,kg,80,18,28,42,58,76
+Male,Dumbbell Bench Press,kg,85,19,30,44,61,79
+Male,Dumbbell Bench Press,kg,90,21,32,46,63,82
+Male,Dumbbell Bench Press,kg,95,22,34,49,66,85
+Male,Dumbbell Bench Press,kg,100,24,36,51,69,88
+Male,Dumbbell Bench Press,kg,105,25,38,53,71,91
+Male,Dumbbell Bench Press,kg,110,27,39,55,73,93
+Male,Dumbbell Bench Press,kg,115,28,41,57,76,96
+Male,Dumbbell Bench Press,kg,120,29,43,59,78,98
+Male,Dumbbell Bench Press,kg,125,31,44,61,80,101
+Male,Dumbbell Bench Press,kg,130,32,46,63,82,103
+Male,Dumbbell Bench Press,kg,135,33,47,64,84,105
+Male,Dumbbell Bench Press,kg,140,35,49,66,86,108
+Male,Pull Ups,kg,50,-9,6,24,44,66
+Male,Pull Ups,kg,55,-8,8,26,48,70
+Male,Pull Ups,kg,60,-8,9,29,51,74
+Male,Pull Ups,kg,65,-7,10,30,53,77
+Male,Pull Ups,kg,70,-7,11,32,56,81
+Male,Pull Ups,kg,75,-7,12,34,58,83
+Male,Pull Ups,kg,80,-7,12,35,60,86
+Male,Pull Ups,kg,85,-7,12,36,61,88
+Male,Pull Ups,kg,90,-8,13,36,62,90
+Male,Pull Ups,kg,95,-8,13,37,64,91
+Male,Pull Ups,kg,100,-9,13,37,64,93
+Male,Pull Ups,kg,105,-10,12,37,65,94
+Male,Pull Ups,kg,110,-10,12,38,66,95
+Male,Pull Ups,kg,115,-11,11,37,66,96
+Male,Pull Ups,kg,120,-12,11,37,66,96
+Male,Pull Ups,kg,125,-14,10,37,66,97
+Male,Pull Ups,kg,130,-15,9,36,66,97
+Male,Pull Ups,kg,135,-16,8,36,66,97
+Male,Pull Ups,kg,140,-17,7,35,66,97
+Male,Incline Bench Press,kg,50,22,34,49,67,87
+Male,Incline Bench Press,kg,55,27,40,56,76,97
+Male,Incline Bench Press,kg,60,32,46,63,83,106
+Male,Incline Bench Press,kg,65,36,51,70,91,114
+Male,Incline Bench Press,kg,70,41,57,76,98,122
+Male,Incline Bench Press,kg,75,45,62,82,105,130
+Male,Incline Bench Press,kg,80,50,67,88,112,138
+Male,Incline Bench Press,kg,85,54,73,94,119,145
+Male,Incline Bench Press,kg,90,59,78,100,125,152
+Male,Incline Bench Press,kg,95,63,82,105,131,159
+Male,Incline Bench Press,kg,100,67,87,111,137,165
+Male,Incline Bench Press,kg,105,71,92,116,143,172
+Male,Incline Bench Press,kg,110,75,96,121,149,178
+Male,Incline Bench Press,kg,115,79,101,126,154,184
+Male,Incline Bench Press,kg,120,83,105,131,160,190
+Male,Incline Bench Press,kg,125,87,110,136,165,196
+Male,Incline Bench Press,kg,130,91,114,141,170,201
+Male,Incline Bench Press,kg,135,94,118,145,175,207
+Male,Incline Bench Press,kg,140,98,122,150,180,212
+Male,Lat Pulldown,kg,50,25,39,58,81,105
+Male,Lat Pulldown,kg,55,28,43,63,86,112
+Male,Lat Pulldown,kg,60,31,47,67,92,118
+Male,Lat Pulldown,kg,65,34,51,72,97,124
+Male,Lat Pulldown,kg,70,37,54,76,101,129
+Male,Lat Pulldown,kg,75,39,57,80,106,134
+Male,Lat Pulldown,kg,80,42,61,84,110,139
+Male,Lat Pulldown,kg,85,45,64,87,115,144
+Male,Lat Pulldown,kg,90,47,67,91,119,149
+Male,Lat Pulldown,kg,95,50,70,94,122,153
+Male,Lat Pulldown,kg,100,52,72,97,126,157
+Male,Lat Pulldown,kg,105,54,75,101,130,161
+Male,Lat Pulldown,kg,110,57,78,104,133,165
+Male,Lat Pulldown,kg,115,59,80,107,137,169
+Male,Lat Pulldown,kg,120,61,83,110,140,172
+Male,Lat Pulldown,kg,125,63,85,112,143,176
+Male,Lat Pulldown,kg,130,65,88,115,146,179
+Male,Lat Pulldown,kg,135,67,90,118,149,183
+Male,Lat Pulldown,kg,140,69,92,120,152,186
+Male,Dips,kg,50,-8,9,31,56,83
+Male,Dips,kg,55,-7,12,35,62,90
+Male,Dips,kg,60,-5,15,39,67,96
+Male,Dips,kg,65,-4,17,43,71,102
+Male,Dips,kg,70,-2,20,46,76,107
+Male,Dips,kg,75,-1,22,49,79,112
+Male,Dips,kg,80,0,23,51,83,116
+Male,Dips,kg,85,0,25,54,86,120
+Male,Dips,kg,90,1,26,56,89,124
+Male,Dips,kg,95,2,27,58,92,127
+Male,Dips,kg,100,2,29,60,94,130
+Male,Dips,kg,105,2,29,61,96,133
+Male,Dips,kg,110,2,30,63,98,136
+Male,Dips,kg,115,2,31,64,100,138
+Male,Dips,kg,120,2,31,65,102,140
+Male,Dips,kg,125,2,31,66,103,142
+Male,Dips,kg,130,2,32,66,104,144
+Male,Dips,kg,135,1,32,67,106,146
+Male,Dips,kg,140,1,32,67,107,147
+Male,Chin ups,kg,50,-6,8,24,42,61
+Male,Chin ups,kg,55,-5,10,27,46,66
+Male,Chin ups,kg,60,-4,11,29,49,69
+Male,Chin ups,kg,65,-3,12,31,51,73
+Male,Chin ups,kg,70,-3,13,32,53,75
+Male,Chin ups,kg,75,-3,14,34,55,78
+Male,Chin ups,kg,80,-3,15,35,57,80
+Male,Chin ups,kg,85,-3,15,36,59,82
+Male,Chin ups,kg,90,-4,15,36,60,84
+Male,Chin ups,kg,95,-4,15,37,61,85
+Male,Chin ups,kg,100,-5,15,37,62,87
+Male,Chin ups,kg,105,-5,15,37,62,88
+Male,Chin ups,kg,110,-6,14,37,63,88
+Male,Chin ups,kg,115,-7,14,37,63,89
+Male,Chin ups,kg,120,-8,13,37,63,89
+Male,Chin ups,kg,125,-9,12,37,63,90
+Male,Chin ups,kg,130,-10,12,36,63,90
+Male,Chin ups,kg,135,-11,11,36,62,90
+Male,Chin ups,kg,140,-13,10,35,62,90
+Female,Squat,kg,40,17,31,51,75,101
+Female,Squat,kg,45,20,36,56,81,109
+Female,Squat,kg,50,23,39,61,87,115
+Female,Squat,kg,55,26,43,65,92,122
+Female,Squat,kg,60,29,47,70,97,128
+Female,Squat,kg,65,32,50,74,102,133
+Female,Squat,kg,70,34,53,78,106,138
+Female,Squat,kg,75,37,56,81,111,143
+Female,Squat,kg,80,39,59,85,115,148
+Female,Squat,kg,85,41,62,88,119,152
+Female,Squat,kg,90,44,65,91,123,157
+Female,Squat,kg,95,46,68,95,126,161
+Female,Squat,kg,100,48,70,98,130,165
+Female,Squat,kg,105,50,73,101,133,169
+Female,Squat,kg,110,52,75,103,136,172
+Female,Squat,kg,115,54,77,106,140,176
+Female,Squat,kg,120,56,80,109,143,179
+Female,Bench Press,kg,40,8,18,32,50,70
+Female,Bench Press,kg,45,10,21,36,55,76
+Female,Bench Press,kg,50,12,24,40,59,82
+Female,Bench Press,kg,55,15,27,43,64,87
+Female,Bench Press,kg,60,17,29,47,68,92
+Female,Bench Press,kg,65,19,32,50,72,96
+Female,Bench Press,kg,70,20,34,53,75,101
+Female,Bench Press,kg,75,22,37,56,79,105
+Female,Bench Press,kg,80,24,39,59,82,109
+Female,Bench Press,kg,85,26,41,62,86,112
+Female,Bench Press,kg,90,28,44,64,89,116
+Female,Bench Press,kg,95,29,46,67,92,119
+Female,Bench Press,kg,100,31,48,69,95,123
+Female,Bench Press,kg,105,33,50,72,98,126
+Female,Bench Press,kg,110,34,52,74,100,129
+Female,Bench Press,kg,115,36,54,76,103,132
+Female,Bench Press,kg,120,37,56,79,106,135
+Female,Deadlift,kg,40,24,40,62,89,118
+Female,Deadlift,kg,45,27,45,68,95,126
+Female,Deadlift,kg,50,31,49,73,102,133
+Female,Deadlift,kg,55,34,53,78,107,140
+Female,Deadlift,kg,60,37,57,83,113,146
+Female,Deadlift,kg,65,40,61,87,118,152
+Female,Deadlift,kg,70,43,64,91,123,157
+Female,Deadlift,kg,75,45,67,95,127,163
+Female,Deadlift,kg,80,48,71,99,132,168
+Female,Deadlift,kg,85,51,74,102,136,172
+Female,Deadlift,kg,90,53,77,106,140,177
+Female,Deadlift,kg,95,55,79,109,144,181
+Female,Deadlift,kg,100,58,82,112,147,185
+Female,Deadlift,kg,105,60,85,116,151,189
+Female,Deadlift,kg,110,62,87,119,154,193
+Female,Deadlift,kg,115,64,90,121,158,197
+Female,Deadlift,kg,120,66,92,124,161,200
+Female,Shoulder Press,kg,40,7,14,23,35,48
+Female,Shoulder Press,kg,45,8,16,25,38,52
+Female,Shoulder Press,kg,50,10,17,28,40,55
+Female,Shoulder Press,kg,55,11,19,30,43,58
+Female,Shoulder Press,kg,60,12,21,32,45,60
+Female,Shoulder Press,kg,65,13,22,34,48,63
+Female,Shoulder Press,kg,70,15,24,35,50,65
+Female,Shoulder Press,kg,75,16,25,37,52,68
+Female,Shoulder Press,kg,80,17,26,39,54,70
+Female,Shoulder Press,kg,85,18,28,40,55,72
+Female,Shoulder Press,kg,90,19,29,42,57,74
+Female,Shoulder Press,kg,95,20,30,43,59,76
+Female,Shoulder Press,kg,100,21,31,45,61,78
+Female,Shoulder Press,kg,105,22,32,46,62,80
+Female,Shoulder Press,kg,110,23,34,47,64,81
+Female,Shoulder Press,kg,115,23,35,49,65,83
+Female,Shoulder Press,kg,120,24,36,50,66,85
+Female,Dumbbell Bench Press,kg,40,2,7,13,22,33
+Female,Dumbbell Bench Press,kg,45,3,8,15,25,36
+Female,Dumbbell Bench Press,kg,50,4,9,17,27,38
+Female,Dumbbell Bench Press,kg,55,5,10,18,28,40
+Female,Dumbbell Bench Press,kg,60,5,11,19,30,43
+Female,Dumbbell Bench Press,kg,65,6,12,21,32,45
+Female,Dumbbell Bench Press,kg,70,7,13,22,33,46
+Female,Dumbbell Bench Press,kg,75,7,14,23,35,48
+Female,Dumbbell Bench Press,kg,80,8,15,24,36,50
+Female,Dumbbell Bench Press,kg,85,9,16,26,38,51
+Female,Dumbbell Bench Press,kg,90,9,17,27,39,53
+Female,Dumbbell Bench Press,kg,95,10,18,28,40,54
+Female,Dumbbell Bench Press,kg,100,11,18,29,42,56
+Female,Dumbbell Bench Press,kg,105,11,19,30,43,57
+Female,Dumbbell Bench Press,kg,110,12,20,31,44,59
+Female,Dumbbell Bench Press,kg,115,12,21,32,45,60
+Female,Dumbbell Bench Press,kg,120,13,21,33,46,61
+Female,Pull Ups,kg,40,-16,-6,5,18,33
+Female,Pull Ups,kg,45,-16,-6,7,21,36
+Female,Pull Ups,kg,50,-16,-5,8,23,39
+Female,Pull Ups,kg,55,-17,-5,9,25,41
+Female,Pull Ups,kg,60,-17,-5,10,26,43
+Female,Pull Ups,kg,65,-18,-5,10,27,45
+Female,Pull Ups,kg,70,-19,-5,10,28,46
+Female,Pull Ups,kg,75,-20,-6,10,28,47
+Female,Pull Ups,kg,80,-21,-6,10,29,48
+Female,Pull Ups,kg,85,-22,-7,10,29,49
+Female,Pull Ups,kg,90,-23,-8,10,29,49
+Female,Pull Ups,kg,95,-25,-9,9,29,49
+Female,Pull Ups,kg,100,-26,-10,8,28,49
+Female,Pull Ups,kg,105,-28,-11,7,28,49
+Female,Pull Ups,kg,110,-29,-13,6,27,49
+Female,Pull Ups,kg,115,-31,-14,5,26,48
+Female,Pull Ups,kg,120,-33,-16,4,26,48
+Female,Incline Bench Press,kg,40,5,13,26,42,61
+Female,Incline Bench Press,kg,45,7,16,29,47,67
+Female,Incline Bench Press,kg,50,9,19,33,51,72
+Female,Incline Bench Press,kg,55,11,21,36,56,78
+Female,Incline Bench Press,kg,60,12,24,40,60,82
+Female,Incline Bench Press,kg,65,14,26,43,64,87
+Female,Incline Bench Press,kg,70,16,29,46,67,91
+Female,Incline Bench Press,kg,75,18,31,49,71,95
+Female,Incline Bench Press,kg,80,20,33,52,74,99
+Female,Incline Bench Press,kg,85,21,36,54,77,103
+Female,Incline Bench Press,kg,90,23,38,57,81,107
+Female,Incline Bench Press,kg,95,25,40,60,84,110
+Female,Incline Bench Press,kg,100,26,42,62,86,114
+Female,Incline Bench Press,kg,105,28,44,65,89,117
+Female,Incline Bench Press,kg,110,29,46,67,92,120
+Female,Incline Bench Press,kg,115,31,48,69,95,123
+Female,Incline Bench Press,kg,120,32,49,71,97,126
+Female,Lat Pulldown,kg,40,14,24,36,52,70
+Female,Lat Pulldown,kg,45,15,25,39,55,72
+Female,Lat Pulldown,kg,50,17,27,41,57,75
+Female,Lat Pulldown,kg,55,18,28,42,59,78
+Female,Lat Pulldown,kg,60,19,30,44,61,80
+Female,Lat Pulldown,kg,65,20,31,46,63,82
+Female,Lat Pulldown,kg,70,21,32,47,65,84
+Female,Lat Pulldown,kg,75,22,34,49,66,86
+Female,Lat Pulldown,kg,80,23,35,50,68,88
+Female,Lat Pulldown,kg,85,24,36,51,69,89
+Female,Lat Pulldown,kg,90,24,37,52,71,91
+Female,Lat Pulldown,kg,95,25,38,54,72,93
+Female,Lat Pulldown,kg,100,26,39,55,74,94
+Female,Lat Pulldown,kg,105,27,40,56,75,95
+Female,Lat Pulldown,kg,110,27,40,57,76,97
+Female,Lat Pulldown,kg,115,28,41,58,77,98
+Female,Lat Pulldown,kg,120,29,42,59,78,99
+Female,Dips,kg,40,-15,-3,11,29,48
+Female,Dips,kg,45,-15,-2,14,32,53
+Female,Dips,kg,50,-15,-1,16,35,57
+Female,Dips,kg,55,-15,0,18,38,60
+Female,Dips,kg,60,-15,0,19,40,63
+Female,Dips,kg,65,-16,0,20,42,66
+Female,Dips,kg,70,-16,1,21,44,68
+Female,Dips,kg,75,-17,1,21,45,70
+Female,Dips,kg,80,-18,0,22,46,71
+Female,Dips,kg,85,-19,0,22,47,73
+Female,Dips,kg,90,-20,-1,22,47,74
+Female,Dips,kg,95,-21,-1,22,48,75
+Female,Dips,kg,100,-22,-2,22,48,75
+Female,Dips,kg,105,-23,-3,21,48,76
+Female,Dips,kg,110,-25,-4,21,48,76
+Female,Dips,kg,115,-26,-5,20,48,76
+Female,Dips,kg,120,-28,-6,19,47,76
+Female,Chin ups,kg,40,-12,-4,5,15,26
+Female,Chin ups,kg,45,-11,-3,7,18,29
+Female,Chin ups,kg,50,-11,-2,8,19,31
+Female,Chin ups,kg,55,-12,-2,9,21,33
+Female,Chin ups,kg,60,-12,-2,10,22,35
+Female,Chin ups,kg,65,-12,-2,10,23,36
+Female,Chin ups,kg,70,-13,-2,10,24,37
+Female,Chin ups,kg,75,-14,-2,10,24,38
+Female,Chin ups,kg,80,-14,-3,10,24,39
+Female,Chin ups,kg,85,-15,-4,10,24,39
+Female,Chin ups,kg,90,-17,-4,9,24,39
+Female,Chin ups,kg,95,-18,-5,9,24,39
+Female,Chin ups,kg,100,-19,-6,8,23,39
+Female,Chin ups,kg,105,-21,-8,7,23,39
+Female,Chin ups,kg,110,-22,-9,6,22,38
+Female,Chin ups,kg,115,-24,-10,5,21,38
+Female,Chin ups,kg,120,-26,-12,4,20,37

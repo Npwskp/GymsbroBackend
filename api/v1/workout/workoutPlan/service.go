@@ -94,7 +94,7 @@ func (s *WorkoutPlanService) CreatePlanByDaysOfWeek(dto *CreatePlanByDaysOfWeekD
 		// Filter out past dates from existing plan
 		var futureDates []time.Time
 		for _, date := range plan.Dates {
-			if date.After(currentDate) {
+			if !date.Before(currentDate) {
 				futureDates = append(futureDates, date)
 			}
 		}
@@ -206,7 +206,7 @@ func (s *WorkoutPlanService) CreatePlanByCyclicWorkout(dto *CreatePlanByCyclicWo
 		// Filter out past dates from existing plan
 		var futureDates []time.Time
 		for _, date := range plan.Dates {
-			if date.After(currentDate) {
+			if !date.Before(currentDate) {
 				futureDates = append(futureDates, date)
 			}
 		}

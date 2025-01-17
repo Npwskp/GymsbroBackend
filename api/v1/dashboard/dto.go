@@ -1,5 +1,12 @@
 package dashboard
 
+import (
+	"time"
+
+	dashboardEnums "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/enums"
+	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
+)
+
 type DashboardResponse struct {
 	FrequencyGraph FrequencyGraphData `json:"frequency_graph"`
 	Analysis       WorkoutAnalysis    `json:"analysis"`
@@ -32,4 +39,25 @@ type WorkoutAnalysis struct {
 	// Recent Trends
 	LastWeekCount  int `json:"last_week_count"`  // Workouts in last 7 days
 	LastMonthCount int `json:"last_month_count"` // Workouts in last 30 days
+}
+
+type UserStrengthStandards struct {
+	ExerciseStandards    []UserStrengthStandardPerExercise    `json:"exerciseStandards"`
+	MuscleGroupStrengths []UserStrengthStandardPerMuscleGroup `json:"muscleGroupStrengths"`
+}
+
+type UserStrengthStandardPerExercise struct {
+	Exercise         string                      `json:"exercise"`
+	Equipment        exerciseEnums.Equipment     `json:"equipment"`
+	RepMax           float64                     `json:"repmax"`
+	RelativeStrength float64                     `json:"relativeStrength"`
+	StrengthLevel    dashboardEnums.StrengthType `json:"strengthLevel"`
+	Score            float64                     `json:"score"`
+	LastPerformed    time.Time                   `json:"lastPerformed"`
+}
+
+type UserStrengthStandardPerMuscleGroup struct {
+	TargetMuscle  exerciseEnums.TargetMuscle  `json:"target_muscle"`
+	StrengthLevel dashboardEnums.StrengthType `json:"strength_level"`
+	Score         float64                     `json:"score"`
 }

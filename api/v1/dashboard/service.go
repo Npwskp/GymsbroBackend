@@ -2,8 +2,18 @@ package dashboard
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"math"
+	"os"
 	"time"
 
+	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
+	dashboardEnums "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/enums"
+	dashboardFunctions "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/functions"
+	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
+	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workoutSession"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,6 +26,7 @@ type DashboardService struct {
 
 type IDashboardService interface {
 	GetDashboard(userId string) (*DashboardResponse, error)
+	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
 }
 
 func getTimeOfDay(t time.Time) string {
@@ -53,10 +64,10 @@ func max(a, b int) int {
 	return b
 }
 
-func (s *DashboardService) GetDashboard(userId string) (*DashboardResponse, error) {
+func (ds *DashboardService) GetDashboard(userId string) (*DashboardResponse, error) {
 	// Get workout sessions
 	sessionFilter := bson.D{{Key: "userid", Value: userId}}
-	cursor, err := s.DB.Collection("workoutSessions").Find(context.Background(), sessionFilter)
+	cursor, err := ds.DB.Collection("workoutSessions").Find(context.Background(), sessionFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +79,7 @@ func (s *DashboardService) GetDashboard(userId string) (*DashboardResponse, erro
 
 	// Get exercise logs
 	logFilter := bson.D{{Key: "userid", Value: userId}}
-	logCursor, err := s.DB.Collection("exerciseLogs").Find(context.Background(), logFilter)
+	logCursor, err := ds.DB.Collection("exerciseLogs").Find(context.Background(), logFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -198,4 +209,239 @@ func (s *DashboardService) GetDashboard(userId string) (*DashboardResponse, erro
 	response.Analysis.CurrentStreak = currentStreak
 
 	return response, nil
+}
+
+func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStrengthStandards, error) {
+	var userObj user.User
+	err := ds.DB.Collection("users").FindOne(context.Background(), bson.D{{Key: "userid", Value: userId}}).Decode(&userObj)
+	if err != nil {
+		return nil, err
+	}
+
+	userBodyWeight := userObj.Weight
+	userGender := userObj.Gender
+
+	if userGender == authEnums.GenderMale {
+		if userBodyWeight < 50 || userBodyWeight > 140 {
+			return nil, errors.New("bodyweight out of range of strength standards processing")
+		}
+	} else if userGender == authEnums.GenderFemale {
+		if userBodyWeight < 45 || userBodyWeight > 120 {
+			return nil, errors.New("bodyweight out of range of strength standards processing")
+		}
+	}
+
+	// Create $or conditions from ConsiderExercises
+	orConditions := make([]bson.D, len(dashboardEnums.ConsiderExercises))
+	for i, exerciseEquip := range dashboardEnums.ConsiderExercises {
+		orConditions[i] = bson.D{
+			{Key: "name", Value: exerciseEquip.Exercise},
+			{Key: "equipment", Value: exerciseEquip.Equipment},
+		}
+	}
+
+	exercise_pipeline := []bson.D{
+		{{Key: "$match", Value: bson.D{
+			{Key: "$or", Value: orConditions},
+		}}},
+	}
+
+	exercise_cursor, err := ds.DB.Collection("exercises").Aggregate(context.Background(), exercise_pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer exercise_cursor.Close(context.Background())
+
+	var exercises []exercise.Exercise
+	if err := exercise_cursor.All(context.Background(), &exercises); err != nil {
+		return nil, err
+	}
+
+	if len(exercises) != len(dashboardEnums.ConsiderExercises) {
+		return nil, errors.New("consider exercise count mismatch")
+	}
+
+	// Map queried exercises to ConsiderExercises
+	exerciseMap := make(map[string]exercise.Exercise)
+	for _, ex := range exercises {
+		exerciseMap[ex.ID.Hex()] = ex
+	}
+
+	// Now you can use exerciseMap to look up exercise info by ID
+	exerciseIds := make([]string, 0)
+	for _, exercise := range exercises {
+		exerciseIds = append(exerciseIds, exercise.ID.Hex())
+	}
+
+	// Find Latest Exercise Logs for each exercise
+	pipeline := []bson.D{
+		{{Key: "$match", Value: bson.D{
+			{Key: "userid", Value: userId},
+			{Key: "exerciseid", Value: bson.D{{Key: "$in", Value: exerciseIds}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{
+			{Key: "exerciseid", Value: 1},
+			{Key: "datetime", Value: -1},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "exerciseid", Value: "$exerciseid"},
+			{Key: "doc", Value: bson.D{{Key: "$first", Value: "$$ROOT"}}},
+		}}},
+		{{Key: "$replaceRoot", Value: bson.D{{Key: "newRoot", Value: "$doc"}}}},
+	}
+
+	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	var latestLogs []exerciseLog.ExerciseLog
+	if err := cursor.All(context.Background(), &latestLogs); err != nil {
+		return nil, err
+	}
+
+	// Create a map of exercise name to latest log for easy lookup
+	latestLogsMap := make(map[string]exerciseLog.ExerciseLog)
+	for _, log := range latestLogs {
+		latestLogsMap[log.ExerciseID] = log
+	}
+
+	// Replace the inline struct with the one from enums
+	var strengthStandards struct {
+		Male   dashboardEnums.StrengthStandards `json:"Male"`
+		Female dashboardEnums.StrengthStandards `json:"Female"`
+	}
+
+	// Read and parse the JSON file
+	jsonFile, err := os.ReadFile("api/v1/dashboard/json/strengthStandard.json")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(jsonFile, &strengthStandards); err != nil {
+		return nil, err
+	}
+
+	// Calculate strength standards for each exercise
+	userStrengthStandards := make([]UserStrengthStandardPerExercise, 0)
+	muscleGroupStrengths := make(map[exerciseEnums.TargetMuscle][]float64)
+
+	for exerciseId, considerExercise := range exerciseMap {
+		latestLog, exists := latestLogsMap[exerciseId]
+
+		if !exists {
+			continue
+		}
+
+		exerciseName := considerExercise.Name
+		exerciseEquipment := considerExercise.Equipment
+
+		// Find the closest bodyweight standards
+		var standards dashboardEnums.StrengthStandards
+
+		if userGender == "Male" {
+			standards = strengthStandards.Male
+		} else {
+			standards = strengthStandards.Female
+		}
+
+		exerciseStandards, exists := standards[exerciseName]
+		if !exists {
+			continue
+		}
+
+		// Find closest bodyweight bracket
+		closestStandardWeight := math.Floor(userBodyWeight/5) * 5
+		var closestStandard dashboardEnums.StrengthStandard
+
+		for _, standard := range exerciseStandards {
+			if standard.Bodyweight == closestStandardWeight {
+				closestStandard = standard
+				break
+			}
+		}
+
+		// Find the set with maximum weight
+		var maxWeight float64
+		var maxReps int
+		for _, set := range latestLog.Sets {
+			if set.Weight*float64(set.Reps) > maxWeight*float64(maxReps) {
+				maxWeight = set.Weight
+				maxReps = set.Reps
+			}
+		}
+
+		// Calculate 1RM using Brzycki formula if more than 1 rep
+		if maxReps > 1 {
+			maxWeight, err = dashboardFunctions.CalculateOneRepMax(maxWeight, float64(maxReps))
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Calculate relative strength (as percentage of bodyweight)
+		relativeStrength := maxWeight / userBodyWeight
+
+		// Calculate strength level based on standards
+		var strengthLevel dashboardEnums.StrengthType
+		var score float64
+
+		switch {
+		case maxWeight <= closestStandard.Standards.Beginner:
+			strengthLevel = dashboardEnums.StrengthTypeBeginner
+			score = (maxWeight / closestStandard.Standards.Beginner) * dashboardEnums.BeginnerScore
+		case maxWeight <= closestStandard.Standards.Novice:
+			strengthLevel = dashboardEnums.StrengthTypeNovice
+			score = dashboardEnums.BeginnerScore + ((maxWeight-closestStandard.Standards.Beginner)/(closestStandard.Standards.Novice-closestStandard.Standards.Beginner))*(dashboardEnums.NoviceScore-dashboardEnums.BeginnerScore)
+		case maxWeight <= closestStandard.Standards.Intermediate:
+			strengthLevel = dashboardEnums.StrengthTypeIntermediate
+			score = dashboardEnums.NoviceScore + ((maxWeight-closestStandard.Standards.Novice)/(closestStandard.Standards.Intermediate-closestStandard.Standards.Novice))*(dashboardEnums.IntermediateScore-dashboardEnums.NoviceScore)
+		case maxWeight <= closestStandard.Standards.Advanced:
+			strengthLevel = dashboardEnums.StrengthTypeAdvanced
+			score = dashboardEnums.IntermediateScore + ((maxWeight-closestStandard.Standards.Intermediate)/(closestStandard.Standards.Advanced-closestStandard.Standards.Intermediate))*(dashboardEnums.AdvancedScore-dashboardEnums.IntermediateScore)
+		case maxWeight <= closestStandard.Standards.Elite:
+			strengthLevel = dashboardEnums.StrengthTypeElite
+			score = dashboardEnums.AdvancedScore + ((maxWeight-closestStandard.Standards.Advanced)/(closestStandard.Standards.Elite-closestStandard.Standards.Advanced))*(dashboardEnums.EliteScore-dashboardEnums.AdvancedScore)
+		default:
+			strengthLevel = dashboardEnums.StrengthTypeElite
+			score = dashboardEnums.EliteScore
+		}
+
+		// Add to muscle group calculations
+		for _, muscleGroup := range considerExercise.TargetMuscle {
+			muscleGroupStrengths[muscleGroup] = append(muscleGroupStrengths[muscleGroup], score)
+		}
+
+		// Add to exercise standards
+		userStrengthStandards = append(userStrengthStandards, UserStrengthStandardPerExercise{
+			Exercise:         exerciseName,
+			Equipment:        exerciseEquipment,
+			RepMax:           maxWeight,
+			RelativeStrength: relativeStrength,
+			StrengthLevel:    strengthLevel,
+			Score:            score,
+			LastPerformed:    latestLog.DateTime,
+		})
+	}
+
+	// Calculate average strength per muscle group
+	muscleGroupStandards := make([]UserStrengthStandardPerMuscleGroup, 0)
+	for muscleGroup, scores := range muscleGroupStrengths {
+		var totalScore float64
+		for _, score := range scores {
+			totalScore += score
+		}
+		avgScore := totalScore / float64(len(scores))
+
+		muscleGroupStandards = append(muscleGroupStandards, UserStrengthStandardPerMuscleGroup{
+			TargetMuscle:  muscleGroup,
+			StrengthLevel: dashboardEnums.ClassifyStrength(avgScore),
+			Score:         avgScore,
+		})
+	}
+
+	return &UserStrengthStandards{
+		ExerciseStandards:    userStrengthStandards,
+		MuscleGroupStrengths: muscleGroupStandards,
+	}, nil
 }
