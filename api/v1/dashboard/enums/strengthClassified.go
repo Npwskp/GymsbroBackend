@@ -1,53 +1,92 @@
 package dashboardEnums
 
-type strengthType string
+import exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
+
+type StrengthType string
+
+type StrengthStandards map[string][]StrengthStandard
+
+type StrengthStandard struct {
+	Bodyweight float64 `json:"bodyweight"`
+	Standards  struct {
+		Beginner     float64 `json:"beginner"`
+		Novice       float64 `json:"novice"`
+		Intermediate float64 `json:"intermediate"`
+		Advanced     float64 `json:"advanced"`
+		Elite        float64 `json:"elite"`
+	} `json:"standards"`
+}
 
 const (
-	strengthTypeBeginner     strengthType = "beginner"     // Score < 30
-	strengthTypeNovice       strengthType = "novice"       // Score 30-45
-	strengthTypeIntermediate strengthType = "intermediate" // Score 45-75
-	strengthTypeAdvanced     strengthType = "advanced"     // Score 75-112.5
-	strengthTypeElite        strengthType = "elite"        // Score > 112.5
+	StrengthTypeUntrained    StrengthType = "untrained"    // Score = 0
+	StrengthTypeBeginner     StrengthType = "beginner"     // Score < 30
+	StrengthTypeNovice       StrengthType = "novice"       // Score 30-45
+	StrengthTypeIntermediate StrengthType = "intermediate" // Score 45-75
+	StrengthTypeAdvanced     StrengthType = "advanced"     // Score 75-112.5
+	StrengthTypeElite        StrengthType = "elite"        // Score > 112.5
 )
 
 // Strength score thresholds
 const (
+	UntrainedScore    float64 = 0.0
 	BeginnerScore     float64 = 30.0
 	NoviceScore       float64 = 45.0
 	IntermediateScore float64 = 75.0
 	AdvancedScore     float64 = 112.5
+	EliteScore        float64 = 125.0
 )
 
-// ClassifyStrength returns the strengthType based on the given strength score
-func ClassifyStrength(score float64) strengthType {
+type ConsiderExercise struct {
+	Exercise  string
+	Equipment exerciseEnums.Equipment
+	ID        string
+}
+
+var ConsiderExercises = []ConsiderExercise{
+	{Exercise: "Bench Press", Equipment: exerciseEnums.Barbell},
+	{Exercise: "Bench Press", Equipment: exerciseEnums.Dumbbell},
+	{Exercise: "Squat", Equipment: exerciseEnums.Barbell},
+	{Exercise: "Deadlift", Equipment: exerciseEnums.Barbell},
+	{Exercise: "Incline Bench Press", Equipment: exerciseEnums.Barbell},
+	{Exercise: "Pull-up", Equipment: exerciseEnums.BodyWeight},
+	{Exercise: "Shoulder Press", Equipment: exerciseEnums.Barbell},
+	{Exercise: "Pulldown", Equipment: exerciseEnums.Cable},
+	{Exercise: "Chest Dip", Equipment: exerciseEnums.BodyWeight}, // Triceps Dips or Chest Dips
+	{Exercise: "Chin-up", Equipment: exerciseEnums.BodyWeight},
+}
+
+// ClassifyStrength returns the StrengthType based on the given strength score
+func ClassifyStrength(score float64) StrengthType {
 	switch {
 	case score < BeginnerScore:
-		return strengthTypeBeginner
+		return StrengthTypeBeginner
 	case score < NoviceScore:
-		return strengthTypeNovice
+		return StrengthTypeNovice
 	case score < IntermediateScore:
-		return strengthTypeIntermediate
+		return StrengthTypeIntermediate
 	case score < AdvancedScore:
-		return strengthTypeAdvanced
+		return StrengthTypeAdvanced
+	case score < EliteScore:
+		return StrengthTypeElite
 	default:
-		return strengthTypeElite
+		return StrengthTypeUntrained
 	}
 }
 
 // GetMinScoreForType returns the minimum score threshold for a given strength type
-func GetMinScoreForType(st strengthType) float64 {
+func GetMinScoreForType(st StrengthType) float64 {
 	switch st {
-	case strengthTypeBeginner:
-		return 0.0
-	case strengthTypeNovice:
+	case StrengthTypeBeginner:
 		return BeginnerScore
-	case strengthTypeIntermediate:
+	case StrengthTypeNovice:
 		return NoviceScore
-	case strengthTypeAdvanced:
+	case StrengthTypeIntermediate:
 		return IntermediateScore
-	case strengthTypeElite:
+	case StrengthTypeAdvanced:
 		return AdvancedScore
+	case StrengthTypeElite:
+		return EliteScore
 	default:
-		return 0.0
+		return UntrainedScore
 	}
 }
