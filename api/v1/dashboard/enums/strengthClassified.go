@@ -51,7 +51,7 @@ var ConsiderExercises = []ConsiderExercise{
 	{Exercise: "Pull-up", Equipment: exerciseEnums.BodyWeight},
 	{Exercise: "Shoulder Press", Equipment: exerciseEnums.Barbell},
 	{Exercise: "Pulldown", Equipment: exerciseEnums.Cable},
-	{Exercise: "Chest Dip", Equipment: exerciseEnums.BodyWeight}, // Triceps Dips or Chest Dips
+	{Exercise: "Chest Dip", Equipment: exerciseEnums.BodyWeight},
 	{Exercise: "Chin-up", Equipment: exerciseEnums.BodyWeight},
 }
 
