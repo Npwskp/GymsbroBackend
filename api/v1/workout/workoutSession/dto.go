@@ -31,7 +31,7 @@ type LoggedSessionDto struct {
 	WorkoutID string            `json:"workoutId"`
 	StartTime time.Time         `json:"startTime" validate:"required"`
 	EndTime   time.Time         `json:"endTime" validate:"required"`
-	Status    SessionStatus     `json:"status" validate:"required,oneof=completed cancelled"`
+	Status    SessionStatus     `json:"status" validate:"required"`
 	Exercises []SessionExercise `json:"exercises"`
 	Notes     string            `json:"notes"`
 }
