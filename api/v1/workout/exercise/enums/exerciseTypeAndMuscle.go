@@ -13,30 +13,21 @@ type TargetMuscle string
 const (
 	// Equipment
 	Assisted          Equipment = "Assisted"
-	AssistedMachine   Equipment = "Assisted (machine)"
-	AssistedPartner   Equipment = "Assisted (partner)"
-	BandResistive     Equipment = "Band Resistive"
 	BandAssisted      Equipment = "Band-assisted"
 	Barbell           Equipment = "Barbell"
 	BodyWeight        Equipment = "Body Weight"
 	Cable             Equipment = "Cable"
-	CableStandingFly  Equipment = "Cable Standing Fly"
-	CablePullSide     Equipment = "Cable (pull side)"
 	Dumbbell          Equipment = "Dumbbell"
-	Isometric         Equipment = "Isometric"
 	Lever             Equipment = "Lever"
 	LeverPlateLoaded  Equipment = "Lever (plate loaded)"
 	LeverSelectorized Equipment = "Lever (selectorized)"
 	Plyometric        Equipment = "Plyometric"
 	SelfAssisted      Equipment = "Self-assisted"
 	Sled              Equipment = "Sled"
-	SledPlateLoaded   Equipment = "Sled (plate loaded)"
-	SledSelectorized  Equipment = "Sled (selectorized)"
 	Smith             Equipment = "Smith"
 	Suspended         Equipment = "Suspended"
 	Suspension        Equipment = "Suspension"
 	Weighted          Equipment = "Weighted"
-	WeightedChestDip  Equipment = "Weighted Chest Dip"
 )
 
 const (
@@ -108,11 +99,9 @@ const (
 
 func GetAllEquipment() []Equipment {
 	return []Equipment{
-		Assisted, AssistedMachine, AssistedPartner, BandResistive, BandAssisted,
-		Barbell, BodyWeight, Cable, CableStandingFly, CablePullSide, Dumbbell,
-		Isometric, Lever, LeverPlateLoaded, LeverSelectorized, Plyometric,
-		SelfAssisted, Sled, SledPlateLoaded, SledSelectorized, Smith,
-		Suspended, Suspension, Weighted, WeightedChestDip,
+		Assisted, BandAssisted, Barbell, BodyWeight, Cable, Dumbbell,
+		Lever, LeverPlateLoaded, LeverSelectorized, Plyometric,
+		SelfAssisted, Sled, Smith, Suspended, Suspension, Weighted,
 	}
 }
 
@@ -143,11 +132,9 @@ func GetAllTargetMuscles() []TargetMuscle {
 
 func ParseEquipment(s string) (Equipment, error) {
 	switch Equipment(s) {
-	case Assisted, AssistedMachine, AssistedPartner, BandResistive, BandAssisted,
-		Barbell, BodyWeight, Cable, CableStandingFly, CablePullSide, Dumbbell,
-		Isometric, Lever, LeverPlateLoaded, LeverSelectorized, Plyometric,
-		SelfAssisted, Sled, SledPlateLoaded, SledSelectorized, Smith,
-		Suspended, Suspension, Weighted, WeightedChestDip:
+	case Assisted, BandAssisted, Barbell, BodyWeight, Cable, Dumbbell,
+		Lever, LeverPlateLoaded, LeverSelectorized, Plyometric,
+		SelfAssisted, Sled, Smith, Suspended, Suspension, Weighted:
 		return Equipment(s), nil
 	default:
 		return "", fmt.Errorf("invalid equipment: %s", s)
