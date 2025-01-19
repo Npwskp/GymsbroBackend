@@ -3506,8 +3506,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "exerciseId",
-                "sets",
-                "workoutSessionId"
+                "sets"
             ],
             "properties": {
                 "exerciseId": {
@@ -3521,9 +3520,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/exerciseLog.SetLog"
                     }
-                },
-                "workoutSessionId": {
-                    "type": "string"
                 }
             }
         },
@@ -3531,8 +3527,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "exerciseid",
-                "userid",
-                "workoutsessionid"
+                "userid"
             ],
             "properties": {
                 "completed_sets": {
@@ -3569,9 +3564,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userid": {
-                    "type": "string"
-                },
-                "workoutsessionid": {
                     "type": "string"
                 }
             }
@@ -4583,15 +4575,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "enum": [
-                        "completed",
-                        "cancelled"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/workoutSession.SessionStatus"
-                        }
-                    ]
+                    "$ref": "#/definitions/workoutSession.SessionStatus"
                 },
                 "workoutId": {
                     "type": "string"

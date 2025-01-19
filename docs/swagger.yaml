@@ -468,12 +468,9 @@ definitions:
         items:
           $ref: '#/definitions/exerciseLog.SetLog'
         type: array
-      workoutSessionId:
-        type: string
     required:
     - exerciseId
     - sets
-    - workoutSessionId
     type: object
   exerciseLog.ExerciseLog:
     properties:
@@ -501,12 +498,9 @@ definitions:
         type: string
       userid:
         type: string
-      workoutsessionid:
-        type: string
     required:
     - exerciseid
     - userid
-    - workoutsessionid
     type: object
   exerciseLog.SetLog:
     properties:
@@ -1188,11 +1182,7 @@ definitions:
       startTime:
         type: string
       status:
-        allOf:
-        - $ref: '#/definitions/workoutSession.SessionStatus'
-        enum:
-        - completed
-        - cancelled
+        $ref: '#/definitions/workoutSession.SessionStatus'
       workoutId:
         type: string
     required:
