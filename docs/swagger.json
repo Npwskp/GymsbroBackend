@@ -2646,58 +2646,6 @@
                 }
             }
         },
-        "/workout-session/{id}/exercise/{exerciseId}": {
-            "post": {
-                "description": "Log a completed exercise in the session",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workoutSessions"
-                ],
-                "summary": "Log exercise completion",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Exercise ID",
-                        "name": "exerciseId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Exercise Completion",
-                        "name": "log",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/workoutSession.CompleteExerciseDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/workoutSession.WorkoutSession"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/workout/{id}": {
             "get": {
                 "description": "Get a workout by ID",
@@ -4556,17 +4504,6 @@
                     "type": "string"
                 },
                 "workoutid": {
-                    "type": "string"
-                }
-            }
-        },
-        "workoutSession.CompleteExerciseDto": {
-            "type": "object",
-            "required": [
-                "exerciseLogId"
-            ],
-            "properties": {
-                "exerciseLogId": {
                     "type": "string"
                 }
             }

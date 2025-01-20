@@ -1144,13 +1144,6 @@ definitions:
     - userid
     - workoutid
     type: object
-  workoutSession.CompleteExerciseDto:
-    properties:
-      exerciseLogId:
-        type: string
-    required:
-    - exerciseLogId
-    type: object
   workoutSession.CreateWorkoutSessionDto:
     properties:
       notes:
@@ -3015,41 +3008,6 @@ paths:
           description: Bad Request
           schema: {}
       summary: End workout session
-      tags:
-      - workoutSessions
-  /workout-session/{id}/exercise/{exerciseId}:
-    post:
-      consumes:
-      - application/json
-      description: Log a completed exercise in the session
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Exercise ID
-        in: path
-        name: exerciseId
-        required: true
-        type: string
-      - description: Exercise Completion
-        in: body
-        name: log
-        required: true
-        schema:
-          $ref: '#/definitions/workoutSession.CompleteExerciseDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/workoutSession.WorkoutSession'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Log exercise completion
       tags:
       - workoutSessions
   /workout-session/log:
