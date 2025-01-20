@@ -175,6 +175,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/rep-max/{exerciseId}": {
+            "get": {
+                "description": "Get estimated rep maxes for a specific exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get rep max estimates",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "exerciseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.RepMaxResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/dashboard/strength-standards": {
             "get": {
                 "description": "Get user strength standards",
@@ -3020,6 +3056,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dashboard.RepMaxResponse": {
+            "type": "object",
+            "properties": {
+                "eightRepMax": {
+                    "type": "number"
+                },
+                "lastUpdated": {
+                    "type": "string"
+                },
+                "oneRepMax": {
+                    "type": "number"
+                },
+                "twelveRepMax": {
+                    "type": "number"
+                }
+            }
+        },
         "dashboard.UserStrengthStandardPerExercise": {
             "type": "object",
             "properties": {
@@ -3344,57 +3397,39 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "Assisted",
-                "Assisted (machine)",
-                "Assisted (partner)",
-                "Band Resistive",
                 "Band-assisted",
                 "Barbell",
                 "Body Weight",
                 "Cable",
-                "Cable Standing Fly",
-                "Cable (pull side)",
                 "Dumbbell",
-                "Isometric",
                 "Lever",
                 "Lever (plate loaded)",
                 "Lever (selectorized)",
                 "Plyometric",
                 "Self-assisted",
                 "Sled",
-                "Sled (plate loaded)",
-                "Sled (selectorized)",
                 "Smith",
                 "Suspended",
                 "Suspension",
-                "Weighted",
-                "Weighted Chest Dip"
+                "Weighted"
             ],
             "x-enum-varnames": [
                 "Assisted",
-                "AssistedMachine",
-                "AssistedPartner",
-                "BandResistive",
                 "BandAssisted",
                 "Barbell",
                 "BodyWeight",
                 "Cable",
-                "CableStandingFly",
-                "CablePullSide",
                 "Dumbbell",
-                "Isometric",
                 "Lever",
                 "LeverPlateLoaded",
                 "LeverSelectorized",
                 "Plyometric",
                 "SelfAssisted",
                 "Sled",
-                "SledPlateLoaded",
-                "SledSelectorized",
                 "Smith",
                 "Suspended",
                 "Suspension",
-                "Weighted",
-                "WeightedChestDip"
+                "Weighted"
             ]
         },
         "exerciseEnums.Force": {

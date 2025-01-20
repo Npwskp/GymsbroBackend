@@ -61,3 +61,10 @@ type UserStrengthStandardPerMuscleGroup struct {
 	StrengthLevel dashboardEnums.StrengthType `json:"strength_level"`
 	Score         float64                     `json:"score"`
 }
+
+type RepMaxResponse struct {
+	OneRepMax    float64   `json:"oneRepMax"`
+	EightRepMax  float64   `json:"eightRepMax"`
+	TwelveRepMax float64   `json:"twelveRepMax"`
+	LastUpdated  time.Time `json:"lastUpdated"`
+}
