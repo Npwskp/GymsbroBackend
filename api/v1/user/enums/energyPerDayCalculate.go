@@ -101,7 +101,7 @@ func CalculateBMI(weight float64, height float64) float64 {
 	return math.Round((weight/(heightInMeters*heightInMeters))*10) / 10
 }
 
-func CalculateCaloriesPerDay(bmr float64, activityLevel ActivityLevelType) float64 {
+func CalculateCaloriesPerDay(bmr float64, activityLevel ActivityLevelType, goal GoalType) float64 {
 	var calories float64
 
 	switch activityLevel {
@@ -117,6 +117,14 @@ func CalculateCaloriesPerDay(bmr float64, activityLevel ActivityLevelType) float
 		calories = bmr * 1.9
 	default:
 		calories = bmr
+	}
+
+	if goal == GoalMaintain {
+		return math.Round(calories)
+	} else if goal == GoalCutting {
+		return math.Round(calories) - 500
+	} else if goal == GoalBulking {
+		return math.Round(calories) + 500
 	}
 
 	return math.Round(calories)
@@ -165,7 +173,7 @@ func CalculateMacronutrients(calories float64) []*Macronutrients {
 func GetUserEnergyConsumePlan(weight float64, height float64, age int, gender authEnums.GenderType, activityLevel ActivityLevelType, goal GoalType) (*EnergyConsumptionPlan, error) {
 	bmr := CalculateBMR(weight, height, age, gender)
 
-	caloriesPerDay := CalculateCaloriesPerDay(bmr, activityLevel)
+	caloriesPerDay := CalculateCaloriesPerDay(bmr, activityLevel, goal)
 	macronutrients := CalculateMacronutrients(caloriesPerDay)
 
 	return &EnergyConsumptionPlan{
