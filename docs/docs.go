@@ -195,6 +195,12 @@ const docTemplate = `{
                         "name": "exerciseId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Use only latest exercise log",
+                        "name": "useLatest",
+                        "in": "query"
                     }
                 ],
                 "responses": {

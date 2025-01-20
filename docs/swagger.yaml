@@ -1385,6 +1385,10 @@ paths:
         name: exerciseId
         required: true
         type: string
+      - description: Use only latest exercise log
+        in: query
+        name: useLatest
+        type: boolean
       produces:
       - application/json
       responses:

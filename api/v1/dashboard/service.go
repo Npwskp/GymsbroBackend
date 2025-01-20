@@ -27,7 +27,7 @@ type DashboardService struct {
 type IDashboardService interface {
 	GetDashboard(userId string) (*DashboardResponse, error)
 	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
-	GetRepMax(userId string, exerciseId string) (*RepMaxResponse, error)
+	GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error)
 }
 
 func getTimeOfDay(t time.Time) string {
@@ -447,35 +447,47 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 	}, nil
 }
 
-func (ds *DashboardService) GetRepMax(userId string, exerciseId string) (*RepMaxResponse, error) {
+func (ds *DashboardService) GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error) {
 	// Create an aggregation pipeline to calculate 1RM at database level
 	pipeline := []bson.D{
 		{{Key: "$match", Value: bson.D{
 			{Key: "userid", Value: userId},
 			{Key: "exerciseid", Value: exerciseId},
 		}}},
-		{{Key: "$unwind", Value: "$sets"}},
-		{{Key: "$match", Value: bson.D{
+	}
+
+	if useLatest {
+		// Add stages to get only the latest exercise log
+		pipeline = append(pipeline,
+			bson.D{{Key: "$sort", Value: bson.D{{Key: "datetime", Value: -1}}}},
+			bson.D{{Key: "$limit", Value: 1}},
+		)
+	}
+
+	// Add remaining stages
+	pipeline = append(pipeline,
+		bson.D{{Key: "$unwind", Value: "$sets"}},
+		bson.D{{Key: "$match", Value: bson.D{
 			{Key: "sets.weight", Value: bson.D{{Key: "$gt", Value: 0}}},
 			{Key: "sets.reps", Value: bson.D{{Key: "$gt", Value: 0}}},
 		}}},
-		{{Key: "$addFields", Value: bson.D{
+		bson.D{{Key: "$addFields", Value: bson.D{
 			{Key: "oneRM", Value: bson.D{
-				{Key: "$multiply", Value: bson.A{
+				{Key: "$divide", Value: bson.A{
 					"$sets.weight",
-					bson.D{{Key: "$divide", Value: bson.A{
-						36.0,
-						bson.D{{Key: "$subtract", Value: bson.A{37.0, "$sets.reps"}}},
+					bson.D{{Key: "$subtract", Value: bson.A{
+						1.0278,
+						bson.D{{Key: "$multiply", Value: bson.A{0.0278, "$sets.reps"}}},
 					}}},
 				}},
 			}},
 		}}},
-		{{Key: "$group", Value: bson.D{
+		bson.D{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: nil},
 			{Key: "bestOneRM", Value: bson.D{{Key: "$max", Value: "$oneRM"}}},
 			{Key: "lastUpdated", Value: bson.D{{Key: "$max", Value: "$datetime"}}},
 		}}},
-	}
+	)
 
 	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
 	if err != nil {
