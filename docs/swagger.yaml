@@ -1197,12 +1197,10 @@ definitions:
     enum:
     - in_progress
     - completed
-    - cancelled
     type: string
     x-enum-varnames:
     - StatusInProgress
     - StatusCompleted
-    - StatusCancelled
   workoutSession.SessionType:
     enum:
     - planned
@@ -3033,6 +3031,24 @@ paths:
           description: Bad Request
           schema: {}
       summary: Log custom session
+      tags:
+      - workoutSessions
+  /workout-session/ongoing:
+    get:
+      consumes:
+      - application/json
+      description: Get the ongoing workout session for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workoutSession.WorkoutSession'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get ongoing session
       tags:
       - workoutSessions
   /workout/{id}:

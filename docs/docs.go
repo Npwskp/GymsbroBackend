@@ -2502,6 +2502,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/workout-session/ongoing": {
+            "get": {
+                "description": "Get the ongoing workout session for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workoutSessions"
+                ],
+                "summary": "Get ongoing session",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/workoutSession.WorkoutSession"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/workout-session/{id}": {
             "get": {
                 "description": "Get a workout session by ID",
@@ -4589,13 +4616,11 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "in_progress",
-                "completed",
-                "cancelled"
+                "completed"
             ],
             "x-enum-varnames": [
                 "StatusInProgress",
-                "StatusCompleted",
-                "StatusCancelled"
+                "StatusCompleted"
             ]
         },
         "workoutSession.SessionType": {

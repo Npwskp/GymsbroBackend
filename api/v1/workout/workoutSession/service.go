@@ -23,12 +23,24 @@ type IWorkoutSessionService interface {
 	UpdateSession(id string, dto *UpdateWorkoutSessionDto, userId string) (*WorkoutSession, error)
 	GetSession(id string, userId string) (*WorkoutSession, error)
 	GetUserSessions(userId string) ([]*WorkoutSession, error)
+	GetOnGoingSession(userId string) (*WorkoutSession, error)
 	DeleteSession(id string, userId string) error
 	LogSession(dto *LoggedSessionDto, userId string) (*WorkoutSession, error)
 }
 
 func (s *WorkoutSessionService) StartSession(dto *CreateWorkoutSessionDto, userId string) (*WorkoutSession, error) {
 	var exercises []SessionExercise
+
+	ongoingSession, err := s.GetOnGoingSession(userId)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			return nil, err
+		}
+	}
+
+	if ongoingSession != nil {
+		return nil, errors.New("user already has an ongoing session")
+	}
 
 	if dto.Type == PlannedSession && dto.WorkoutID != "" {
 		// If starting from a plan, fetch and copy the workout exercises
@@ -214,6 +226,19 @@ func (s *WorkoutSessionService) GetUserSessions(userId string) ([]*WorkoutSessio
 	return sessions, nil
 }
 
+func (s *WorkoutSessionService) GetOnGoingSession(userId string) (*WorkoutSession, error) {
+	filter := bson.D{{Key: "userid", Value: userId}, {Key: "status", Value: StatusInProgress}}
+	opts := options.FindOne().SetSort(bson.D{{Key: "startTime", Value: -1}})
+
+	session := &WorkoutSession{}
+	err := s.DB.Collection("workoutSessions").FindOne(context.Background(), filter, opts).Decode(session)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
 func (s *WorkoutSessionService) DeleteSession(id string, userId string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -282,13 +307,13 @@ func (s *WorkoutSessionService) LogSession(dto *LoggedSessionDto, userId string)
 	}
 	session.TotalVolume = totalVolume
 
-	result, err := s.DB.Collection("workoutSession").InsertOne(context.Background(), session)
+	result, err := s.DB.Collection("workoutSessions").InsertOne(context.Background(), session)
 	if err != nil {
 		return nil, err
 	}
 
 	createdSession := &WorkoutSession{}
-	err = s.DB.Collection("workoutSession").FindOne(context.Background(), bson.D{{Key: "_id", Value: result.InsertedID}}).Decode(createdSession)
+	err = s.DB.Collection("workoutSessions").FindOne(context.Background(), bson.D{{Key: "_id", Value: result.InsertedID}}).Decode(createdSession)
 	if err != nil {
 		return nil, err
 	}

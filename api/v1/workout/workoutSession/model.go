@@ -40,5 +40,4 @@ type SessionStatus string
 const (
 	StatusInProgress SessionStatus = "in_progress"
 	StatusCompleted  SessionStatus = "completed"
-	StatusCancelled  SessionStatus = "cancelled"
 )

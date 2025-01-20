@@ -190,6 +190,27 @@ func (c *WorkoutSessionController) GetUserSessionsHandler(ctx *fiber.Ctx) error 
 	return ctx.JSON(sessions)
 }
 
+// @Summary     Get ongoing session
+// @Description Get the ongoing workout session for a user
+// @Tags        workoutSessions
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} WorkoutSession
+// @Failure     400 {object} Error
+// @Router      /workout-session/ongoing [get]
+func (c *WorkoutSessionController) GetOnGoingSessionHandler(ctx *fiber.Ctx) error {
+	userId := function.GetUserIDFromContext(ctx)
+
+	session, err := c.Service.GetOnGoingSession(userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(session)
+}
+
 // @Summary     Delete session
 // @Description Delete a workout session
 // @Tags        workoutSessions
@@ -218,6 +239,7 @@ func (c *WorkoutSessionController) Handle() {
 	g.Post("/", c.StartSessionHandler)
 	g.Post("/log", c.LogSessionHandler)
 	g.Get("/", c.GetUserSessionsHandler)
+	g.Get("/ongoing", c.GetOnGoingSessionHandler)
 	g.Get("/:id", c.GetSessionHandler)
 	g.Put("/:id", c.UpdateSessionHandler)
 	g.Put("/:id/end", c.EndSessionHandler)
