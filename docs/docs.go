@@ -2502,6 +2502,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/workout-session/ongoing": {
+            "get": {
+                "description": "Get the ongoing workout session for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workoutSessions"
+                ],
+                "summary": "Get ongoing session",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/workoutSession.WorkoutSession"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/workout-session/{id}": {
             "get": {
                 "description": "Get a workout session by ID",
@@ -2632,58 +2659,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/workoutSession.WorkoutSession"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/workout-session/{id}/exercise/{exerciseId}": {
-            "post": {
-                "description": "Log a completed exercise in the session",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workoutSessions"
-                ],
-                "summary": "Log exercise completion",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Exercise ID",
-                        "name": "exerciseId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Exercise Completion",
-                        "name": "log",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/workoutSession.CompleteExerciseDto"
-                        }
                     }
                 ],
                 "responses": {
@@ -4562,17 +4537,6 @@ const docTemplate = `{
                 }
             }
         },
-        "workoutSession.CompleteExerciseDto": {
-            "type": "object",
-            "required": [
-                "exerciseLogId"
-            ],
-            "properties": {
-                "exerciseLogId": {
-                    "type": "string"
-                }
-            }
-        },
         "workoutSession.CreateWorkoutSessionDto": {
             "type": "object",
             "required": [
@@ -4652,13 +4616,11 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "in_progress",
-                "completed",
-                "cancelled"
+                "completed"
             ],
             "x-enum-varnames": [
                 "StatusInProgress",
-                "StatusCompleted",
-                "StatusCancelled"
+                "StatusCompleted"
             ]
         },
         "workoutSession.SessionType": {
