@@ -453,6 +453,8 @@ definitions:
     - UpperTrapezius
   exerciseLog.CreateExerciseLogDto:
     properties:
+      dateTime:
+        type: string
       exerciseId:
         type: string
       notes:
@@ -534,6 +536,8 @@ definitions:
     - FailureSet
   exerciseLog.UpdateExerciseLogDto:
     properties:
+      dateTime:
+        type: string
       notes:
         type: string
       sets:

@@ -32,6 +32,10 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 		totalVolume += float64(set.Reps) * set.Weight
 	}
 
+	if dto.DateTime.IsZero() {
+		dto.DateTime = time.Now()
+	}
+
 	log := &ExerciseLog{
 		UserID:        userId,
 		ExerciseID:    dto.ExerciseID,
@@ -39,7 +43,7 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 		TotalVolume:   totalVolume,
 		Notes:         dto.Notes,
 		Duration:      0, // This will be updated when the session ends
-		DateTime:      time.Now(),
+		DateTime:      dto.DateTime,
 		Sets:          dto.Sets,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
@@ -125,6 +129,10 @@ func (s *ExerciseLogService) UpdateLog(id string, dto *UpdateExerciseLogDto, use
 		return nil, err
 	}
 
+	if dto.DateTime.IsZero() {
+		dto.DateTime = time.Now()
+	}
+
 	filter := bson.D{
 		{Key: "_id", Value: oid},
 		{Key: "userid", Value: userId},
@@ -133,6 +141,7 @@ func (s *ExerciseLogService) UpdateLog(id string, dto *UpdateExerciseLogDto, use
 	update := bson.D{{Key: "$set", Value: bson.D{
 		{Key: "sets", Value: dto.Sets},
 		{Key: "notes", Value: dto.Notes},
+		{Key: "datetime", Value: dto.DateTime},
 	}}}
 
 	after := options.After

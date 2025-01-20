@@ -3548,6 +3548,9 @@
                 "sets"
             ],
             "properties": {
+                "dateTime": {
+                    "type": "string"
+                },
                 "exerciseId": {
                     "type": "string"
                 },
@@ -3664,6 +3667,9 @@
                 "sets"
             ],
             "properties": {
+                "dateTime": {
+                    "type": "string"
+                },
                 "notes": {
                     "type": "string"
                 },

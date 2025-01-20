@@ -3550,6 +3550,9 @@ const docTemplate = `{
                 "sets"
             ],
             "properties": {
+                "dateTime": {
+                    "type": "string"
+                },
                 "exerciseId": {
                     "type": "string"
                 },
@@ -3666,6 +3669,9 @@ const docTemplate = `{
                 "sets"
             ],
             "properties": {
+                "dateTime": {
+                    "type": "string"
+                },
                 "notes": {
                     "type": "string"
                 },
