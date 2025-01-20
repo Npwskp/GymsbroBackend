@@ -152,11 +152,46 @@ func (wc *WorkoutController) DeleteWorkoutHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNoContent).Send(nil)
 }
 
+// @Summary     Search workouts
+// @Description Search workouts by name and description
+// @Tags        workouts
+// @Accept      json
+// @Produce     json
+// @Param       query query string false "Search query for workout name or description"
+// @Success     200 {array} Workout
+// @Failure     400 {object} Error
+// @Failure     500 {object} Error
+// @Router      /workout/search [get]
+func (wc *WorkoutController) SearchWorkoutsHandler(c *fiber.Ctx) error {
+	var filters SearchWorkoutFilters
+	if err := c.QueryParser(&filters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	userId := function.GetUserIDFromContext(c)
+
+	workouts, err := wc.Service.SearchWorkouts(filters.Query, userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if workouts == nil {
+		workouts = []*Workout{}
+	}
+
+	return c.JSON(workouts)
+}
+
 func (wc *WorkoutController) Handle() {
 	g := wc.Instance.Group("/workout")
 
 	g.Post("/", wc.CreateWorkoutHandler)
 	g.Get("/", wc.GetWorkoutsHandler)
+	g.Get("/search", wc.SearchWorkoutsHandler)
 	g.Get("/:id", wc.GetWorkoutHandler)
 	g.Put("/:id", wc.UpdateWorkoutHandler)
 	g.Delete("/:id", wc.DeleteWorkoutHandler)

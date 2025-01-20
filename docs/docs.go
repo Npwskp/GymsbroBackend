@@ -2675,6 +2675,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/workout/search": {
+            "get": {
+                "description": "Search workouts by name and description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Search workouts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query for workout name or description",
+                        "name": "query",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/workout.Workout"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/workout/{id}": {
             "get": {
                 "description": "Get a workout by ID",
@@ -4366,6 +4408,7 @@ const docTemplate = `{
         "workout.CreateWorkoutDto": {
             "type": "object",
             "required": [
+                "exercises",
                 "name"
             ],
             "properties": {
@@ -4385,6 +4428,10 @@ const docTemplate = `{
         },
         "workout.UpdateWorkoutDto": {
             "type": "object",
+            "required": [
+                "exercises",
+                "name"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
