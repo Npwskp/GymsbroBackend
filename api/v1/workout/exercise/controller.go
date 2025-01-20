@@ -396,10 +396,6 @@ func (ec *ExerciseController) SearchAndFilterExerciseHandler(c *fiber.Ctx) error
 		})
 	}
 
-	if exercises == nil {
-		exercises = []*Exercise{}
-	}
-
 	return c.JSON(exercises)
 }
 

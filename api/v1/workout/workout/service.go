@@ -78,7 +78,7 @@ func (ws *WorkoutService) GetWorkoutsByUser(userId string) ([]*Workout, error) {
 		return nil, err
 	}
 
-	var workouts []*Workout
+	workouts := make([]*Workout, 0)
 	if err := cursor.All(context.Background(), &workouts); err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (ws *WorkoutService) SearchWorkouts(query string, userId string) ([]*Workou
 		return nil, err
 	}
 
-	var workouts []*Workout
+	workouts := make([]*Workout, 0)
 	if err := cursor.All(context.Background(), &workouts); err != nil {
 		return nil, err
 	}

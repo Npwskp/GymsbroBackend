@@ -218,7 +218,7 @@ func (s *WorkoutSessionService) GetUserSessions(userId string) ([]*WorkoutSessio
 		return nil, err
 	}
 
-	var sessions []*WorkoutSession
+	sessions := make([]*WorkoutSession, 0)
 	if err := cursor.All(context.Background(), &sessions); err != nil {
 		return nil, err
 	}

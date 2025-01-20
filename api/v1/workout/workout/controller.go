@@ -87,10 +87,6 @@ func (wc *WorkoutController) GetWorkoutsHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 
-	if workouts == nil {
-		workouts = []*Workout{}
-	}
-
 	return c.Status(fiber.StatusOK).JSON(workouts)
 }
 
@@ -177,10 +173,6 @@ func (wc *WorkoutController) SearchWorkoutsHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
-	}
-
-	if workouts == nil {
-		workouts = []*Workout{}
 	}
 
 	return c.JSON(workouts)

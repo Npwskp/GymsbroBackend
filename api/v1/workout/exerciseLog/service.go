@@ -72,7 +72,7 @@ func (s *ExerciseLogService) GetLogsByUser(userId string) ([]*ExerciseLog, error
 		return nil, err
 	}
 
-	var logs []*ExerciseLog
+	logs := make([]*ExerciseLog, 0)
 	if err := cursor.All(context.Background(), &logs); err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (s *ExerciseLogService) GetLogsByExercise(exerciseId string, userId string)
 		return nil, err
 	}
 
-	var logs []*ExerciseLog
+	logs := make([]*ExerciseLog, 0)
 	if err := cursor.All(context.Background(), &logs); err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (s *ExerciseLogService) GetLogsByDateRange(userId string, startDate, endDat
 		return nil, err
 	}
 
-	var logs []*ExerciseLog
+	logs := make([]*ExerciseLog, 0)
 	if err := cursor.All(context.Background(), &logs); err != nil {
 		return nil, err
 	}

@@ -107,11 +107,6 @@ func (nc *MealController) GetMealByUserHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	// Initialize empty slice if meals is nil
-	if meals == nil {
-		meals = []*Meal{}
-	}
-
 	return c.Status(fiber.StatusOK).JSON(meals)
 }
 
@@ -205,11 +200,6 @@ func (mc *MealController) SearchFilteredMealsHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
-	}
-
-	// Initialize empty slice if meals is nil
-	if meals == nil {
-		meals = []*Meal{}
 	}
 
 	return c.JSON(meals)

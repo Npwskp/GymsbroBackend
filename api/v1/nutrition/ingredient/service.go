@@ -80,7 +80,7 @@ func (is *IngredientService) GetIngredientByUser(userId string) ([]*Ingredient, 
 	if err != nil {
 		return nil, err
 	}
-	var ingredients []*Ingredient
+	ingredients := make([]*Ingredient, 0)
 	if err := cursor.All(context.Background(), &ingredients); err != nil {
 		return nil, err
 	}
@@ -233,13 +233,13 @@ func (is *IngredientService) SearchFilteredIngredients(filters SearchFilters) ([
 	}
 	defer publicCursor.Close(context.Background())
 
-	var publicIngredients []*Ingredient
+	publicIngredients := make([]*Ingredient, 0)
 	if err := publicCursor.All(context.Background(), &publicIngredients); err != nil {
 		return nil, fmt.Errorf("error decoding public ingredients: %w", err)
 	}
 
 	// Get user-specific ingredients if UserID is provided
-	var userIngredients []*Ingredient
+	userIngredients := make([]*Ingredient, 0)
 	if filters.UserID != "" {
 		userCursor, err := is.DB.Collection("ingredient").Find(context.Background(), userQuery, opts)
 		if err != nil {

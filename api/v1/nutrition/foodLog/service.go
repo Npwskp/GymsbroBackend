@@ -97,7 +97,7 @@ func (fs *FoodLogService) GetFoodLogByUser(userid string) ([]*FoodLog, error) {
 	if err != nil {
 		return nil, err
 	}
-	var foodlogs []*FoodLog
+	foodlogs := make([]*FoodLog, 0)
 	if err := cursor.All(context.Background(), &foodlogs); err != nil {
 		return nil, err
 	}
