@@ -7,18 +7,17 @@ import (
 )
 
 type ExerciseLog struct {
-	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	UserID           string             `json:"userid" bson:"userid" validate:"required"`
-	ExerciseID       string             `json:"exerciseid" validate:"required"`
-	WorkoutSessionID string             `json:"workoutsessionid" bson:"workoutsessionid" validate:"required"`
-	CompletedSets    int                `json:"completed_sets" bson:"completed_sets"`
-	TotalVolume      float64            `json:"total_volume" bson:"total_volume"`
-	Notes            string             `json:"notes" bson:"notes"`
-	Duration         int                `json:"duration" bson:"duration"`
-	DateTime         time.Time          `json:"datetime" bson:"datetime"`
-	Sets             []SetLog           `json:"sets" validate:"dive"`
-	CreatedAt        time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt        time.Time          `json:"updated_at" bson:"updated_at"`
+	ID            primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	UserID        string             `json:"userid" bson:"userid" validate:"required"`
+	ExerciseID    string             `json:"exerciseid" bson:"exerciseid" validate:"required"`
+	CompletedSets int                `json:"completed_sets" bson:"completed_sets"`
+	TotalVolume   float64            `json:"total_volume" bson:"total_volume"`
+	Notes         string             `json:"notes" bson:"notes"`
+	Duration      int                `json:"duration" bson:"duration"`
+	DateTime      time.Time          `json:"datetime" bson:"datetime"`
+	Sets          []SetLog           `json:"sets" validate:"dive"`
+	CreatedAt     time.Time          `json:"created_at" bson:"created_at"`
+	UpdatedAt     time.Time          `json:"updated_at" bson:"updated_at"`
 }
 
 type SetType string

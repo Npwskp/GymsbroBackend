@@ -27,6 +27,7 @@ type DashboardService struct {
 type IDashboardService interface {
 	GetDashboard(userId string) (*DashboardResponse, error)
 	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
+	GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error)
 }
 
 func getTimeOfDay(t time.Time) string {
@@ -443,5 +444,88 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 	return &UserStrengthStandards{
 		ExerciseStandards:    userStrengthStandards,
 		MuscleGroupStrengths: muscleGroupStandards,
+	}, nil
+}
+
+func (ds *DashboardService) GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error) {
+	// Create an aggregation pipeline to calculate 1RM at database level
+	pipeline := []bson.D{
+		{{Key: "$match", Value: bson.D{
+			{Key: "userid", Value: userId},
+			{Key: "exerciseid", Value: exerciseId},
+		}}},
+	}
+
+	if useLatest {
+		// Add stages to get only the latest exercise log
+		pipeline = append(pipeline,
+			bson.D{{Key: "$sort", Value: bson.D{{Key: "datetime", Value: -1}}}},
+			bson.D{{Key: "$limit", Value: 1}},
+		)
+	}
+
+	// Add remaining stages
+	pipeline = append(pipeline,
+		bson.D{{Key: "$unwind", Value: "$sets"}},
+		bson.D{{Key: "$match", Value: bson.D{
+			{Key: "sets.weight", Value: bson.D{{Key: "$gt", Value: 0}}},
+			{Key: "sets.reps", Value: bson.D{{Key: "$gt", Value: 0}}},
+		}}},
+		bson.D{{Key: "$addFields", Value: bson.D{
+			{Key: "oneRM", Value: bson.D{
+				{Key: "$divide", Value: bson.A{
+					"$sets.weight",
+					bson.D{{Key: "$subtract", Value: bson.A{
+						1.0278,
+						bson.D{{Key: "$multiply", Value: bson.A{0.0278, "$sets.reps"}}},
+					}}},
+				}},
+			}},
+		}}},
+		bson.D{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "bestOneRM", Value: bson.D{{Key: "$max", Value: "$oneRM"}}},
+			{Key: "lastUpdated", Value: bson.D{{Key: "$max", Value: "$datetime"}}},
+		}}},
+	)
+
+	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	// Get the result
+	var results []struct {
+		BestOneRM   float64   `bson:"bestOneRM"`
+		LastUpdated time.Time `bson:"lastUpdated"`
+	}
+
+	if err := cursor.All(context.Background(), &results); err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 || results[0].BestOneRM == 0 {
+		return nil, errors.New("no valid sets found for rep max calculation")
+	}
+
+	bestOneRM := math.Round(results[0].BestOneRM*100) / 100
+
+	// Calculate other rep maxes using the best one rep max
+	eightRM, err := dashboardFunctions.EstimateRepMax(bestOneRM, 8)
+	if err != nil {
+		return nil, err
+	}
+
+	twelveRM, err := dashboardFunctions.EstimateRepMax(bestOneRM, 12)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RepMaxResponse{
+		OneRepMax:    bestOneRM,
+		EightRepMax:  eightRM,
+		TwelveRepMax: twelveRM,
+		LastUpdated:  results[0].LastUpdated,
 	}, nil
 }

@@ -54,8 +54,34 @@ func (c *DashboardController) GetUserStrengthStandardsHandler(ctx *fiber.Ctx) er
 	return ctx.JSON(strengthStandards)
 }
 
+// @Summary     Get rep max estimates
+// @Description Get estimated rep maxes for a specific exercise
+// @Tags        dashboard
+// @Accept      json
+// @Produce     json
+// @Param       exerciseId path string true "Exercise ID"
+// @Param       useLatest query boolean false "Use only latest exercise log"
+// @Success     200 {object} RepMaxResponse
+// @Failure     400 {object} Error
+// @Router      /dashboard/rep-max/{exerciseId} [get]
+func (c *DashboardController) GetRepMaxHandler(ctx *fiber.Ctx) error {
+	userId := function.GetUserIDFromContext(ctx)
+	exerciseId := ctx.Params("exerciseId")
+	useLatest := ctx.QueryBool("useLatest", false)
+
+	repMax, err := c.Service.GetRepMax(userId, exerciseId, useLatest)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(repMax)
+}
+
 func (c *DashboardController) Handle() {
 	g := c.Instance.Group("/dashboard")
 	g.Get("/", c.GetDashboardHandler)
 	g.Get("/strength-standards", c.GetUserStrengthStandardsHandler)
+	g.Get("/rep-max/:exerciseId", c.GetRepMaxHandler)
 }

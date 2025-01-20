@@ -32,45 +32,24 @@ func (s *ExerciseLogService) CreateLog(dto *CreateExerciseLogDto, userId string)
 		totalVolume += float64(set.Reps) * set.Weight
 	}
 
+	if dto.DateTime.IsZero() {
+		dto.DateTime = time.Now()
+	}
+
 	log := &ExerciseLog{
-		UserID:           userId,
-		ExerciseID:       dto.ExerciseID,
-		WorkoutSessionID: dto.WorkoutSessionID,
-		CompletedSets:    completedSets,
-		TotalVolume:      totalVolume,
-		Notes:            dto.Notes,
-		Duration:         0, // This will be updated when the session ends
-		DateTime:         time.Now(),
-		Sets:             dto.Sets,
-		CreatedAt:        time.Now(),
-		UpdatedAt:        time.Now(),
+		UserID:        userId,
+		ExerciseID:    dto.ExerciseID,
+		CompletedSets: completedSets,
+		TotalVolume:   totalVolume,
+		Notes:         dto.Notes,
+		Duration:      0, // This will be updated when the session ends
+		DateTime:      dto.DateTime,
+		Sets:          dto.Sets,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 
 	result, err := s.DB.Collection("exerciseLogs").InsertOne(context.Background(), log)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update the workout session with the exercise log reference
-	sessionOid, err := primitive.ObjectIDFromHex(dto.WorkoutSessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.DB.Collection("workoutSessions").UpdateOne(
-		context.Background(),
-		bson.D{
-			{Key: "_id", Value: sessionOid},
-			{Key: "userid", Value: userId},
-			{Key: "exercises.exerciseId", Value: dto.ExerciseID},
-		},
-		bson.D{{
-			Key: "$set",
-			Value: bson.D{
-				{Key: "exercises.$.exerciseLogId", Value: result.InsertedID},
-			},
-		}},
-	)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +129,10 @@ func (s *ExerciseLogService) UpdateLog(id string, dto *UpdateExerciseLogDto, use
 		return nil, err
 	}
 
+	if dto.DateTime.IsZero() {
+		dto.DateTime = time.Now()
+	}
+
 	filter := bson.D{
 		{Key: "_id", Value: oid},
 		{Key: "userid", Value: userId},
@@ -158,6 +141,7 @@ func (s *ExerciseLogService) UpdateLog(id string, dto *UpdateExerciseLogDto, use
 	update := bson.D{{Key: "$set", Value: bson.D{
 		{Key: "sets", Value: dto.Sets},
 		{Key: "notes", Value: dto.Notes},
+		{Key: "datetime", Value: dto.DateTime},
 	}}}
 
 	after := options.After

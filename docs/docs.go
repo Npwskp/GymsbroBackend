@@ -175,6 +175,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/rep-max/{exerciseId}": {
+            "get": {
+                "description": "Get estimated rep maxes for a specific exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get rep max estimates",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "exerciseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Use only latest exercise log",
+                        "name": "useLatest",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.RepMaxResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/dashboard/strength-standards": {
             "get": {
                 "description": "Get user strength standards",
@@ -3020,6 +3062,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dashboard.RepMaxResponse": {
+            "type": "object",
+            "properties": {
+                "eightRepMax": {
+                    "type": "number"
+                },
+                "lastUpdated": {
+                    "type": "string"
+                },
+                "oneRepMax": {
+                    "type": "number"
+                },
+                "twelveRepMax": {
+                    "type": "number"
+                }
+            }
+        },
         "dashboard.UserStrengthStandardPerExercise": {
             "type": "object",
             "properties": {
@@ -3344,57 +3403,39 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "Assisted",
-                "Assisted (machine)",
-                "Assisted (partner)",
-                "Band Resistive",
                 "Band-assisted",
                 "Barbell",
                 "Body Weight",
                 "Cable",
-                "Cable Standing Fly",
-                "Cable (pull side)",
                 "Dumbbell",
-                "Isometric",
                 "Lever",
                 "Lever (plate loaded)",
                 "Lever (selectorized)",
                 "Plyometric",
                 "Self-assisted",
                 "Sled",
-                "Sled (plate loaded)",
-                "Sled (selectorized)",
                 "Smith",
                 "Suspended",
                 "Suspension",
-                "Weighted",
-                "Weighted Chest Dip"
+                "Weighted"
             ],
             "x-enum-varnames": [
                 "Assisted",
-                "AssistedMachine",
-                "AssistedPartner",
-                "BandResistive",
                 "BandAssisted",
                 "Barbell",
                 "BodyWeight",
                 "Cable",
-                "CableStandingFly",
-                "CablePullSide",
                 "Dumbbell",
-                "Isometric",
                 "Lever",
                 "LeverPlateLoaded",
                 "LeverSelectorized",
                 "Plyometric",
                 "SelfAssisted",
                 "Sled",
-                "SledPlateLoaded",
-                "SledSelectorized",
                 "Smith",
                 "Suspended",
                 "Suspension",
-                "Weighted",
-                "WeightedChestDip"
+                "Weighted"
             ]
         },
         "exerciseEnums.Force": {
@@ -3506,10 +3547,12 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "exerciseId",
-                "sets",
-                "workoutSessionId"
+                "sets"
             ],
             "properties": {
+                "dateTime": {
+                    "type": "string"
+                },
                 "exerciseId": {
                     "type": "string"
                 },
@@ -3521,9 +3564,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/exerciseLog.SetLog"
                     }
-                },
-                "workoutSessionId": {
-                    "type": "string"
                 }
             }
         },
@@ -3531,8 +3571,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "exerciseid",
-                "userid",
-                "workoutsessionid"
+                "userid"
             ],
             "properties": {
                 "completed_sets": {
@@ -3569,9 +3608,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userid": {
-                    "type": "string"
-                },
-                "workoutsessionid": {
                     "type": "string"
                 }
             }
@@ -3633,6 +3669,9 @@ const docTemplate = `{
                 "sets"
             ],
             "properties": {
+                "dateTime": {
+                    "type": "string"
+                },
                 "notes": {
                     "type": "string"
                 },
@@ -4583,15 +4622,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "enum": [
-                        "completed",
-                        "cancelled"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/workoutSession.SessionStatus"
-                        }
-                    ]
+                    "$ref": "#/definitions/workoutSession.SessionStatus"
                 },
                 "workoutId": {
                     "type": "string"
