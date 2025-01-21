@@ -149,7 +149,11 @@ func (ws *WorkoutService) DeleteWorkout(id string, userId string) error {
 
 func (ws *WorkoutService) SearchWorkouts(query string, userId string) ([]*Workout, error) {
 	filter := bson.D{
-		{Key: "userid", Value: userId},
+		{Key: "$or", Value: bson.A{
+			bson.D{{Key: "userid", Value: userId}},
+			bson.D{{Key: "userid", Value: ""}},
+			bson.D{{Key: "userid", Value: primitive.Null{}}},
+		}},
 	}
 
 	// If query is provided, add text search
