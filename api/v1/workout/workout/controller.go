@@ -57,9 +57,8 @@ func (wc *WorkoutController) CreateWorkoutHandler(c *fiber.Ctx) error {
 // @Router      /workout/{id} [get]
 func (wc *WorkoutController) GetWorkoutHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
-	userId := function.GetUserIDFromContext(c)
 
-	workout, err := wc.Service.GetWorkout(id, userId)
+	workout, err := wc.Service.GetWorkout(id)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Workout not found"})
@@ -70,7 +69,7 @@ func (wc *WorkoutController) GetWorkoutHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(workout)
 }
 
-// @Summary     Get user workouts
+// @Summary     Get all workouts
 // @Description Get all workouts for the current user
 // @Tags        workouts
 // @Accept      json
@@ -82,7 +81,7 @@ func (wc *WorkoutController) GetWorkoutHandler(c *fiber.Ctx) error {
 func (wc *WorkoutController) GetWorkoutsHandler(c *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(c)
 
-	workouts, err := wc.Service.GetWorkoutsByUser(userId)
+	workouts, err := wc.Service.GetWorkouts(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
