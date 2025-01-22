@@ -161,6 +161,20 @@ const docTemplate = `{
                     "dashboard"
                 ],
                 "summary": "Get workout dashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -3232,7 +3246,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "labels": {
-                    "description": "Data points for last 30 days",
+                    "description": "Date labels in \"2024-01-01\" format",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3331,34 +3345,6 @@ const docTemplate = `{
         "dashboard.WorkoutAnalysis": {
             "type": "object",
             "properties": {
-                "average_per_week": {
-                    "description": "Time-based Stats",
-                    "type": "number"
-                },
-                "best_streak": {
-                    "description": "Best consecutive days streak",
-                    "type": "integer"
-                },
-                "current_streak": {
-                    "description": "Current consecutive days streak",
-                    "type": "integer"
-                },
-                "last_month_count": {
-                    "description": "Workouts in last 30 days",
-                    "type": "integer"
-                },
-                "last_week_count": {
-                    "description": "Recent Trends",
-                    "type": "integer"
-                },
-                "most_active_day": {
-                    "description": "Pattern Analysis",
-                    "type": "string"
-                },
-                "most_active_time": {
-                    "description": "\"Morning\", \"Afternoon\", \"Evening\", \"Night\"",
-                    "type": "string"
-                },
                 "total_exercises": {
                     "type": "integer"
                 },

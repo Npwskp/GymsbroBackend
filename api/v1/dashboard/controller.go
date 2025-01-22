@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"time"
+
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,13 +19,29 @@ type DashboardController struct {
 // @Tags        dashboard
 // @Accept      json
 // @Produce     json
+// @Param       startDate query string false "Start date"
+// @Param       endDate query string false "End date"
 // @Success     200 {object} DashboardResponse
 // @Failure     400 {object} Error
 // @Router      /dashboard [get]
 func (c *DashboardController) GetDashboardHandler(ctx *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(ctx)
 
-	dashboard, err := c.Service.GetDashboard(userId)
+	startDate, err := time.Parse("2006-01-02 15:04:05", ctx.Query("startDate"))
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid start date format. Expected format: YYYY-MM-DD HH:mm:ss",
+		})
+	}
+
+	endDate, err := time.Parse("2006-01-02 15:04:05", ctx.Query("endDate"))
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid end date format. Expected format: YYYY-MM-DD HH:mm:ss",
+		})
+	}
+
+	dashboard, err := c.Service.GetDashboard(userId, startDate, endDate)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),

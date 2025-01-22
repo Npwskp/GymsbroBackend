@@ -14,7 +14,6 @@ type DashboardResponse struct {
 
 // FrequencyGraphData provides data points for plotting exercise frequency
 type FrequencyGraphData struct {
-	// Data points for last 30 days
 	Labels    []string  `json:"labels"`    // Date labels in "2024-01-01" format
 	Values    []int     `json:"values"`    // Number of exercises/workouts per day
 	TrendLine []float64 `json:"trendline"` // 7-day moving average
@@ -26,19 +25,6 @@ type WorkoutAnalysis struct {
 	TotalWorkouts  int     `json:"total_workouts"`
 	TotalExercises int     `json:"total_exercises"`
 	TotalVolume    float64 `json:"total_volume"`
-
-	// Time-based Stats
-	AveragePerWeek float64 `json:"average_per_week"`
-	BestStreak     int     `json:"best_streak"`    // Best consecutive days streak
-	CurrentStreak  int     `json:"current_streak"` // Current consecutive days streak
-
-	// Pattern Analysis
-	MostActiveDay  string `json:"most_active_day"`  // e.g., "Monday"
-	MostActiveTime string `json:"most_active_time"` // "Morning", "Afternoon", "Evening", "Night"
-
-	// Recent Trends
-	LastWeekCount  int `json:"last_week_count"`  // Workouts in last 7 days
-	LastMonthCount int `json:"last_month_count"` // Workouts in last 30 days
 }
 
 type UserStrengthStandards struct {
