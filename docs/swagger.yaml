@@ -823,6 +823,14 @@ definitions:
       value:
         type: number
     type: object
+  unitEnums.BodyPartMeasureUnit:
+    enum:
+    - in
+    - cm
+    type: string
+    x-enum-varnames:
+    - BodyPartMeasureUnitInch
+    - BodyPartMeasureUnitCm
   unitEnums.ExerciseWeightUnit:
     enum:
     - lbs
@@ -831,7 +839,7 @@ definitions:
     x-enum-varnames:
     - ExerciseWeightUnitPound
     - ExerciseWeightUnitKg
-  unitEnums.UnitInfo:
+  unitEnums.ScaleUnitInfo:
     properties:
       displayName:
         type: string
@@ -840,9 +848,9 @@ definitions:
       toGrams:
         type: number
       type:
-        $ref: '#/definitions/unitEnums.UnitType'
+        $ref: '#/definitions/unitEnums.ScaleUnitType'
     type: object
-  unitEnums.UnitType:
+  unitEnums.ScaleUnitType:
     enum:
     - mass
     - volume
@@ -2627,6 +2635,12 @@ paths:
       consumes:
       - application/json
       description: Get a list of all available units with their information
+      parameters:
+      - description: Unit type
+        in: query
+        name: unitType
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -2634,7 +2648,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/unitEnums.UnitInfo'
+              $ref: '#/definitions/unitEnums.ScaleUnitInfo'
             type: array
       summary: Get all units
       tags:
@@ -2650,17 +2664,39 @@ paths:
         name: symbol
         required: true
         type: string
+      - description: Unit type
+        in: query
+        name: unitType
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/unitEnums.UnitInfo'
+            $ref: '#/definitions/unitEnums.ScaleUnitInfo'
         "404":
           description: Not Found
           schema: {}
       summary: Get unit information
+      tags:
+      - Units
+  /unit/bodypart:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available body part measure units
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/unitEnums.BodyPartMeasureUnit'
+            type: array
+      summary: Get all body part measure units
       tags:
       - Units
   /unit/convert:
@@ -2669,6 +2705,11 @@ paths:
       - application/json
       description: Convert a value from one unit to another
       parameters:
+      - description: Unit type
+        in: query
+        name: unitType
+        required: true
+        type: string
       - description: Conversion request
         in: body
         name: body

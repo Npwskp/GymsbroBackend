@@ -1,18 +1,25 @@
 package unitEnums
 
-// UnitType represents the category of measurement
-type UnitType string
+// ScaleUnitType represents the category of measurement
+type ScaleUnitType string
 
-// UnitInfo stores information about a unit
-type UnitInfo struct {
-	Symbol      string   `json:"symbol"`
-	Type        UnitType `json:"type"`
-	DisplayName string   `json:"displayName"`
-	ToGrams     float64  `json:"toGrams"`
+// Unit type constants
+const (
+	MassUnit    ScaleUnitType = "mass"
+	VolumeUnit  ScaleUnitType = "volume"
+	CookingUnit ScaleUnitType = "cooking"
+)
+
+// ScaleUnitInfo stores information about a unit
+type ScaleUnitInfo struct {
+	Symbol      string        `json:"symbol"`
+	Type        ScaleUnitType `json:"type"`
+	DisplayName string        `json:"displayName"`
+	ToGrams     float64       `json:"toGrams"`
 }
 
-// UnitInfoMap stores detailed information about each unit
-var UnitInfoMap = map[string]UnitInfo{
+// ScaleUnitInfoMap stores detailed information about each unit
+var ScaleUnitInfoMap = map[string]ScaleUnitInfo{
 	// Mass units
 	"µg":  {Symbol: "µg", Type: MassUnit, DisplayName: "Microgram", ToGrams: 1e-6},
 	"mg":  {Symbol: "mg", Type: MassUnit, DisplayName: "Milligram", ToGrams: 1e-3},
@@ -39,9 +46,13 @@ var UnitInfoMap = map[string]UnitInfo{
 	"1/2_cup": {Symbol: "1/2_cup", Type: CookingUnit, DisplayName: "1/2 Cup", ToGrams: 118.294},
 }
 
-// Unit type constants
+type ExerciseWeightUnit string
+
 const (
-	MassUnit    UnitType = "mass"
-	VolumeUnit  UnitType = "volume"
-	CookingUnit UnitType = "cooking"
+	ExerciseWeightUnitPound ExerciseWeightUnit = "lbs"
+	ExerciseWeightUnitKg    ExerciseWeightUnit = "kg"
 )
+
+func GetAllExerciseWeightUnit() []ExerciseWeightUnit {
+	return []ExerciseWeightUnit{ExerciseWeightUnitPound, ExerciseWeightUnitKg}
+}

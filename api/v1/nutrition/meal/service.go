@@ -112,7 +112,7 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 		}
 
 		// Convert ingredient amount to grams for calculation
-		amountInGrams, err := ns.UnitService.ConvertBetweenUnits(ingBody.Amount, ingBody.Unit, "g")
+		amountInGrams, err := ns.UnitService.ConvertUnits(ingBody.Amount, ingBody.Unit, "g", "scale")
 		if err != nil {
 			return nil, fmt.Errorf("error converting units for ingredient %s: %w", ingBody.IngredientId, err)
 		}

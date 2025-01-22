@@ -1972,13 +1972,48 @@ const docTemplate = `{
                     "Units"
                 ],
                 "summary": "Get all units",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unit type",
+                        "name": "unitType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/unitEnums.UnitInfo"
+                                "$ref": "#/definitions/unitEnums.ScaleUnitInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/unit/bodypart": {
+            "get": {
+                "description": "Get a list of all available body part measure units",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get all body part measure units",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/unitEnums.BodyPartMeasureUnit"
                             }
                         }
                     }
@@ -1999,6 +2034,13 @@ const docTemplate = `{
                 ],
                 "summary": "Convert between units",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unit type",
+                        "name": "unitType",
+                        "in": "query",
+                        "required": true
+                    },
                     {
                         "description": "Conversion request",
                         "name": "body",
@@ -2069,13 +2111,20 @@ const docTemplate = `{
                         "name": "symbol",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unit type",
+                        "name": "unitType",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/unitEnums.UnitInfo"
+                            "$ref": "#/definitions/unitEnums.ScaleUnitInfo"
                         }
                     },
                     "404": {
@@ -4240,6 +4289,17 @@ const docTemplate = `{
                 }
             }
         },
+        "unitEnums.BodyPartMeasureUnit": {
+            "type": "string",
+            "enum": [
+                "in",
+                "cm"
+            ],
+            "x-enum-varnames": [
+                "BodyPartMeasureUnitInch",
+                "BodyPartMeasureUnitCm"
+            ]
+        },
         "unitEnums.ExerciseWeightUnit": {
             "type": "string",
             "enum": [
@@ -4251,7 +4311,7 @@ const docTemplate = `{
                 "ExerciseWeightUnitKg"
             ]
         },
-        "unitEnums.UnitInfo": {
+        "unitEnums.ScaleUnitInfo": {
             "type": "object",
             "properties": {
                 "displayName": {
@@ -4264,11 +4324,11 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "type": {
-                    "$ref": "#/definitions/unitEnums.UnitType"
+                    "$ref": "#/definitions/unitEnums.ScaleUnitType"
                 }
             }
         },
-        "unitEnums.UnitType": {
+        "unitEnums.ScaleUnitType": {
             "type": "string",
             "enum": [
                 "mass",
