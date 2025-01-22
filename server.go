@@ -65,7 +65,7 @@ func disconnectDB() error {
 // @description	This is a sample server for GymsBro API.
 // @BasePath	/api/v1
 // @schemes		http https
-// @host		localhost:8080
+// @host		35.240.232.32:8080
 // @version					1.0
 
 // @securityDefinitions.apikey	BearerAuth
