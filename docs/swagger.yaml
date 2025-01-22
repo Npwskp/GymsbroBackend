@@ -807,6 +807,51 @@ definitions:
     - name
     - unit
     type: object
+  unit.ConversionRequest:
+    properties:
+      from_unit:
+        type: string
+      to_unit:
+        type: string
+      value:
+        type: number
+    type: object
+  unit.ConversionResponse:
+    properties:
+      unit:
+        type: string
+      value:
+        type: number
+    type: object
+  unitEnums.ExerciseWeightUnit:
+    enum:
+    - lbs
+    - kg
+    type: string
+    x-enum-varnames:
+    - ExerciseWeightUnitPound
+    - ExerciseWeightUnitKg
+  unitEnums.UnitInfo:
+    properties:
+      displayName:
+        type: string
+      symbol:
+        type: string
+      toGrams:
+        type: number
+      type:
+        $ref: '#/definitions/unitEnums.UnitType'
+    type: object
+  unitEnums.UnitType:
+    enum:
+    - mass
+    - volume
+    - cooking
+    type: string
+    x-enum-varnames:
+    - MassUnit
+    - VolumeUnit
+    - CookingUnit
   user.CreateUserDto:
     properties:
       activityLevel:
@@ -2577,6 +2622,89 @@ paths:
       summary: Get meals by user
       tags:
       - meals
+  /unit:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available units with their information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/unitEnums.UnitInfo'
+            type: array
+      summary: Get all units
+      tags:
+      - Units
+  /unit/{symbol}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific unit by its symbol
+      parameters:
+      - description: Unit symbol
+        in: path
+        name: symbol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/unitEnums.UnitInfo'
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Get unit information
+      tags:
+      - Units
+  /unit/convert:
+    post:
+      consumes:
+      - application/json
+      description: Convert a value from one unit to another
+      parameters:
+      - description: Conversion request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/unit.ConversionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/unit.ConversionResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Convert between units
+      tags:
+      - Units
+  /unit/weight:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available weight units
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/unitEnums.ExerciseWeightUnit'
+            type: array
+      summary: Get all weight units
+      tags:
+      - Units
   /user:
     get:
       consumes:

@@ -29,6 +29,7 @@ const (
 type MealService struct {
 	DB           *mongo.Database
 	MinioService minio.MinioService
+	UnitService  unit.IUnitService
 }
 
 type IMealService interface {
@@ -111,7 +112,7 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 		}
 
 		// Convert ingredient amount to grams for calculation
-		amountInGrams, err := unit.Service.ConvertBetweenUnits(ingBody.Amount, ingBody.Unit, "g")
+		amountInGrams, err := ns.UnitService.ConvertBetweenUnits(ingBody.Amount, ingBody.Unit, "g")
 		if err != nil {
 			return nil, fmt.Errorf("error converting units for ingredient %s: %w", ingBody.IngredientId, err)
 		}

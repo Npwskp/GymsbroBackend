@@ -1957,6 +1957,132 @@
                 }
             }
         },
+        "/unit": {
+            "get": {
+                "description": "Get a list of all available units with their information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get all units",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/unitEnums.UnitInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/unit/convert": {
+            "post": {
+                "description": "Convert a value from one unit to another",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Convert between units",
+                "parameters": [
+                    {
+                        "description": "Conversion request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/unit.ConversionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/unit.ConversionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/unit/weight": {
+            "get": {
+                "description": "Get a list of all available weight units",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get all weight units",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/unitEnums.ExerciseWeightUnit"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/unit/{symbol}": {
+            "get": {
+                "description": "Get detailed information about a specific unit by its symbol",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get unit information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unit symbol",
+                        "name": "symbol",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/unitEnums.UnitInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "description": "Get all users",
@@ -4086,6 +4212,72 @@
                     "type": "string"
                 }
             }
+        },
+        "unit.ConversionRequest": {
+            "type": "object",
+            "properties": {
+                "from_unit": {
+                    "type": "string"
+                },
+                "to_unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "unit.ConversionResponse": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "unitEnums.ExerciseWeightUnit": {
+            "type": "string",
+            "enum": [
+                "lbs",
+                "kg"
+            ],
+            "x-enum-varnames": [
+                "ExerciseWeightUnitPound",
+                "ExerciseWeightUnitKg"
+            ]
+        },
+        "unitEnums.UnitInfo": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "toGrams": {
+                    "type": "number"
+                },
+                "type": {
+                    "$ref": "#/definitions/unitEnums.UnitType"
+                }
+            }
+        },
+        "unitEnums.UnitType": {
+            "type": "string",
+            "enum": [
+                "mass",
+                "volume",
+                "cooking"
+            ],
+            "x-enum-varnames": [
+                "MassUnit",
+                "VolumeUnit",
+                "CookingUnit"
+            ]
         },
         "user.CreateUserDto": {
             "type": "object",

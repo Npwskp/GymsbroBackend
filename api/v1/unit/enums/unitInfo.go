@@ -1,15 +1,26 @@
-package unit
+package unitEnums
+
+// UnitType represents the category of measurement
+type UnitType string
+
+// UnitInfo stores information about a unit
+type UnitInfo struct {
+	Symbol      string   `json:"symbol"`
+	Type        UnitType `json:"type"`
+	DisplayName string   `json:"displayName"`
+	ToGrams     float64  `json:"toGrams"`
+}
 
 // UnitInfoMap stores detailed information about each unit
 var UnitInfoMap = map[string]UnitInfo{
 	// Mass units
-	"µg": {Symbol: "µg", Type: MassUnit, DisplayName: "Microgram", ToGrams: 1e-6},
-	"mg": {Symbol: "mg", Type: MassUnit, DisplayName: "Milligram", ToGrams: 1e-3},
-	"g":  {Symbol: "g", Type: MassUnit, DisplayName: "Gram", ToGrams: 1},
-	"kg": {Symbol: "kg", Type: MassUnit, DisplayName: "Kilogram", ToGrams: 1000},
-	"oz": {Symbol: "oz", Type: MassUnit, DisplayName: "Ounce", ToGrams: 28.3495},
-	"lb": {Symbol: "lb", Type: MassUnit, DisplayName: "Pound", ToGrams: 453.592},
-	"t":  {Symbol: "t", Type: MassUnit, DisplayName: "Metric Ton", ToGrams: 1e6},
+	"µg":  {Symbol: "µg", Type: MassUnit, DisplayName: "Microgram", ToGrams: 1e-6},
+	"mg":  {Symbol: "mg", Type: MassUnit, DisplayName: "Milligram", ToGrams: 1e-3},
+	"g":   {Symbol: "g", Type: MassUnit, DisplayName: "Gram", ToGrams: 1},
+	"kg":  {Symbol: "kg", Type: MassUnit, DisplayName: "Kilogram", ToGrams: 1000},
+	"oz":  {Symbol: "oz", Type: MassUnit, DisplayName: "Ounce", ToGrams: 28.3495},
+	"lbs": {Symbol: "lbs", Type: MassUnit, DisplayName: "Pound", ToGrams: 453.592},
+	"t":   {Symbol: "t", Type: MassUnit, DisplayName: "Metric Ton", ToGrams: 1e6},
 
 	// Volume units
 	"ml":    {Symbol: "ml", Type: VolumeUnit, DisplayName: "Milliliter", ToGrams: 1},

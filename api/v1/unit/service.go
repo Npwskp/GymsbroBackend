@@ -1,42 +1,44 @@
 package unit
 
-import "fmt"
+import (
+	"fmt"
 
-// Global instance of UnitService
-var Service *UnitService
+	unitEnums "github.com/Npwskp/GymsbroBackend/api/v1/unit/enums"
+)
 
-// init function will be called automatically when the package is imported
-func init() {
-	Service = NewUnitService()
-}
+type UnitService struct{}
 
-// UnitService provides helper methods for unit operations
-type UnitService struct {
-	unitMap map[string]UnitInfo
-}
-
-// NewUnitService creates a new instance of UnitService
-func NewUnitService() *UnitService {
-	return &UnitService{
-		unitMap: UnitInfoMap,
-	}
+type IUnitService interface {
+	GetUnit(symbol string) (unitEnums.UnitInfo, bool)
+	IsValidUnit(symbol string) bool
+	GetAllUnits() []unitEnums.UnitInfo
+	ConvertToGrams(value float64, fromUnit string) (float64, error)
+	ConvertBetweenUnits(value float64, fromUnit, toUnit string) (float64, error)
 }
 
 // GetUnit returns unit info for a given symbol
-func (s *UnitService) GetUnit(symbol string) (UnitInfo, bool) {
-	unit, exists := s.unitMap[symbol]
+func (s *UnitService) GetUnit(symbol string) (unitEnums.UnitInfo, bool) {
+	unit, exists := unitEnums.UnitInfoMap[symbol]
 	return unit, exists
 }
 
 // IsValidUnit checks if a unit symbol is valid
 func (s *UnitService) IsValidUnit(symbol string) bool {
-	_, exists := s.unitMap[symbol]
+	_, exists := unitEnums.UnitInfoMap[symbol]
 	return exists
+}
+
+func (s *UnitService) GetAllUnits() []unitEnums.UnitInfo {
+	units := make([]unitEnums.UnitInfo, 0, len(unitEnums.UnitInfoMap))
+	for _, unit := range unitEnums.UnitInfoMap {
+		units = append(units, unit)
+	}
+	return units
 }
 
 // ConvertToGrams converts a value from one unit to grams
 func (s *UnitService) ConvertToGrams(value float64, fromUnit string) (float64, error) {
-	unit, exists := s.unitMap[fromUnit]
+	unit, exists := unitEnums.UnitInfoMap[fromUnit]
 	if !exists {
 		return 0, fmt.Errorf("invalid unit: %s", fromUnit)
 	}
@@ -46,8 +48,8 @@ func (s *UnitService) ConvertToGrams(value float64, fromUnit string) (float64, e
 // ConvertBetweenUnits converts a value from one unit to another
 func (s *UnitService) ConvertBetweenUnits(value float64, fromUnit, toUnit string) (float64, error) {
 	// First validate both units
-	fromUnitInfo, fromExists := s.unitMap[fromUnit]
-	toUnitInfo, toExists := s.unitMap[toUnit]
+	fromUnitInfo, fromExists := unitEnums.UnitInfoMap[fromUnit]
+	toUnitInfo, toExists := unitEnums.UnitInfoMap[toUnit]
 
 	if !fromExists {
 		return 0, fmt.Errorf("invalid source unit: %s", fromUnit)
