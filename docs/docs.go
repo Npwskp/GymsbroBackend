@@ -161,6 +161,20 @@ const docTemplate = `{
                     "dashboard"
                 ],
                 "summary": "Get workout dashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1959,6 +1973,181 @@ const docTemplate = `{
                 }
             }
         },
+        "/unit": {
+            "get": {
+                "description": "Get a list of all available units with their information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get all units",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unit type",
+                        "name": "unitType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/unitEnums.ScaleUnitInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/unit/bodypart": {
+            "get": {
+                "description": "Get a list of all available body part measure units",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get all body part measure units",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/unitEnums.BodyPartMeasureUnit"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/unit/convert": {
+            "post": {
+                "description": "Convert a value from one unit to another",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Convert between units",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unit type",
+                        "name": "unitType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Conversion request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/unit.ConversionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/unit.ConversionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/unit/weight": {
+            "get": {
+                "description": "Get a list of all available weight units",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get all weight units",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/unitEnums.ExerciseWeightUnit"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/unit/{symbol}": {
+            "get": {
+                "description": "Get detailed information about a specific unit by its symbol",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Units"
+                ],
+                "summary": "Get unit information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unit symbol",
+                        "name": "symbol",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unit type",
+                        "name": "unitType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/unitEnums.ScaleUnitInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "description": "Get all users",
@@ -2336,7 +2525,7 @@ const docTemplate = `{
                 "tags": [
                     "workouts"
                 ],
-                "summary": "Get user workouts",
+                "summary": "Get all workouts",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2670,6 +2859,48 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/workout/search": {
+            "get": {
+                "description": "Search workouts by name and description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Search workouts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query for workout name or description",
+                        "name": "query",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/workout.Workout"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -3015,7 +3246,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "labels": {
-                    "description": "Data points for last 30 days",
+                    "description": "Date labels in \"2024-01-01\" format",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3114,34 +3345,6 @@ const docTemplate = `{
         "dashboard.WorkoutAnalysis": {
             "type": "object",
             "properties": {
-                "average_per_week": {
-                    "description": "Time-based Stats",
-                    "type": "number"
-                },
-                "best_streak": {
-                    "description": "Best consecutive days streak",
-                    "type": "integer"
-                },
-                "current_streak": {
-                    "description": "Current consecutive days streak",
-                    "type": "integer"
-                },
-                "last_month_count": {
-                    "description": "Workouts in last 30 days",
-                    "type": "integer"
-                },
-                "last_week_count": {
-                    "description": "Recent Trends",
-                    "type": "integer"
-                },
-                "most_active_day": {
-                    "description": "Pattern Analysis",
-                    "type": "string"
-                },
-                "most_active_time": {
-                    "description": "\"Morning\", \"Afternoon\", \"Evening\", \"Night\"",
-                    "type": "string"
-                },
                 "total_exercises": {
                     "type": "integer"
                 },
@@ -4047,6 +4250,83 @@ const docTemplate = `{
                 }
             }
         },
+        "unit.ConversionRequest": {
+            "type": "object",
+            "properties": {
+                "from_unit": {
+                    "type": "string"
+                },
+                "to_unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "unit.ConversionResponse": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "unitEnums.BodyPartMeasureUnit": {
+            "type": "string",
+            "enum": [
+                "in",
+                "cm"
+            ],
+            "x-enum-varnames": [
+                "BodyPartMeasureUnitInch",
+                "BodyPartMeasureUnitCm"
+            ]
+        },
+        "unitEnums.ExerciseWeightUnit": {
+            "type": "string",
+            "enum": [
+                "lbs",
+                "kg"
+            ],
+            "x-enum-varnames": [
+                "ExerciseWeightUnitPound",
+                "ExerciseWeightUnitKg"
+            ]
+        },
+        "unitEnums.ScaleUnitInfo": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "toGrams": {
+                    "type": "number"
+                },
+                "type": {
+                    "$ref": "#/definitions/unitEnums.ScaleUnitType"
+                }
+            }
+        },
+        "unitEnums.ScaleUnitType": {
+            "type": "string",
+            "enum": [
+                "mass",
+                "volume",
+                "cooking"
+            ],
+            "x-enum-varnames": [
+                "MassUnit",
+                "VolumeUnit",
+                "CookingUnit"
+            ]
+        },
         "user.CreateUserDto": {
             "type": "object",
             "required": [
@@ -4366,6 +4646,7 @@ const docTemplate = `{
         "workout.CreateWorkoutDto": {
             "type": "object",
             "required": [
+                "exercises",
                 "name"
             ],
             "properties": {
@@ -4385,6 +4666,10 @@ const docTemplate = `{
         },
         "workout.UpdateWorkoutDto": {
             "type": "object",
+            "required": [
+                "exercises",
+                "name"
+            ],
             "properties": {
                 "description": {
                     "type": "string"

@@ -64,7 +64,7 @@ definitions:
   dashboard.FrequencyGraphData:
     properties:
       labels:
-        description: Data points for last 30 days
+        description: Date labels in "2024-01-01" format
         items:
           type: string
         type: array
@@ -129,27 +129,6 @@ definitions:
     type: object
   dashboard.WorkoutAnalysis:
     properties:
-      average_per_week:
-        description: Time-based Stats
-        type: number
-      best_streak:
-        description: Best consecutive days streak
-        type: integer
-      current_streak:
-        description: Current consecutive days streak
-        type: integer
-      last_month_count:
-        description: Workouts in last 30 days
-        type: integer
-      last_week_count:
-        description: Recent Trends
-        type: integer
-      most_active_day:
-        description: Pattern Analysis
-        type: string
-      most_active_time:
-        description: '"Morning", "Afternoon", "Evening", "Night"'
-        type: string
       total_exercises:
         type: integer
       total_volume:
@@ -807,6 +786,59 @@ definitions:
     - name
     - unit
     type: object
+  unit.ConversionRequest:
+    properties:
+      from_unit:
+        type: string
+      to_unit:
+        type: string
+      value:
+        type: number
+    type: object
+  unit.ConversionResponse:
+    properties:
+      unit:
+        type: string
+      value:
+        type: number
+    type: object
+  unitEnums.BodyPartMeasureUnit:
+    enum:
+    - in
+    - cm
+    type: string
+    x-enum-varnames:
+    - BodyPartMeasureUnitInch
+    - BodyPartMeasureUnitCm
+  unitEnums.ExerciseWeightUnit:
+    enum:
+    - lbs
+    - kg
+    type: string
+    x-enum-varnames:
+    - ExerciseWeightUnitPound
+    - ExerciseWeightUnitKg
+  unitEnums.ScaleUnitInfo:
+    properties:
+      displayName:
+        type: string
+      symbol:
+        type: string
+      toGrams:
+        type: number
+      type:
+        $ref: '#/definitions/unitEnums.ScaleUnitType'
+    type: object
+  unitEnums.ScaleUnitType:
+    enum:
+    - mass
+    - volume
+    - cooking
+    type: string
+    x-enum-varnames:
+    - MassUnit
+    - VolumeUnit
+    - CookingUnit
   user.CreateUserDto:
     properties:
       activityLevel:
@@ -1037,6 +1069,7 @@ definitions:
       name:
         type: string
     required:
+    - exercises
     - name
     type: object
   workout.UpdateWorkoutDto:
@@ -1049,6 +1082,9 @@ definitions:
         type: array
       name:
         type: string
+    required:
+    - exercises
+    - name
     type: object
   workout.Workout:
     properties:
@@ -1356,6 +1392,15 @@ paths:
       consumes:
       - application/json
       description: Get workout frequency graph and analysis
+      parameters:
+      - description: Start date
+        in: query
+        name: startDate
+        type: string
+      - description: End date
+        in: query
+        name: endDate
+        type: string
       produces:
       - application/json
       responses:
@@ -2573,6 +2618,122 @@ paths:
       summary: Get meals by user
       tags:
       - meals
+  /unit:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available units with their information
+      parameters:
+      - description: Unit type
+        in: query
+        name: unitType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/unitEnums.ScaleUnitInfo'
+            type: array
+      summary: Get all units
+      tags:
+      - Units
+  /unit/{symbol}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific unit by its symbol
+      parameters:
+      - description: Unit symbol
+        in: path
+        name: symbol
+        required: true
+        type: string
+      - description: Unit type
+        in: query
+        name: unitType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/unitEnums.ScaleUnitInfo'
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Get unit information
+      tags:
+      - Units
+  /unit/bodypart:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available body part measure units
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/unitEnums.BodyPartMeasureUnit'
+            type: array
+      summary: Get all body part measure units
+      tags:
+      - Units
+  /unit/convert:
+    post:
+      consumes:
+      - application/json
+      description: Convert a value from one unit to another
+      parameters:
+      - description: Unit type
+        in: query
+        name: unitType
+        required: true
+        type: string
+      - description: Conversion request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/unit.ConversionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/unit.ConversionResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Convert between units
+      tags:
+      - Units
+  /unit/weight:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available weight units
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/unitEnums.ExerciseWeightUnit'
+            type: array
+      summary: Get all weight units
+      tags:
+      - Units
   /user:
     get:
       consumes:
@@ -2836,7 +2997,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Get user workouts
+      summary: Get all workouts
       tags:
       - workouts
     post:
@@ -3135,6 +3296,34 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Update a workout
+      tags:
+      - workouts
+  /workout/search:
+    get:
+      consumes:
+      - application/json
+      description: Search workouts by name and description
+      parameters:
+      - description: Search query for workout name or description
+        in: query
+        name: query
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/workout.Workout'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Search workouts
       tags:
       - workouts
   /workoutPlan/byCyclicWorkout:

@@ -1,70 +1,90 @@
 package unit
 
-import "fmt"
+import (
+	"fmt"
 
-// Global instance of UnitService
-var Service *UnitService
+	unitEnums "github.com/Npwskp/GymsbroBackend/api/v1/unit/enums"
+)
 
-// init function will be called automatically when the package is imported
-func init() {
-	Service = NewUnitService()
-}
+type UnitService struct{}
 
-// UnitService provides helper methods for unit operations
-type UnitService struct {
-	unitMap map[string]UnitInfo
-}
+type unitType string
 
-// NewUnitService creates a new instance of UnitService
-func NewUnitService() *UnitService {
-	return &UnitService{
-		unitMap: UnitInfoMap,
-	}
+const (
+	scaleUnitType   unitType = "scale"
+	measureUnitType unitType = "measure"
+)
+
+type IUnitService interface {
+	GetUnit(symbol string, unitType unitType) (interface{}, bool)
+	GetAllUnits(unitType unitType) interface{}
+	ConvertUnits(value float64, fromUnit, toUnit string, unitType unitType) (float64, error)
 }
 
 // GetUnit returns unit info for a given symbol
-func (s *UnitService) GetUnit(symbol string) (UnitInfo, bool) {
-	unit, exists := s.unitMap[symbol]
-	return unit, exists
+func (s *UnitService) GetUnit(symbol string, uType unitType) (interface{}, bool) {
+	switch uType {
+	case scaleUnitType:
+		return unitEnums.ScaleUnitInfoMap[symbol], symbol != ""
+	case measureUnitType:
+		return unitEnums.MeasureUnitInfoMap[symbol], symbol != ""
+	default:
+		return nil, false
+	}
 }
 
-// IsValidUnit checks if a unit symbol is valid
-func (s *UnitService) IsValidUnit(symbol string) bool {
-	_, exists := s.unitMap[symbol]
-	return exists
+// GetAllUnits returns all units of specified type
+func (s *UnitService) GetAllUnits(uType unitType) interface{} {
+	switch uType {
+	case scaleUnitType:
+		units := make([]unitEnums.ScaleUnitInfo, 0, len(unitEnums.ScaleUnitInfoMap))
+		for _, unit := range unitEnums.ScaleUnitInfoMap {
+			units = append(units, unit)
+		}
+		return units
+	case measureUnitType:
+		units := make([]unitEnums.MeasureUnitInfo, 0, len(unitEnums.MeasureUnitInfoMap))
+		for _, unit := range unitEnums.MeasureUnitInfoMap {
+			units = append(units, unit)
+		}
+		return units
+	default:
+		return nil
+	}
 }
 
-// ConvertToGrams converts a value from one unit to grams
-func (s *UnitService) ConvertToGrams(value float64, fromUnit string) (float64, error) {
-	unit, exists := s.unitMap[fromUnit]
-	if !exists {
-		return 0, fmt.Errorf("invalid unit: %s", fromUnit)
+// ConvertUnits converts a value between units of the same type
+func (s *UnitService) ConvertUnits(value float64, fromUnit, toUnit string, uType unitType) (float64, error) {
+	switch uType {
+	case scaleUnitType:
+		fromScaleUnitInfo, fromExists := unitEnums.ScaleUnitInfoMap[fromUnit]
+		toScaleUnitInfo, toExists := unitEnums.ScaleUnitInfoMap[toUnit]
+
+		if !fromExists {
+			return 0, fmt.Errorf("invalid source unit: %s", fromUnit)
+		}
+		if !toExists {
+			return 0, fmt.Errorf("invalid target unit: %s", toUnit)
+		}
+
+		valueInGrams := value * fromScaleUnitInfo.ToGrams
+		return valueInGrams / toScaleUnitInfo.ToGrams, nil
+
+	case measureUnitType:
+		fromMeasureUnitInfo, fromExists := unitEnums.MeasureUnitInfoMap[fromUnit]
+		toMeasureUnitInfo, toExists := unitEnums.MeasureUnitInfoMap[toUnit]
+
+		if !fromExists {
+			return 0, fmt.Errorf("invalid source unit: %s", fromUnit)
+		}
+		if !toExists {
+			return 0, fmt.Errorf("invalid target unit: %s", toUnit)
+		}
+
+		valueInMeters := value * fromMeasureUnitInfo.ToMeter
+		return valueInMeters / toMeasureUnitInfo.ToMeter, nil
+
+	default:
+		return 0, fmt.Errorf("invalid unit type")
 	}
-	return value * unit.ToGrams, nil
-}
-
-// ConvertBetweenUnits converts a value from one unit to another
-func (s *UnitService) ConvertBetweenUnits(value float64, fromUnit, toUnit string) (float64, error) {
-	// First validate both units
-	fromUnitInfo, fromExists := s.unitMap[fromUnit]
-	toUnitInfo, toExists := s.unitMap[toUnit]
-
-	if !fromExists {
-		return 0, fmt.Errorf("invalid source unit: %s", fromUnit)
-	}
-	if !toExists {
-		return 0, fmt.Errorf("invalid target unit: %s", toUnit)
-	}
-
-	// Check if units are of the same type
-	if fromUnitInfo.Type != toUnitInfo.Type {
-		return 0, fmt.Errorf("cannot convert between different unit types: %s (%s) to %s (%s)",
-			fromUnit, fromUnitInfo.Type, toUnit, toUnitInfo.Type)
-	}
-
-	// Convert to grams first, then to target unit
-	valueInGrams := value * fromUnitInfo.ToGrams
-	result := valueInGrams / toUnitInfo.ToGrams
-
-	return result, nil
 }

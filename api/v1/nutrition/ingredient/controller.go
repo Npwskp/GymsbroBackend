@@ -78,11 +78,6 @@ func (ic *IngredientController) GetIngredientByUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Initialize empty slice if ingredients is nil
-	if ingredients == nil {
-		ingredients = []*Ingredient{}
-	}
-
 	return c.JSON(ingredients)
 }
 
@@ -174,11 +169,6 @@ func (ic *IngredientController) SearchFilteredIngredients(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
-	}
-
-	// Initialize empty slice if ingredients is nil
-	if ingredients == nil {
-		ingredients = []*Ingredient{}
 	}
 
 	return c.JSON(ingredients)

@@ -57,9 +57,8 @@ func (wc *WorkoutController) CreateWorkoutHandler(c *fiber.Ctx) error {
 // @Router      /workout/{id} [get]
 func (wc *WorkoutController) GetWorkoutHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
-	userId := function.GetUserIDFromContext(c)
 
-	workout, err := wc.Service.GetWorkout(id, userId)
+	workout, err := wc.Service.GetWorkout(id)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Workout not found"})
@@ -70,7 +69,7 @@ func (wc *WorkoutController) GetWorkoutHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(workout)
 }
 
-// @Summary     Get user workouts
+// @Summary     Get all workouts
 // @Description Get all workouts for the current user
 // @Tags        workouts
 // @Accept      json
@@ -82,13 +81,9 @@ func (wc *WorkoutController) GetWorkoutHandler(c *fiber.Ctx) error {
 func (wc *WorkoutController) GetWorkoutsHandler(c *fiber.Ctx) error {
 	userId := function.GetUserIDFromContext(c)
 
-	workouts, err := wc.Service.GetWorkoutsByUser(userId)
+	workouts, err := wc.Service.GetWorkouts(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
-	}
-
-	if workouts == nil {
-		workouts = []*Workout{}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(workouts)
@@ -152,11 +147,42 @@ func (wc *WorkoutController) DeleteWorkoutHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNoContent).Send(nil)
 }
 
+// @Summary     Search workouts
+// @Description Search workouts by name and description
+// @Tags        workouts
+// @Accept      json
+// @Produce     json
+// @Param       query query string false "Search query for workout name or description"
+// @Success     200 {array} Workout
+// @Failure     400 {object} Error
+// @Failure     500 {object} Error
+// @Router      /workout/search [get]
+func (wc *WorkoutController) SearchWorkoutsHandler(c *fiber.Ctx) error {
+	var filters SearchWorkoutFilters
+	if err := c.QueryParser(&filters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	userId := function.GetUserIDFromContext(c)
+
+	workouts, err := wc.Service.SearchWorkouts(filters.Query, userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(workouts)
+}
+
 func (wc *WorkoutController) Handle() {
 	g := wc.Instance.Group("/workout")
 
 	g.Post("/", wc.CreateWorkoutHandler)
 	g.Get("/", wc.GetWorkoutsHandler)
+	g.Get("/search", wc.SearchWorkoutsHandler)
 	g.Get("/:id", wc.GetWorkoutHandler)
 	g.Put("/:id", wc.UpdateWorkoutHandler)
 	g.Delete("/:id", wc.DeleteWorkoutHandler)

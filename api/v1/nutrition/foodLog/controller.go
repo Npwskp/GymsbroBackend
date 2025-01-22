@@ -80,9 +80,6 @@ func (fc *FoodLogController) GetFoodLogByUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	if foodlogs == nil {
-		foodlogs = []*FoodLog{}
-	}
 	return c.JSON(foodlogs)
 }
 

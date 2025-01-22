@@ -29,6 +29,7 @@ const (
 type MealService struct {
 	DB           *mongo.Database
 	MinioService minio.MinioService
+	UnitService  unit.IUnitService
 }
 
 type IMealService interface {
@@ -111,7 +112,7 @@ func (ns *MealService) CalculateNutrient(body *CalculateNutrientBody, userid str
 		}
 
 		// Convert ingredient amount to grams for calculation
-		amountInGrams, err := unit.Service.ConvertBetweenUnits(ingBody.Amount, ingBody.Unit, "g")
+		amountInGrams, err := ns.UnitService.ConvertUnits(ingBody.Amount, ingBody.Unit, "g", "scale")
 		if err != nil {
 			return nil, fmt.Errorf("error converting units for ingredient %s: %w", ingBody.IngredientId, err)
 		}
@@ -196,7 +197,7 @@ func (ns *MealService) GetMealByUser(userId string) ([]*Meal, error) {
 	if err != nil {
 		return nil, err
 	}
-	var meals []*Meal
+	meals := make([]*Meal, 0)
 	if err := cursor.All(context.Background(), &meals); err != nil {
 		return nil, err
 	}
@@ -346,13 +347,13 @@ func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, erro
 	}
 	defer publicCursor.Close(context.Background())
 
-	var publicMeals []*Meal
+	publicMeals := make([]*Meal, 0)
 	if err := publicCursor.All(context.Background(), &publicMeals); err != nil {
 		return nil, fmt.Errorf("error decoding public meals: %w", err)
 	}
 
 	// Get user-specific meals if UserID is provided
-	var userMeals []*Meal
+	userMeals := make([]*Meal, 0)
 	if filters.UserID != "" {
 		userCursor, err := ns.DB.Collection("meal").Find(context.Background(), userQuery, opts)
 		if err != nil {

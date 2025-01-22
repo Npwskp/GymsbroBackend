@@ -10,6 +10,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/ingredient"
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
+	"github.com/Npwskp/GymsbroBackend/api/v1/unit"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
@@ -35,6 +36,11 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	authController := auth.AuthController{Instance: public, Service: &authService}
 	authController.Handle() // Login, Register, etc.
 
+	// Unit service (public)
+	unitService := unit.UnitService{}
+	unitController := unit.UnitController{Instance: public, Service: &unitService}
+	unitController.Handle()
+
 	// Protected routes group (requires auth)
 	protected := api.Group("")
 	protected.Use(middleware.AuthMiddleware())
@@ -53,7 +59,7 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	ingredientController := ingredient.IngredientController{Instance: protected, Service: &ingredientService}
 	ingredientController.Handle()
 
-	mealService := meal.MealService{DB: db, MinioService: minioDeps.MinioService}
+	mealService := meal.MealService{DB: db, MinioService: minioDeps.MinioService, UnitService: &unitService}
 	mealController := meal.MealController{Instance: protected, Service: &mealService}
 	mealController.Handle()
 

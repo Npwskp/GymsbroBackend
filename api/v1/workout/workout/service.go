@@ -17,10 +17,11 @@ type WorkoutService struct {
 
 type IWorkoutService interface {
 	CreateWorkout(workout *CreateWorkoutDto, userId string) (*Workout, error)
-	GetWorkout(id string, userId string) (*Workout, error)
-	GetWorkoutsByUser(userId string) ([]*Workout, error)
+	GetWorkout(id string) (*Workout, error)
+	GetWorkouts(userId string) ([]*Workout, error)
 	UpdateWorkout(id string, workout *UpdateWorkoutDto, userId string) (*Workout, error)
 	DeleteWorkout(id string, userId string) error
+	SearchWorkouts(query string, userId string) ([]*Workout, error)
 }
 
 func (ws *WorkoutService) CreateWorkout(dto *CreateWorkoutDto, userId string) (*Workout, error) {
@@ -47,7 +48,7 @@ func (ws *WorkoutService) CreateWorkout(dto *CreateWorkoutDto, userId string) (*
 	return createdWorkout, nil
 }
 
-func (ws *WorkoutService) GetWorkout(id string, userId string) (*Workout, error) {
+func (ws *WorkoutService) GetWorkout(id string) (*Workout, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,6 @@ func (ws *WorkoutService) GetWorkout(id string, userId string) (*Workout, error)
 
 	filter := bson.D{
 		{Key: "_id", Value: oid},
-		{Key: "userid", Value: userId},
 	}
 
 	workout := &Workout{}
@@ -69,15 +69,21 @@ func (ws *WorkoutService) GetWorkout(id string, userId string) (*Workout, error)
 	return workout, nil
 }
 
-func (ws *WorkoutService) GetWorkoutsByUser(userId string) ([]*Workout, error) {
-	filter := bson.D{{Key: "userid", Value: userId}}
+func (ws *WorkoutService) GetWorkouts(userId string) ([]*Workout, error) {
+	filter := bson.D{
+		{Key: "$or", Value: bson.A{
+			bson.D{{Key: "userid", Value: userId}},
+			bson.D{{Key: "userid", Value: ""}},
+			bson.D{{Key: "userid", Value: primitive.Null{}}},
+		}},
+	}
 
 	cursor, err := ws.DB.Collection("workout").Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}
 
-	var workouts []*Workout
+	workouts := make([]*Workout, 0)
 	if err := cursor.All(context.Background(), &workouts); err != nil {
 		return nil, err
 	}
@@ -144,4 +150,37 @@ func (ws *WorkoutService) DeleteWorkout(id string, userId string) error {
 	}
 
 	return nil
+}
+
+func (ws *WorkoutService) SearchWorkouts(query string, userId string) ([]*Workout, error) {
+	filter := bson.D{
+		{Key: "$or", Value: bson.A{
+			bson.D{{Key: "userid", Value: userId}},
+			bson.D{{Key: "userid", Value: ""}},
+			bson.D{{Key: "userid", Value: primitive.Null{}}},
+		}},
+	}
+
+	// If query is provided, add text search
+	if query != "" {
+		filter = append(filter, bson.E{
+			Key: "$or",
+			Value: bson.A{
+				bson.D{{Key: "name", Value: primitive.Regex{Pattern: query, Options: "i"}}},
+				bson.D{{Key: "description", Value: primitive.Regex{Pattern: query, Options: "i"}}},
+			},
+		})
+	}
+
+	cursor, err := ws.DB.Collection("workout").Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	workouts := make([]*Workout, 0)
+	if err := cursor.All(context.Background(), &workouts); err != nil {
+		return nil, err
+	}
+
+	return workouts, nil
 }

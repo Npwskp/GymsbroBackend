@@ -74,7 +74,7 @@ func (us *UserService) GetAllUsers() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var users []*User
+	users := make([]*User, 0)
 	if err := cursor.All(context.Background(), &users); err != nil {
 		return nil, err
 	}

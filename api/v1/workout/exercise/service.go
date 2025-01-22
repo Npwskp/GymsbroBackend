@@ -136,7 +136,7 @@ func (es *ExerciseService) GetAllExercises(userId string) ([]*Exercise, error) {
 	if err != nil {
 		return nil, err
 	}
-	var exercises []*Exercise
+	exercises := make([]*Exercise, 0)
 	if err := cursor.All(context.Background(), &exercises); err != nil {
 		return nil, err
 	}
@@ -387,7 +387,7 @@ func (es *ExerciseService) SearchAndFilterExercise(
 	}
 	defer cursor.Close(context.Background())
 
-	var exercises []*Exercise
+	exercises := make([]*Exercise, 0)
 	if err := cursor.All(context.Background(), &exercises); err != nil {
 		return nil, err
 	}
