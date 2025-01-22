@@ -2997,7 +2997,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Get user workouts
+      summary: Get all workouts
       tags:
       - workouts
     post:

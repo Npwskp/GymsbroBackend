@@ -2525,7 +2525,7 @@ const docTemplate = `{
                 "tags": [
                     "workouts"
                 ],
-                "summary": "Get user workouts",
+                "summary": "Get all workouts",
                 "responses": {
                     "200": {
                         "description": "OK",
