@@ -9,9 +9,10 @@ import (
 )
 
 type DashboardResponse struct {
-	FrequencyGraph FrequencyGraphData `json:"frequency_graph"`
-	Analysis       WorkoutAnalysis    `json:"analysis"`
-	TopProgress    []ExerciseProgress `json:"top_progress"`
+	FrequencyGraph FrequencyGraphData  `json:"frequency_graph"`
+	Analysis       WorkoutAnalysis     `json:"analysis"`
+	TopProgress    []ExerciseProgress  `json:"top_progress"`
+	TopFrequency   []ExerciseFrequency `json:"top_frequency"`
 }
 
 // FrequencyGraphData provides data points for plotting exercise frequency
@@ -24,9 +25,10 @@ type FrequencyGraphData struct {
 // WorkoutAnalysis provides overall workout statistics
 type WorkoutAnalysis struct {
 	// General Stats
-	TotalWorkouts  int     `json:"total_workouts"`
-	TotalExercises int     `json:"total_exercises"`
-	TotalVolume    float64 `json:"total_volume"`
+	TotalWorkouts          int     `json:"total_workouts"`
+	TotalExercises         int     `json:"total_exercises"`
+	TotalVolume            float64 `json:"total_volume"`
+	AverageWorkoutDuration float64 `json:"average_workout_duration"`
 }
 
 type UserStrengthStandards struct {
@@ -69,4 +71,10 @@ type ExerciseProgress struct {
 	Progress       float64           `json:"progress"`      // Average of volume and 1RM progress
 	StartDate      time.Time         `json:"startDate"`
 	EndDate        time.Time         `json:"endDate"`
+}
+
+type ExerciseFrequency struct {
+	ExerciseID string            `json:"exerciseId"`
+	Exercise   exercise.Exercise `json:"exercise"`
+	Frequency  float64           `json:"frequency"`
 }

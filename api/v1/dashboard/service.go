@@ -113,12 +113,14 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Prepare frequency graph data
 	dailyCount := make(map[string]int)
 	var totalVolume float64
+	var totalDuration float64
 
 	// Process sessions
 	for _, session := range sessions {
 		dateStr := session.StartTime.Format("2006-01-02")
 		dailyCount[dateStr]++
 		totalVolume += session.TotalVolume
+		totalDuration += float64(session.Duration)
 	}
 
 	// Process exercise logs
@@ -139,6 +141,7 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Calculate trend line (7-day moving average)
 	response.FrequencyGraph.TrendLine = calculateMovingAverage(response.FrequencyGraph.Values, 7)
 	response.Analysis.TotalVolume = totalVolume
+	response.Analysis.AverageWorkoutDuration = totalDuration / float64(len(sessions))
 
 	// Get top progress exercises with date range
 	topProgress, err := ds.GetTopProgressExercises(userId, startDate, endDate)
@@ -148,6 +151,14 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 
 	response.TopProgress = make([]ExerciseProgress, 0)
 	response.TopProgress = append(response.TopProgress, topProgress...)
+
+	topFrequency, err := ds.GetTopFrequencyExercises(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	response.TopFrequency = make([]ExerciseFrequency, 0)
+	response.TopFrequency = append(response.TopFrequency, topFrequency...)
 
 	return response, nil
 }
@@ -536,6 +547,31 @@ func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, en
 	})
 
 	return progressList, nil
+}
+
+func (ds *DashboardService) GetTopFrequencyExercises(userId string, startDate, endDate time.Time) ([]ExerciseFrequency, error) {
+	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate frequency for each exercise
+	var frequencyList []ExerciseFrequency
+	for _, exercise := range exerciseData {
+		frequency := ExerciseFrequency{
+			ExerciseID: exercise.ID,
+			Exercise:   exercise.RootExercise,
+			Frequency:  float64(len(exercise.Logs)),
+		}
+		frequencyList = append(frequencyList, frequency)
+	}
+
+	// Sort by frequency in descending order
+	sort.Slice(frequencyList, func(i, j int) bool {
+		return frequencyList[i].Frequency > frequencyList[j].Frequency
+	})
+
+	return frequencyList, nil
 }
 
 func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDate time.Time) ([]ExerciseData, error) {

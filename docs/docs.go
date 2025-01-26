@@ -3240,11 +3240,31 @@ const docTemplate = `{
                 "frequency_graph": {
                     "$ref": "#/definitions/dashboard.FrequencyGraphData"
                 },
+                "top_frequency": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ExerciseFrequency"
+                    }
+                },
                 "top_progress": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dashboard.ExerciseProgress"
                     }
+                }
+            }
+        },
+        "dashboard.ExerciseFrequency": {
+            "type": "object",
+            "properties": {
+                "exercise": {
+                    "$ref": "#/definitions/exercise.Exercise"
+                },
+                "exerciseId": {
+                    "type": "string"
+                },
+                "frequency": {
+                    "type": "number"
                 }
             }
         },
@@ -3392,6 +3412,9 @@ const docTemplate = `{
         "dashboard.WorkoutAnalysis": {
             "type": "object",
             "properties": {
+                "average_workout_duration": {
+                    "type": "number"
+                },
                 "total_exercises": {
                     "type": "integer"
                 },
