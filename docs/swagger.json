@@ -3237,6 +3237,53 @@
                 },
                 "frequency_graph": {
                     "$ref": "#/definitions/dashboard.FrequencyGraphData"
+                },
+                "top_progress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ExerciseProgress"
+                    }
+                }
+            }
+        },
+        "dashboard.ExerciseProgress": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "endOneRM": {
+                    "type": "number"
+                },
+                "endVolume": {
+                    "type": "number"
+                },
+                "exercise": {
+                    "$ref": "#/definitions/exercise.Exercise"
+                },
+                "exerciseId": {
+                    "type": "string"
+                },
+                "oneRMProgress": {
+                    "description": "Percentage increase in 1RM",
+                    "type": "number"
+                },
+                "progress": {
+                    "description": "Average of volume and 1RM progress",
+                    "type": "number"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "startOneRM": {
+                    "type": "number"
+                },
+                "startVolume": {
+                    "type": "number"
+                },
+                "volumeProgress": {
+                    "description": "Percentage increase in volume",
+                    "type": "number"
                 }
             }
         },

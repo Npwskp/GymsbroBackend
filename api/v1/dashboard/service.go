@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 	"os"
+	"sort"
 	"time"
 
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
@@ -22,6 +23,12 @@ import (
 
 type DashboardService struct {
 	DB *mongo.Database
+}
+
+type ExerciseData struct {
+	ID           string                    `bson:"_id"`
+	RootExercise exercise.Exercise         `bson:"exercise"`
+	Logs         []exerciseLog.ExerciseLog `bson:"logs"`
 }
 
 type IDashboardService interface {
@@ -132,6 +139,14 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Calculate trend line (7-day moving average)
 	response.FrequencyGraph.TrendLine = calculateMovingAverage(response.FrequencyGraph.Values, 7)
 	response.Analysis.TotalVolume = totalVolume
+
+	// Get top progress exercises with date range
+	topProgress, err := ds.GetTopProgressExercises(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	response.TopProgress = topProgress
 
 	return response, nil
 }
@@ -452,4 +467,145 @@ func (ds *DashboardService) GetRepMax(userId string, exerciseId string, useLates
 		TwelveRepMax: twelveRM,
 		LastUpdated:  results[0].LastUpdated,
 	}, nil
+}
+
+func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, endDate time.Time) ([]ExerciseProgress, error) {
+	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate progress for each exercise
+	var progressList []ExerciseProgress
+	for _, exercise := range exerciseData {
+		logs := exercise.Logs
+		if len(logs) < 2 {
+			continue // Skip if we don't have at least 2 logs
+		}
+
+		firstLog := logs[0]
+		lastLog := logs[len(logs)-1]
+
+		// Skip if logs are on the same day
+		if firstLog.DateTime.Equal(lastLog.DateTime) {
+			continue
+		}
+
+		// Calculate Volume Progress
+		startMaxSetVolume, endMaxSetVolume := calculateMaxSetVolume(firstLog.Sets), calculateMaxSetVolume(lastLog.Sets)
+		if startMaxSetVolume <= 0 || endMaxSetVolume <= 0 {
+			continue
+		}
+
+		volumeProgress := ((endMaxSetVolume - startMaxSetVolume) / startMaxSetVolume) * 100
+
+		// Calculate 1RM Progress
+		startOneRM, err := calculateBestOneRM(firstLog.Sets)
+		if err != nil {
+			continue
+		}
+		endOneRM, err := calculateBestOneRM(lastLog.Sets)
+		if err != nil {
+			continue
+		}
+
+		oneRMProgress := ((endOneRM - startOneRM) / startOneRM) * 100
+
+		// Use the average of both progress metrics
+		averageProgress := (volumeProgress + oneRMProgress) / 2
+
+		progressList = append(progressList, ExerciseProgress{
+			ExerciseID:     exercise.ID,
+			Exercise:       exercise.RootExercise,
+			StartVolume:    startMaxSetVolume,
+			EndVolume:      endMaxSetVolume,
+			VolumeProgress: math.Round(volumeProgress*100) / 100,
+			StartOneRM:     startOneRM,
+			EndOneRM:       endOneRM,
+			OneRMProgress:  math.Round(oneRMProgress*100) / 100,
+			Progress:       math.Round(averageProgress*100) / 100,
+			StartDate:      firstLog.DateTime,
+			EndDate:        lastLog.DateTime,
+		})
+	}
+
+	// Sort by average progress in descending order
+	sort.Slice(progressList, func(i, j int) bool {
+		return progressList[i].Progress > progressList[j].Progress
+	})
+
+	return progressList, nil
+}
+
+func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDate time.Time) ([]ExerciseData, error) {
+	pipeline := []bson.D{
+		{{Key: "$match", Value: bson.D{
+			{Key: "userid", Value: userId},
+			{Key: "datetime", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lte", Value: endDate},
+			}},
+		}}},
+		{{Key: "$sort", Value: bson.D{
+			{Key: "exerciseid", Value: 1},
+			{Key: "datetime", Value: 1},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$exerciseid"},
+			{Key: "logs", Value: bson.D{{Key: "$push", Value: "$$ROOT"}}},
+		}}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "exercises"},
+			{Key: "localField", Value: "_id"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "exercise"},
+		}}},
+		{{Key: "$unwind", Value: "$exercise"}},
+	}
+
+	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var exerciseData []ExerciseData
+	if err := cursor.All(context.Background(), &exerciseData); err != nil {
+		return nil, err
+	}
+
+	return exerciseData, nil
+}
+
+// Helper function to calculate max set volume
+func calculateMaxSetVolume(sets []exerciseLog.SetLog) float64 {
+	maxSetVolume := 0.0
+	for _, set := range sets {
+		setVolume := set.Weight * float64(set.Reps)
+		if setVolume > maxSetVolume {
+			maxSetVolume = setVolume
+		}
+	}
+	return maxSetVolume
+}
+
+// Helper function to calculate best 1RM from sets
+func calculateBestOneRM(sets []exerciseLog.SetLog) (float64, error) {
+	bestOneRM := 0.0
+	for _, set := range sets {
+		if set.Weight <= 0 || set.Reps <= 0 {
+			continue
+		}
+		oneRM, err := dashboardFunctions.CalculateOneRepMax(set.Weight, float64(set.Reps))
+		if err != nil {
+			continue
+		}
+		if oneRM > bestOneRM {
+			bestOneRM = oneRM
+		}
+	}
+	if bestOneRM <= 0 {
+		return 0, errors.New("no valid sets found for 1RM calculation")
+	}
+	return bestOneRM, nil
 }
