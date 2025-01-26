@@ -146,7 +146,8 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 		return nil, err
 	}
 
-	response.TopProgress = topProgress
+	response.TopProgress = make([]ExerciseProgress, 0)
+	response.TopProgress = append(response.TopProgress, topProgress...)
 
 	return response, nil
 }
