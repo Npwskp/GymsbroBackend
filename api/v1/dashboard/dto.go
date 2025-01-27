@@ -78,3 +78,19 @@ type ExerciseFrequency struct {
 	Exercise   exercise.Exercise `json:"exercise"`
 	Frequency  float64           `json:"frequency"`
 }
+
+type DailyNutritionSummary struct {
+	Date          string  `json:"date"`
+	TotalCalories float64 `json:"total_calories"`
+	TotalProtein  float64 `json:"total_protein"`
+	TotalCarbs    float64 `json:"total_carbs"`
+	TotalFat      float64 `json:"total_fat"`
+}
+
+type NutritionSummaryResponse struct {
+	DailySummaries  []DailyNutritionSummary `json:"daily_summaries"`
+	AverageCalories float64                 `json:"average_calories"`
+	AverageProtein  float64                 `json:"average_protein"`
+	AverageCarbs    float64                 `json:"average_carbs"`
+	AverageFat      float64                 `json:"average_fat"`
+}

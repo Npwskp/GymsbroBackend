@@ -54,6 +54,19 @@ definitions:
     x-enum-varnames:
     - GenderMale
     - GenderFemale
+  dashboard.DailyNutritionSummary:
+    properties:
+      date:
+        type: string
+      total_calories:
+        type: number
+      total_carbs:
+        type: number
+      total_fat:
+        type: number
+      total_protein:
+        type: number
+    type: object
   dashboard.DashboardResponse:
     properties:
       analysis:
@@ -122,6 +135,21 @@ definitions:
         description: Number of exercises/workouts per day
         items:
           type: integer
+        type: array
+    type: object
+  dashboard.NutritionSummaryResponse:
+    properties:
+      average_calories:
+        type: number
+      average_carbs:
+        type: number
+      average_fat:
+        type: number
+      average_protein:
+        type: number
+      daily_summaries:
+        items:
+          $ref: '#/definitions/dashboard.DailyNutritionSummary'
         type: array
     type: object
   dashboard.RepMaxResponse:
@@ -1459,6 +1487,33 @@ paths:
           description: Bad Request
           schema: {}
       summary: Get workout dashboard
+      tags:
+      - dashboard
+  /dashboard/nutrition-summary:
+    get:
+      consumes:
+      - application/json
+      description: Get nutrition summary
+      parameters:
+      - description: Start date
+        in: query
+        name: startDate
+        type: string
+      - description: End date
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.NutritionSummaryResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get nutrition summary
       tags:
       - dashboard
   /dashboard/rep-max/{exerciseId}:

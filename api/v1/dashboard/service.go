@@ -12,6 +12,7 @@ import (
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	dashboardEnums "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/enums"
 	dashboardFunctions "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/functions"
+	foodLog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
@@ -35,6 +36,7 @@ type IDashboardService interface {
 	GetDashboard(userId string, startDate, endDate time.Time) (*DashboardResponse, error)
 	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
 	GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error)
+	GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error)
 }
 
 func calculateMovingAverage(values []int, window int) []float64 {
@@ -645,4 +647,68 @@ func calculateBestOneRM(sets []exerciseLog.SetLog) (float64, error) {
 		return 0, errors.New("no valid sets found for 1RM calculation")
 	}
 	return bestOneRM, nil
+}
+
+func (s *DashboardService) GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error) {
+	foodLogService := &foodLog.FoodLogService{DB: s.DB}
+
+	var dailySummaries []DailyNutritionSummary
+	totalCalories, totalProtein, totalCarbs, totalFat := 0.0, 0.0, 0.0, 0.0
+	daysCount := 0
+
+	// Iterate through each day in the range
+	for currentDate := startDate; !currentDate.After(endDate); currentDate = currentDate.AddDate(0, 0, 1) {
+		dateStr := currentDate.Format("2006-01-02")
+		nutrients, err := foodLogService.CalculateDailyNutrients(dateStr, userid)
+		if err != nil || len(nutrients.Nutrients) == 0 || nutrients.Calories == 0 {
+			// Skip days with no data
+			continue
+		}
+
+		// Extract macronutrients from nutrients array
+		var protein, carbs, fat float64
+		for _, nutrient := range nutrients.Nutrients {
+			switch nutrient.Name {
+			case "Protein":
+				protein = nutrient.Amount
+			case "Carbohydrate, by difference":
+				carbs = nutrient.Amount
+			case "Total lipid (fat)":
+				fat = nutrient.Amount
+			}
+		}
+
+		summary := DailyNutritionSummary{
+			Date:          dateStr,
+			TotalCalories: nutrients.Calories,
+			TotalProtein:  protein,
+			TotalCarbs:    carbs,
+			TotalFat:      fat,
+		}
+
+		dailySummaries = append(dailySummaries, summary)
+		totalCalories += nutrients.Calories
+		totalProtein += protein
+		totalCarbs += carbs
+		totalFat += fat
+		daysCount++
+	}
+
+	// Calculate averages
+	var response NutritionSummaryResponse
+	if daysCount > 0 {
+		response = NutritionSummaryResponse{
+			DailySummaries:  dailySummaries,
+			AverageCalories: totalCalories / float64(daysCount),
+			AverageProtein:  totalProtein / float64(daysCount),
+			AverageCarbs:    totalCarbs / float64(daysCount),
+			AverageFat:      totalFat / float64(daysCount),
+		}
+	} else {
+		response = NutritionSummaryResponse{
+			DailySummaries: []DailyNutritionSummary{},
+		}
+	}
+
+	return &response, nil
 }
