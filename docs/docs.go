@@ -189,6 +189,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/nutrition-summary": {
+            "get": {
+                "description": "Get nutrition summary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get nutrition summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.NutritionSummaryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/dashboard/rep-max/{exerciseId}": {
             "get": {
                 "description": "Get estimated rep maxes for a specific exercise",
@@ -3231,6 +3272,26 @@ const docTemplate = `{
                 "GenderFemale"
             ]
         },
+        "dashboard.DailyNutritionSummary": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "total_calories": {
+                    "type": "number"
+                },
+                "total_carbs": {
+                    "type": "number"
+                },
+                "total_fat": {
+                    "type": "number"
+                },
+                "total_protein": {
+                    "type": "number"
+                }
+            }
+        },
         "dashboard.DashboardResponse": {
             "type": "object",
             "properties": {
@@ -3239,6 +3300,73 @@ const docTemplate = `{
                 },
                 "frequency_graph": {
                     "$ref": "#/definitions/dashboard.FrequencyGraphData"
+                },
+                "top_frequency": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ExerciseFrequency"
+                    }
+                },
+                "top_progress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ExerciseProgress"
+                    }
+                }
+            }
+        },
+        "dashboard.ExerciseFrequency": {
+            "type": "object",
+            "properties": {
+                "exercise": {
+                    "$ref": "#/definitions/exercise.Exercise"
+                },
+                "exerciseId": {
+                    "type": "string"
+                },
+                "frequency": {
+                    "type": "number"
+                }
+            }
+        },
+        "dashboard.ExerciseProgress": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "endOneRM": {
+                    "type": "number"
+                },
+                "endVolume": {
+                    "type": "number"
+                },
+                "exercise": {
+                    "$ref": "#/definitions/exercise.Exercise"
+                },
+                "exerciseId": {
+                    "type": "string"
+                },
+                "oneRMProgress": {
+                    "description": "Percentage increase in 1RM",
+                    "type": "number"
+                },
+                "progress": {
+                    "description": "Average of volume and 1RM progress",
+                    "type": "number"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "startOneRM": {
+                    "type": "number"
+                },
+                "startVolume": {
+                    "type": "number"
+                },
+                "volumeProgress": {
+                    "description": "Percentage increase in volume",
+                    "type": "number"
                 }
             }
         },
@@ -3264,6 +3392,29 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "integer"
+                    }
+                }
+            }
+        },
+        "dashboard.NutritionSummaryResponse": {
+            "type": "object",
+            "properties": {
+                "average_calories": {
+                    "type": "number"
+                },
+                "average_carbs": {
+                    "type": "number"
+                },
+                "average_fat": {
+                    "type": "number"
+                },
+                "average_protein": {
+                    "type": "number"
+                },
+                "daily_summaries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.DailyNutritionSummary"
                     }
                 }
             }
@@ -3345,6 +3496,9 @@ const docTemplate = `{
         "dashboard.WorkoutAnalysis": {
             "type": "object",
             "properties": {
+                "average_workout_duration": {
+                    "type": "number"
+                },
                 "total_exercises": {
                     "type": "integer"
                 },

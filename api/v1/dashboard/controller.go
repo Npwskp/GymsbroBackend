@@ -97,9 +97,58 @@ func (c *DashboardController) GetRepMaxHandler(ctx *fiber.Ctx) error {
 	return ctx.JSON(repMax)
 }
 
+// @Summary     Get nutrition summary
+// @Description Get nutrition summary
+// @Tags        dashboard
+// @Accept      json
+// @Produce     json
+// @Param       startDate query string false "Start date"
+// @Param       endDate query string false "End date"
+// @Success     200 {object} NutritionSummaryResponse
+// @Failure     400 {object} Error
+// @Router      /dashboard/nutrition-summary [get]
+func (dc *DashboardController) GetNutritionSummary(c *fiber.Ctx) error {
+	userid := function.GetUserIDFromContext(c)
+	if userid == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	startDate, err := time.Parse("2006-01-02 15:04:05", c.Query("startDate"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	endDate, err := time.Parse("2006-01-02 15:04:05", c.Query("endDate"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if startDate.After(endDate) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "start date cannot be after end date",
+		})
+	}
+
+	summary, err := dc.Service.GetNutritionSummary(userid, startDate, endDate)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(summary)
+}
+
 func (c *DashboardController) Handle() {
 	g := c.Instance.Group("/dashboard")
 	g.Get("/", c.GetDashboardHandler)
+	g.Get("/nutrition-summary", c.GetNutritionSummary)
 	g.Get("/strength-standards", c.GetUserStrengthStandardsHandler)
 	g.Get("/rep-max/:exerciseId", c.GetRepMaxHandler)
 }

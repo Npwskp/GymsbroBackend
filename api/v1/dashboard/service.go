@@ -6,11 +6,13 @@ import (
 	"errors"
 	"math"
 	"os"
+	"sort"
 	"time"
 
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	dashboardEnums "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/enums"
 	dashboardFunctions "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/functions"
+	foodLog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
@@ -24,10 +26,17 @@ type DashboardService struct {
 	DB *mongo.Database
 }
 
+type ExerciseData struct {
+	ID           string                    `bson:"_id"`
+	RootExercise exercise.Exercise         `bson:"exercise"`
+	Logs         []exerciseLog.ExerciseLog `bson:"logs"`
+}
+
 type IDashboardService interface {
 	GetDashboard(userId string, startDate, endDate time.Time) (*DashboardResponse, error)
 	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
 	GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error)
+	GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error)
 }
 
 func calculateMovingAverage(values []int, window int) []float64 {
@@ -106,12 +115,14 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Prepare frequency graph data
 	dailyCount := make(map[string]int)
 	var totalVolume float64
+	var totalDuration float64
 
 	// Process sessions
 	for _, session := range sessions {
 		dateStr := session.StartTime.Format("2006-01-02")
 		dailyCount[dateStr]++
 		totalVolume += session.TotalVolume
+		totalDuration += float64(session.Duration)
 	}
 
 	// Process exercise logs
@@ -132,6 +143,34 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Calculate trend line (7-day moving average)
 	response.FrequencyGraph.TrendLine = calculateMovingAverage(response.FrequencyGraph.Values, 7)
 	response.Analysis.TotalVolume = totalVolume
+
+	// Handle potential division by zero for average workout duration
+	if len(sessions) > 0 {
+		avgDuration := totalDuration / float64(len(sessions))
+		if !math.IsNaN(avgDuration) && !math.IsInf(avgDuration, 0) {
+			response.Analysis.AverageWorkoutDuration = avgDuration
+		} else {
+			response.Analysis.AverageWorkoutDuration = 0
+		}
+	} else {
+		response.Analysis.AverageWorkoutDuration = 0
+	}
+
+	// Get top progress exercises
+	topProgress, err := ds.GetTopProgressExercises(userId, startDate, endDate)
+	if err == nil && len(topProgress) > 0 {
+		response.TopProgress = topProgress
+	} else {
+		response.TopProgress = make([]ExerciseProgress, 0)
+	}
+
+	// Get top frequency exercises
+	topFrequency, err := ds.GetTopFrequencyExercises(userId, startDate, endDate)
+	if err == nil && len(topFrequency) > 0 {
+		response.TopFrequency = topFrequency
+	} else {
+		response.TopFrequency = make([]ExerciseFrequency, 0)
+	}
 
 	return response, nil
 }
@@ -452,4 +491,243 @@ func (ds *DashboardService) GetRepMax(userId string, exerciseId string, useLates
 		TwelveRepMax: twelveRM,
 		LastUpdated:  results[0].LastUpdated,
 	}, nil
+}
+
+func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, endDate time.Time) ([]ExerciseProgress, error) {
+	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate progress for each exercise
+	var progressList []ExerciseProgress
+	for _, exercise := range exerciseData {
+		logs := exercise.Logs
+		if len(logs) < 2 {
+			continue // Skip if we don't have at least 2 logs
+		}
+
+		firstLog := logs[0]
+		lastLog := logs[len(logs)-1]
+
+		// Skip if logs are on the same day
+		if firstLog.DateTime.Equal(lastLog.DateTime) {
+			continue
+		}
+
+		// Calculate Volume Progress
+		startMaxSetVolume, endMaxSetVolume := calculateMaxSetVolume(firstLog.Sets), calculateMaxSetVolume(lastLog.Sets)
+		if startMaxSetVolume <= 0 || endMaxSetVolume <= 0 {
+			continue
+		}
+
+		volumeProgress := ((endMaxSetVolume - startMaxSetVolume) / startMaxSetVolume) * 100
+		if math.IsNaN(volumeProgress) || math.IsInf(volumeProgress, 0) {
+			continue
+		}
+
+		// Calculate 1RM Progress
+		startOneRM, err := calculateBestOneRM(firstLog.Sets)
+		if err != nil {
+			continue
+		}
+		endOneRM, err := calculateBestOneRM(lastLog.Sets)
+		if err != nil {
+			continue
+		}
+
+		oneRMProgress := ((endOneRM - startOneRM) / startOneRM) * 100
+		if math.IsNaN(oneRMProgress) || math.IsInf(oneRMProgress, 0) {
+			continue
+		}
+
+		// Use the average of both progress metrics
+		averageProgress := (volumeProgress + oneRMProgress) / 2
+		if math.IsNaN(averageProgress) || math.IsInf(averageProgress, 0) {
+			continue
+		}
+
+		progressList = append(progressList, ExerciseProgress{
+			ExerciseID:     exercise.ID,
+			Exercise:       exercise.RootExercise,
+			StartVolume:    startMaxSetVolume,
+			EndVolume:      endMaxSetVolume,
+			VolumeProgress: math.Round(volumeProgress*100) / 100,
+			StartOneRM:     startOneRM,
+			EndOneRM:       endOneRM,
+			OneRMProgress:  math.Round(oneRMProgress*100) / 100,
+			Progress:       math.Round(averageProgress*100) / 100,
+			StartDate:      firstLog.DateTime,
+			EndDate:        lastLog.DateTime,
+		})
+	}
+
+	// Sort by average progress in descending order
+	sort.Slice(progressList, func(i, j int) bool {
+		return progressList[i].Progress > progressList[j].Progress
+	})
+
+	return progressList, nil
+}
+
+func (ds *DashboardService) GetTopFrequencyExercises(userId string, startDate, endDate time.Time) ([]ExerciseFrequency, error) {
+	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate frequency for each exercise
+	var frequencyList []ExerciseFrequency
+	for _, exercise := range exerciseData {
+		frequency := ExerciseFrequency{
+			ExerciseID: exercise.ID,
+			Exercise:   exercise.RootExercise,
+			Frequency:  float64(len(exercise.Logs)),
+		}
+		frequencyList = append(frequencyList, frequency)
+	}
+
+	// Sort by frequency in descending order
+	sort.Slice(frequencyList, func(i, j int) bool {
+		return frequencyList[i].Frequency > frequencyList[j].Frequency
+	})
+
+	return frequencyList, nil
+}
+
+func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDate time.Time) ([]ExerciseData, error) {
+	pipeline := []bson.D{
+		{{Key: "$match", Value: bson.D{
+			{Key: "userid", Value: userId},
+			{Key: "datetime", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lte", Value: endDate},
+			}},
+		}}},
+		{{Key: "$sort", Value: bson.D{
+			{Key: "exerciseid", Value: 1},
+			{Key: "datetime", Value: 1},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$exerciseid"},
+			{Key: "logs", Value: bson.D{{Key: "$push", Value: "$$ROOT"}}},
+		}}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "exercises"},
+			{Key: "localField", Value: "_id"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "exercise"},
+		}}},
+		{{Key: "$unwind", Value: "$exercise"}},
+	}
+
+	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var exerciseData []ExerciseData
+	if err := cursor.All(context.Background(), &exerciseData); err != nil {
+		return nil, err
+	}
+
+	return exerciseData, nil
+}
+
+// Helper function to calculate max set volume
+func calculateMaxSetVolume(sets []exerciseLog.SetLog) float64 {
+	maxSetVolume := 0.0
+	for _, set := range sets {
+		setVolume := set.Weight * float64(set.Reps)
+		if setVolume > maxSetVolume {
+			maxSetVolume = setVolume
+		}
+	}
+	return maxSetVolume
+}
+
+// Helper function to calculate best 1RM from sets
+func calculateBestOneRM(sets []exerciseLog.SetLog) (float64, error) {
+	bestOneRM := 0.0
+	for _, set := range sets {
+		if set.Weight <= 0 || set.Reps <= 0 {
+			continue
+		}
+		oneRM, err := dashboardFunctions.CalculateOneRepMax(set.Weight, float64(set.Reps))
+		if err != nil {
+			continue
+		}
+		if oneRM > bestOneRM {
+			bestOneRM = oneRM
+		}
+	}
+	if bestOneRM <= 0 {
+		return 0, errors.New("no valid sets found for 1RM calculation")
+	}
+	return bestOneRM, nil
+}
+
+func (s *DashboardService) GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error) {
+	foodLogService := &foodLog.FoodLogService{DB: s.DB}
+
+	var dailySummaries []DailyNutritionSummary
+	totalCalories, totalProtein, totalCarbs, totalFat := 0.0, 0.0, 0.0, 0.0
+	daysCount := 0
+
+	// Iterate through each day in the range
+	for currentDate := startDate; !currentDate.After(endDate); currentDate = currentDate.AddDate(0, 0, 1) {
+		dateStr := currentDate.Format("2006-01-02")
+		nutrients, err := foodLogService.CalculateDailyNutrients(dateStr, userid)
+		if err != nil || len(nutrients.Nutrients) == 0 || nutrients.Calories == 0 {
+			// Skip days with no data
+			continue
+		}
+
+		// Extract macronutrients from nutrients array
+		var protein, carbs, fat float64
+		for _, nutrient := range nutrients.Nutrients {
+			switch nutrient.Name {
+			case "Protein":
+				protein = nutrient.Amount
+			case "Carbohydrate, by difference":
+				carbs = nutrient.Amount
+			case "Total lipid (fat)":
+				fat = nutrient.Amount
+			}
+		}
+
+		summary := DailyNutritionSummary{
+			Date:          dateStr,
+			TotalCalories: nutrients.Calories,
+			TotalProtein:  protein,
+			TotalCarbs:    carbs,
+			TotalFat:      fat,
+		}
+
+		dailySummaries = append(dailySummaries, summary)
+		totalCalories += nutrients.Calories
+		totalProtein += protein
+		totalCarbs += carbs
+		totalFat += fat
+		daysCount++
+	}
+
+	// Calculate averages
+	var response NutritionSummaryResponse
+	if daysCount > 0 {
+		response = NutritionSummaryResponse{
+			DailySummaries:  dailySummaries,
+			AverageCalories: totalCalories / float64(daysCount),
+			AverageProtein:  totalProtein / float64(daysCount),
+			AverageCarbs:    totalCarbs / float64(daysCount),
+			AverageFat:      totalFat / float64(daysCount),
+		}
+	} else {
+		response = NutritionSummaryResponse{
+			DailySummaries: []DailyNutritionSummary{},
+		}
+	}
+
+	return &response, nil
 }

@@ -12,5 +12,5 @@ type FoodLog struct {
 	Date      string             `json:"date" validate:"required" bson:"date"`
 	Meals     []string           `json:"meals"`
 	CreatedAt time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
-	UpdateAt  time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	UpdatedAt time.Time          `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 }
