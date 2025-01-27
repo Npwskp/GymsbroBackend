@@ -143,24 +143,34 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Calculate trend line (7-day moving average)
 	response.FrequencyGraph.TrendLine = calculateMovingAverage(response.FrequencyGraph.Values, 7)
 	response.Analysis.TotalVolume = totalVolume
-	response.Analysis.AverageWorkoutDuration = totalDuration / float64(len(sessions))
 
-	// Get top progress exercises with date range
+	// Handle potential division by zero for average workout duration
+	if len(sessions) > 0 {
+		avgDuration := totalDuration / float64(len(sessions))
+		if !math.IsNaN(avgDuration) && !math.IsInf(avgDuration, 0) {
+			response.Analysis.AverageWorkoutDuration = avgDuration
+		} else {
+			response.Analysis.AverageWorkoutDuration = 0
+		}
+	} else {
+		response.Analysis.AverageWorkoutDuration = 0
+	}
+
+	// Get top progress exercises
 	topProgress, err := ds.GetTopProgressExercises(userId, startDate, endDate)
-	if err != nil {
-		return nil, err
+	if err == nil && len(topProgress) > 0 {
+		response.TopProgress = topProgress
+	} else {
+		response.TopProgress = make([]ExerciseProgress, 0)
 	}
 
-	response.TopProgress = make([]ExerciseProgress, 0)
-	response.TopProgress = append(response.TopProgress, topProgress...)
-
+	// Get top frequency exercises
 	topFrequency, err := ds.GetTopFrequencyExercises(userId, startDate, endDate)
-	if err != nil {
-		return nil, err
+	if err == nil && len(topFrequency) > 0 {
+		response.TopFrequency = topFrequency
+	} else {
+		response.TopFrequency = make([]ExerciseFrequency, 0)
 	}
-
-	response.TopFrequency = make([]ExerciseFrequency, 0)
-	response.TopFrequency = append(response.TopFrequency, topFrequency...)
 
 	return response, nil
 }
@@ -512,6 +522,9 @@ func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, en
 		}
 
 		volumeProgress := ((endMaxSetVolume - startMaxSetVolume) / startMaxSetVolume) * 100
+		if math.IsNaN(volumeProgress) || math.IsInf(volumeProgress, 0) {
+			continue
+		}
 
 		// Calculate 1RM Progress
 		startOneRM, err := calculateBestOneRM(firstLog.Sets)
@@ -524,9 +537,15 @@ func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, en
 		}
 
 		oneRMProgress := ((endOneRM - startOneRM) / startOneRM) * 100
+		if math.IsNaN(oneRMProgress) || math.IsInf(oneRMProgress, 0) {
+			continue
+		}
 
 		// Use the average of both progress metrics
 		averageProgress := (volumeProgress + oneRMProgress) / 2
+		if math.IsNaN(averageProgress) || math.IsInf(averageProgress, 0) {
+			continue
+		}
 
 		progressList = append(progressList, ExerciseProgress{
 			ExerciseID:     exercise.ID,
