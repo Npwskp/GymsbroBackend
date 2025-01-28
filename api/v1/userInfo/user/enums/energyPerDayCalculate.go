@@ -69,11 +69,6 @@ type EnergyConsumptionPlan struct {
 	Macronutrients []*Macronutrients `json:"macronutrients"`
 }
 
-type CalPerActivity struct {
-	ActivityName string
-	Calories     float64
-}
-
 type Macronutrients struct {
 	CarbPreference CarbPreferenceType `json:"carb_preference"`
 	Calories       float64            `json:"calories"`
