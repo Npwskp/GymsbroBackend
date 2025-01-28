@@ -17,9 +17,6 @@ type User struct {
 	Height         float64                                      `json:"height" default:"0"`
 	Age            int                                          `json:"age" validate:"required,min=1,max=120"`
 	Gender         authEnums.GenderType                         `json:"gender" validate:"required"`
-	Neck           float64                                      `json:"neck" default:"0"`
-	Waist          float64                                      `json:"waist" default:"0"`
-	Hip            float64                                      `json:"hip" default:"0"`
 	ActivityLevel  userFitnessPreferenceEnums.ActivityLevelType `json:"activitylevel" default:"sedentary"`
 	Goal           userFitnessPreferenceEnums.GoalType          `json:"goal" default:"maintain"`
 	Macronutrients *userFitnessPreferenceEnums.Macronutrients   `json:"macronutrients" bson:"macronutrients"`
@@ -42,9 +39,6 @@ func CreateUserModel(user *CreateUserDto) *User {
 		Height:        user.Height,
 		Age:           user.Age,
 		Gender:        user.Gender,
-		Neck:          user.Neck,
-		Waist:         user.Waist,
-		Hip:           user.Hip,
 		ActivityLevel: user.ActivityLevel,
 		Goal:          user.Goal,
 		IsFirstLogin:  true,

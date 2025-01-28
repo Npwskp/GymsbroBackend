@@ -1032,9 +1032,6 @@ definitions:
       height:
         default: 0
         type: number
-      hip:
-        default: 0
-        type: number
       id:
         type: string
       is_first_login:
@@ -1042,9 +1039,6 @@ definitions:
         type: boolean
       macronutrients:
         $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
-      neck:
-        default: 0
-        type: number
       oauth_id:
         type: string
       oauth_provider:
@@ -1060,9 +1054,6 @@ definitions:
         maxLength: 20
         minLength: 3
         type: string
-      waist:
-        default: 0
-        type: number
       weight:
         default: 0
         type: number

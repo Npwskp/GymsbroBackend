@@ -4663,10 +4663,6 @@
                     "type": "number",
                     "default": 0
                 },
-                "hip": {
-                    "type": "number",
-                    "default": 0
-                },
                 "id": {
                     "type": "string"
                 },
@@ -4676,10 +4672,6 @@
                 },
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
-                },
-                "neck": {
-                    "type": "number",
-                    "default": 0
                 },
                 "oauth_id": {
                     "type": "string"
@@ -4701,10 +4693,6 @@
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 3
-                },
-                "waist": {
-                    "type": "number",
-                    "default": 0
                 },
                 "weight": {
                     "type": "number",
