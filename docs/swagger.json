@@ -2022,7 +2022,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all units",
                 "parameters": [
@@ -2057,7 +2057,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all body part measure units",
                 "responses": {
@@ -2083,7 +2083,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Convert between units",
                 "parameters": [
@@ -2128,7 +2128,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all weight units",
                 "responses": {
@@ -2154,7 +2154,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get unit information",
                 "parameters": [

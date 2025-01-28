@@ -15,7 +15,7 @@ type Error error
 // GetAllScaleUnits returns all available units
 // @Summary Get all units
 // @Description Get a list of all available units with their information
-// @Tags Units
+// @Tags units
 // @Accept json
 // @Produce json
 // @Param unitType query string true "Unit type"
@@ -30,7 +30,7 @@ func (uc *UnitController) GetAllScaleUnits(ctx *fiber.Ctx) error {
 // GetScaleUnit returns information about a specific unit
 // @Summary Get unit information
 // @Description Get detailed information about a specific unit by its symbol
-// @Tags Units
+// @Tags units
 // @Accept json
 // @Produce json
 // @Param symbol path string true "Unit symbol"
@@ -51,7 +51,7 @@ func (uc *UnitController) GetScaleUnit(ctx *fiber.Ctx) error {
 // GetWeightUnits returns all available weight units
 // @Summary Get all weight units
 // @Description Get a list of all available weight units
-// @Tags Units
+// @Tags units
 // @Accept json
 // @Produce json
 // @Success 200 {array} unitEnums.ExerciseWeightUnit
@@ -64,7 +64,7 @@ func (uc *UnitController) GetWeightUnits(ctx *fiber.Ctx) error {
 // GetBodyPartMeasureUnits returns all available body part measure units
 // @Summary Get all body part measure units
 // @Description Get a list of all available body part measure units
-// @Tags Units
+// @Tags units
 // @Accept json
 // @Produce json
 // @Success 200 {array} unitEnums.BodyPartMeasureUnit
@@ -77,7 +77,7 @@ func (uc *UnitController) GetBodyPartMeasureUnits(ctx *fiber.Ctx) error {
 // ConvertUnits converts a value between units
 // @Summary Convert between units
 // @Description Convert a value from one unit to another
-// @Tags Units
+// @Tags units
 // @Accept json
 // @Produce json
 // @Param unitType query string true "Unit type"

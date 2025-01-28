@@ -2024,7 +2024,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all units",
                 "parameters": [
@@ -2059,7 +2059,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all body part measure units",
                 "responses": {
@@ -2085,7 +2085,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Convert between units",
                 "parameters": [
@@ -2130,7 +2130,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all weight units",
                 "responses": {
@@ -2156,7 +2156,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get unit information",
                 "parameters": [

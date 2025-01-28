@@ -2742,7 +2742,7 @@ paths:
             type: array
       summary: Get all units
       tags:
-      - Units
+      - units
   /unit/{symbol}:
     get:
       consumes:
@@ -2771,7 +2771,7 @@ paths:
           schema: {}
       summary: Get unit information
       tags:
-      - Units
+      - units
   /unit/bodypart:
     get:
       consumes:
@@ -2788,7 +2788,7 @@ paths:
             type: array
       summary: Get all body part measure units
       tags:
-      - Units
+      - units
   /unit/convert:
     post:
       consumes:
@@ -2818,7 +2818,7 @@ paths:
           schema: {}
       summary: Convert between units
       tags:
-      - Units
+      - units
   /unit/weight:
     get:
       consumes:
@@ -2835,7 +2835,7 @@ paths:
             type: array
       summary: Get all weight units
       tags:
-      - Units
+      - units
   /user:
     get:
       consumes:
