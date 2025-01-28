@@ -2,7 +2,7 @@ package user
 
 import (
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
-	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user/enums"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 )
 
 type CreateUserDto struct {

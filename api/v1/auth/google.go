@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/config"
-	"github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

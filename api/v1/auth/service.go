@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/config"
-	"github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/user"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
