@@ -60,6 +60,39 @@ func max(a, b int) int {
 	return b
 }
 
+// Helper function to calculate max set volume
+func calculateMaxSetVolume(sets []exerciseLog.SetLog) float64 {
+	maxSetVolume := 0.0
+	for _, set := range sets {
+		setVolume := set.Weight * float64(set.Reps)
+		if setVolume > maxSetVolume {
+			maxSetVolume = setVolume
+		}
+	}
+	return maxSetVolume
+}
+
+// Helper function to calculate best 1RM from sets
+func calculateBestOneRM(sets []exerciseLog.SetLog) (float64, error) {
+	bestOneRM := 0.0
+	for _, set := range sets {
+		if set.Weight <= 0 || set.Reps <= 0 {
+			continue
+		}
+		oneRM, err := dashboardFunctions.CalculateOneRepMax(set.Weight, float64(set.Reps))
+		if err != nil {
+			continue
+		}
+		if oneRM > bestOneRM {
+			bestOneRM = oneRM
+		}
+	}
+	if bestOneRM <= 0 {
+		return 0, errors.New("no valid sets found for 1RM calculation")
+	}
+	return bestOneRM, nil
+}
+
 func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.Time) (*DashboardResponse, error) {
 	// Get workout sessions with date filter
 	sessionFilter := bson.D{
@@ -156,8 +189,13 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 		response.Analysis.AverageWorkoutDuration = 0
 	}
 
+	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
 	// Get top progress exercises
-	topProgress, err := ds.GetTopProgressExercises(userId, startDate, endDate)
+	topProgress, err := ds.GetTopProgressExercises(exerciseData)
 	if err == nil && len(topProgress) > 0 {
 		response.TopProgress = topProgress
 	} else {
@@ -165,7 +203,7 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	}
 
 	// Get top frequency exercises
-	topFrequency, err := ds.GetTopFrequencyExercises(userId, startDate, endDate)
+	topFrequency, err := ds.GetTopFrequencyExercises(exerciseData)
 	if err == nil && len(topFrequency) > 0 {
 		response.TopFrequency = topFrequency
 	} else {
@@ -493,12 +531,7 @@ func (ds *DashboardService) GetRepMax(userId string, exerciseId string, useLates
 	}, nil
 }
 
-func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, endDate time.Time) ([]ExerciseProgress, error) {
-	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
-	if err != nil {
-		return nil, err
-	}
-
+func (ds *DashboardService) GetTopProgressExercises(exerciseData []ExerciseData) ([]ExerciseProgress, error) {
 	// Calculate progress for each exercise
 	var progressList []ExerciseProgress
 	for _, exercise := range exerciseData {
@@ -570,12 +603,7 @@ func (ds *DashboardService) GetTopProgressExercises(userId string, startDate, en
 	return progressList, nil
 }
 
-func (ds *DashboardService) GetTopFrequencyExercises(userId string, startDate, endDate time.Time) ([]ExerciseFrequency, error) {
-	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
-	if err != nil {
-		return nil, err
-	}
-
+func (ds *DashboardService) GetTopFrequencyExercises(exerciseData []ExerciseData) ([]ExerciseFrequency, error) {
 	// Calculate frequency for each exercise
 	var frequencyList []ExerciseFrequency
 	for _, exercise := range exerciseData {
@@ -633,39 +661,6 @@ func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDat
 	}
 
 	return exerciseData, nil
-}
-
-// Helper function to calculate max set volume
-func calculateMaxSetVolume(sets []exerciseLog.SetLog) float64 {
-	maxSetVolume := 0.0
-	for _, set := range sets {
-		setVolume := set.Weight * float64(set.Reps)
-		if setVolume > maxSetVolume {
-			maxSetVolume = setVolume
-		}
-	}
-	return maxSetVolume
-}
-
-// Helper function to calculate best 1RM from sets
-func calculateBestOneRM(sets []exerciseLog.SetLog) (float64, error) {
-	bestOneRM := 0.0
-	for _, set := range sets {
-		if set.Weight <= 0 || set.Reps <= 0 {
-			continue
-		}
-		oneRM, err := dashboardFunctions.CalculateOneRepMax(set.Weight, float64(set.Reps))
-		if err != nil {
-			continue
-		}
-		if oneRM > bestOneRM {
-			bestOneRM = oneRM
-		}
-	}
-	if bestOneRM <= 0 {
-		return 0, errors.New("no valid sets found for 1RM calculation")
-	}
-	return bestOneRM, nil
 }
 
 func (s *DashboardService) GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error) {
