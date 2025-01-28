@@ -30,7 +30,6 @@ const (
 
 type IUserService interface {
 	CreateUser(user *CreateUserDto) (*User, error)
-	GetAllUsers() ([]*User, error)
 	GetUser(id string) (*User, error)
 	GetUserByEmail(email string) (*User, error)
 	GetUserByOAuthID(oauthid string) (*User, error)
@@ -67,18 +66,6 @@ func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 		return nil, err
 	}
 	return createdUser, nil
-}
-
-func (us *UserService) GetAllUsers() ([]*User, error) {
-	cursor, err := us.DB.Collection("users").Find(context.Background(), bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	users := make([]*User, 0)
-	if err := cursor.All(context.Background(), &users); err != nil {
-		return nil, err
-	}
-	return users, nil
 }
 
 func (us *UserService) GetUser(id string) (*User, error) {

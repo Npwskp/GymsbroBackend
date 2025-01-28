@@ -53,24 +53,6 @@ func (uc *UserController) PostUsersHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
-// @Summary		Get all users
-// @Description	Get all users
-// @Tags		users
-// @Accept		json
-// @Produce		json
-// @Success		200	{array}	User
-// @Failure		400	{object} Error
-// @Router		/user [get]
-func (uc *UserController) GetAllUsersHandler(c *fiber.Ctx) error {
-	users, err := uc.Service.GetAllUsers()
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-	return c.Status(fiber.StatusOK).JSON(users)
-}
-
 // @Summary		Get a user
 // @Description	Get a user
 // @Tags		users
@@ -337,7 +319,6 @@ func (uc *UserController) Handle() {
 	g := uc.Instance.Group("/user")
 
 	g.Post("", uc.PostUsersHandler)
-	g.Get("", uc.GetAllUsersHandler)
 	g.Get("/me", uc.GetUserHandler)
 	g.Get("/energyplan", uc.GetUserEnergyConsumePlanHandler)
 	g.Get("/activitylevels", uc.GetAllActivityLevels)

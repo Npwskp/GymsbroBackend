@@ -2190,34 +2190,6 @@ const docTemplate = `{
             }
         },
         "/user": {
-            "get": {
-                "description": "Get all users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/user.User"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Create a user",
                 "consumes": [
