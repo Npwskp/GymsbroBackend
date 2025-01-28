@@ -13,6 +13,8 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+	bodyCompositionLog "github.com/Npwskp/GymsbroBackend/api/v1/userLog/userBodyComposition"
+	macronutrientLog "github.com/Npwskp/GymsbroBackend/api/v1/userLog/userMacronutrient"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,8 +22,10 @@ import (
 )
 
 type UserService struct {
-	DB           *mongo.Database
-	MinioService minio.MinioService
+	DB                    *mongo.Database
+	MinioService          minio.MinioService
+	BodyCompositionLogger bodyCompositionLog.IBodyCompositionLogService
+	MacronutrientLogger   macronutrientLog.IMacronutrientLogService
 }
 
 const (
@@ -212,13 +216,13 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		Carbs:          function.Coalesce(doc.Macronutrients.Carbs, user.Macronutrients.Carbs).(float64),
 	}
 
-	new_nutrition_info := &userFitnessPreferenceEnums.NutritionInfo{
+	new_nutrition_info := userFitnessPreferenceEnums.NutritionInfo{
 		BMR:           new_BMR,
 		ActivityLevel: function.Coalesce(doc.NutritionInfo.ActivityLevel, user.NutritionInfo.ActivityLevel).(userFitnessPreferenceEnums.ActivityLevelType),
 		Goal:          function.Coalesce(doc.NutritionInfo.Goal, user.NutritionInfo.Goal).(userFitnessPreferenceEnums.GoalType),
 	}
 
-	new_body_composition := &userFitnessPreferenceEnums.BodyCompositionInfo{
+	new_body_composition := userFitnessPreferenceEnums.BodyCompositionInfo{
 		BMI:                new_BMI,
 		BodyFatMass:        function.Coalesce(doc.BodyComposition.BodyFatMass, user.BodyComposition.BodyFatMass).(float64),
 		BodyFatPercentage:  function.Coalesce(doc.BodyComposition.BodyFatPercentage, user.BodyComposition.BodyFatPercentage).(float64),
@@ -249,6 +253,30 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		return nil, errors.New("no user found for the given ID")
 	}
 
+	if us.BodyCompositionLogger != nil {
+		bodyCompLogDto := &bodyCompositionLog.CreateBodyCompositionLogDto{
+			UserID:          id,
+			Weight:          new_weight,
+			BodyComposition: new_body_composition,
+		}
+		_, err = us.BodyCompositionLogger.CreateBodyCompositionLog(bodyCompLogDto)
+		if err != nil {
+			fmt.Printf("Error logging body composition: %v\n", err)
+		}
+	}
+
+	if us.MacronutrientLogger != nil {
+		macroLogDto := &macronutrientLog.CreateMacronutrientLogDto{
+			UserID:         id,
+			Macronutrients: new_macronutrients,
+		}
+		_, err = us.MacronutrientLogger.CreateMacronutrientLog(macroLogDto)
+		if err != nil {
+			fmt.Printf("Error logging macronutrients: %v\n", err)
+		}
+	}
+
+	// Retrieve the updated document
 	filter = bson.D{{Key: "_id", Value: oid}}
 	UpdatedUser := &User{}
 	updatedRecord := us.DB.Collection("users").FindOne(context.Background(), filter)

@@ -12,6 +12,8 @@ import (
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	"github.com/Npwskp/GymsbroBackend/api/v1/unit"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	bodyCompositionLog "github.com/Npwskp/GymsbroBackend/api/v1/userLog/userBodyComposition"
+	macronutrientLog "github.com/Npwskp/GymsbroBackend/api/v1/userLog/userMacronutrient"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
@@ -30,6 +32,10 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 		log.Fatalf("Failed to inject MinIO dependencies: %v", err)
 	}
 
+	// Initialize logging services
+	bodyCompositionLogger := &bodyCompositionLog.BodyCompositionLogService{DB: db}
+	macronutrientLogger := &macronutrientLog.MacronutrientLogService{DB: db}
+
 	// Public routes group (no auth required)
 	public := api.Group("")
 	authService := auth.AuthService{DB: db}
@@ -47,7 +53,12 @@ func InjectApp(app *fiber.App, db *mongo.Database) {
 	protected.Use(middleware.ExtractUserContext())
 
 	// All protected controllers
-	userService := user.UserService{DB: db, MinioService: minioDeps.MinioService}
+	userService := user.UserService{
+		DB:                    db,
+		MinioService:          minioDeps.MinioService,
+		BodyCompositionLogger: bodyCompositionLogger,
+		MacronutrientLogger:   macronutrientLogger,
+	}
 	userController := user.UserController{Instance: protected, Service: &userService}
 	userController.Handle()
 
