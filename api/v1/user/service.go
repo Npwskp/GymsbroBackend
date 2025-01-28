@@ -200,10 +200,24 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	new_BMR := userFitnessPreferenceEnums.CalculateBMR(new_weight, new_height, new_age, new_gender)
 	new_BMI := userFitnessPreferenceEnums.CalculateBMI(new_weight, new_height)
 
+	// Initialize NutritionInfo if nil
+	if doc.NutritionInfo == (userFitnessPreferenceEnums.NutritionInfo{}) {
+		doc.NutritionInfo = user.NutritionInfo
+	}
 	doc.NutritionInfo.BMR = new_BMR
+
+	// Initialize BodyComposition if nil
+	if doc.BodyComposition == (userFitnessPreferenceEnums.BodyCompositionInfo{}) {
+		doc.BodyComposition = user.BodyComposition
+	}
 	doc.BodyComposition.BMI = new_BMI
 
-	new_macronutrients := &userFitnessPreferenceEnums.Macronutrients{
+	// Initialize Macronutrients if nil
+	if doc.Macronutrients == (userFitnessPreferenceEnums.Macronutrients{}) {
+		doc.Macronutrients = user.Macronutrients
+	}
+
+	new_macronutrients := userFitnessPreferenceEnums.Macronutrients{
 		CarbPreference: function.Coalesce(doc.Macronutrients.CarbPreference, user.Macronutrients.CarbPreference).(userFitnessPreferenceEnums.CarbPreferenceType),
 		Calories:       function.Coalesce(doc.Macronutrients.Calories, user.Macronutrients.Calories).(float64),
 		Protein:        function.Coalesce(doc.Macronutrients.Protein, user.Macronutrients.Protein).(float64),
@@ -218,7 +232,7 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 	}
 
 	new_body_composition := &userFitnessPreferenceEnums.BodyCompositionInfo{
-		BMI:                function.Coalesce(doc.BodyComposition.BMI, user.BodyComposition.BMI).(float64),
+		BMI:                new_BMI,
 		BodyFatMass:        function.Coalesce(doc.BodyComposition.BodyFatMass, user.BodyComposition.BodyFatMass).(float64),
 		BodyFatPercentage:  function.Coalesce(doc.BodyComposition.BodyFatPercentage, user.BodyComposition.BodyFatPercentage).(float64),
 		SkeletalMuscleMass: function.Coalesce(doc.BodyComposition.SkeletalMuscleMass, user.BodyComposition.SkeletalMuscleMass).(float64),

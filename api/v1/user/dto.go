@@ -33,5 +33,5 @@ type UpdateBodyDto struct {
 	Gender          authEnums.GenderType                           `json:"gender"`
 	NutritionInfo   userFitnessPreferenceEnums.NutritionInfo       `json:"nutrition_info"`
 	BodyComposition userFitnessPreferenceEnums.BodyCompositionInfo `json:"body_composition"`
-	Macronutrients  *userFitnessPreferenceEnums.Macronutrients     `json:"macronutrients"`
+	Macronutrients  userFitnessPreferenceEnums.Macronutrients      `json:"macronutrients"`
 }
