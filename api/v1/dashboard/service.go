@@ -14,12 +14,14 @@ import (
 	dashboardFunctions "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/functions"
 	foodLog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workoutSession"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DashboardService struct {
@@ -37,9 +39,10 @@ type IDashboardService interface {
 	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
 	GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error)
 	GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error)
+	GetBodyCompositionAnalysis(userId string, startDate, endDate time.Time) (*BodyCompositionAnalysisResponse, error)
 }
 
-func calculateMovingAverage(values []int, window int) []float64 {
+func calculateMovingAverageInt(values []int, window int) []float64 {
 	result := make([]float64, len(values))
 	for i := range values {
 		count := 0
@@ -51,13 +54,6 @@ func calculateMovingAverage(values []int, window int) []float64 {
 		result[i] = float64(sum) / float64(count)
 	}
 	return result
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // Helper function to calculate max set volume
@@ -174,7 +170,7 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	}
 
 	// Calculate trend line (7-day moving average)
-	response.FrequencyGraph.TrendLine = calculateMovingAverage(response.FrequencyGraph.Values, 7)
+	response.FrequencyGraph.TrendLine = calculateMovingAverageInt(response.FrequencyGraph.Values, 7)
 	response.Analysis.TotalVolume = totalVolume
 
 	// Handle potential division by zero for average workout duration
@@ -731,5 +727,75 @@ func (s *DashboardService) GetNutritionSummary(userid string, startDate, endDate
 		}
 	}
 
+	return &response, nil
+}
+
+func (ds *DashboardService) GetBodyCompositionAnalysis(userId string, startDate, endDate time.Time) (*BodyCompositionAnalysisResponse, error) {
+	// Query body composition logs within date range
+	filter := bson.D{
+		{Key: "userid", Value: userId},
+		{Key: "created_at", Value: bson.D{
+			{Key: "$gte", Value: startDate},
+			{Key: "$lte", Value: endDate},
+		}},
+	}
+
+	// Sort by date ascending
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: 1}})
+	cursor, err := ds.DB.Collection("bodyCompositionLog").Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var logs []struct {
+		CreatedAt       time.Time                                      `bson:"created_at"`
+		Weight          float64                                        `bson:"weight"`
+		BodyComposition userFitnessPreferenceEnums.BodyCompositionInfo `bson:"body_composition"`
+	}
+
+	if err := cursor.All(context.Background(), &logs); err != nil {
+		return nil, err
+	}
+
+	if len(logs) == 0 {
+		return &BodyCompositionAnalysisResponse{
+			Labels:  []string{},
+			Data:    []DailyBodyCompositionSummary{},
+			Changes: []DailyBodyCompositionSummary{},
+		}, nil
+	}
+
+	response := BodyCompositionAnalysisResponse{
+		Labels:  []string{},
+		Data:    []DailyBodyCompositionSummary{},
+		Changes: []DailyBodyCompositionSummary{},
+	}
+
+	for i, log := range logs {
+		response.Labels = append(response.Labels, log.CreatedAt.Format("2006-01-02"))
+		response.Data = append(response.Data, DailyBodyCompositionSummary{
+			Weight:             log.Weight,
+			BMI:                log.BodyComposition.BMI,
+			BodyFatMass:        log.BodyComposition.BodyFatMass,
+			BodyFatPercentage:  log.BodyComposition.BodyFatPercentage,
+			SkeletalMuscleMass: log.BodyComposition.SkeletalMuscleMass,
+			ExtracellularWater: log.BodyComposition.ExtracellularWater,
+			ECWRatio:           log.BodyComposition.ECWRatio,
+		})
+		if i > 0 {
+			response.Changes = append(response.Changes, DailyBodyCompositionSummary{
+				Weight:             log.Weight - logs[i-1].Weight,
+				BMI:                log.BodyComposition.BMI - logs[i-1].BodyComposition.BMI,
+				BodyFatMass:        log.BodyComposition.BodyFatMass - logs[i-1].BodyComposition.BodyFatMass,
+				BodyFatPercentage:  log.BodyComposition.BodyFatPercentage - logs[i-1].BodyComposition.BodyFatPercentage,
+				SkeletalMuscleMass: log.BodyComposition.SkeletalMuscleMass - logs[i-1].BodyComposition.SkeletalMuscleMass,
+				ECWRatio:           log.BodyComposition.ECWRatio - logs[i-1].BodyComposition.ECWRatio,
+				ExtracellularWater: log.BodyComposition.ExtracellularWater - logs[i-1].BodyComposition.ExtracellularWater,
+			})
+		} else {
+			response.Changes = append(response.Changes, DailyBodyCompositionSummary{})
+		}
+	}
 	return &response, nil
 }

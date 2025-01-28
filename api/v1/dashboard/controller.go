@@ -145,10 +145,59 @@ func (dc *DashboardController) GetNutritionSummary(c *fiber.Ctx) error {
 	return c.JSON(summary)
 }
 
+// @Summary     Get body composition analysis
+// @Description Get body composition metrics and trends over time
+// @Tags        dashboard
+// @Accept      json
+// @Produce     json
+// @Param       startDate query string false "Start date"
+// @Param       endDate query string false "End date"
+// @Success     200 {object} BodyCompositionAnalysisResponse
+// @Failure     400 {object} Error
+// @Router      /dashboard/body-composition [get]
+func (dc *DashboardController) GetBodyCompositionAnalysis(c *fiber.Ctx) error {
+	userId := function.GetUserIDFromContext(c)
+	if userId == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	startDate, err := time.Parse("2006-01-02 15:04:05", c.Query("startDate"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid start date format. Expected format: YYYY-MM-DD HH:mm:ss",
+		})
+	}
+
+	endDate, err := time.Parse("2006-01-02 15:04:05", c.Query("endDate"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid end date format. Expected format: YYYY-MM-DD HH:mm:ss",
+		})
+	}
+
+	if startDate.After(endDate) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "start date cannot be after end date",
+		})
+	}
+
+	analysis, err := dc.Service.GetBodyCompositionAnalysis(userId, startDate, endDate)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(analysis)
+}
+
 func (c *DashboardController) Handle() {
 	g := c.Instance.Group("/dashboard")
 	g.Get("/", c.GetDashboardHandler)
 	g.Get("/nutrition-summary", c.GetNutritionSummary)
+	g.Get("/body-composition", c.GetBodyCompositionAnalysis)
 	g.Get("/strength-standards", c.GetUserStrengthStandardsHandler)
 	g.Get("/rep-max/:exerciseId", c.GetRepMaxHandler)
 }
