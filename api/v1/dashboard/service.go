@@ -97,7 +97,7 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Get workout sessions with date filter
 	sessionFilter := bson.D{
 		{Key: "userid", Value: userId},
-		{Key: "starttime", Value: bson.D{
+		{Key: "start_time", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
 		}},
