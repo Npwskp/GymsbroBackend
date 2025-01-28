@@ -632,8 +632,12 @@ func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDat
 				{Key: "$lte", Value: endDate},
 			}},
 		}}},
+		{{Key: "$addFields", Value: bson.D{
+			{Key: "exerciseid", Value: bson.D{
+				{Key: "$toObjectId", Value: "$exerciseid"},
+			}},
+		}}},
 		{{Key: "$sort", Value: bson.D{
-			{Key: "exerciseid", Value: 1},
 			{Key: "datetime", Value: 1},
 		}}},
 		{{Key: "$group", Value: bson.D{
@@ -646,7 +650,10 @@ func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDat
 			{Key: "foreignField", Value: "_id"},
 			{Key: "as", Value: "exercise"},
 		}}},
-		{{Key: "$unwind", Value: "$exercise"}},
+		{{Key: "$unwind", Value: bson.D{
+			{Key: "path", Value: "$exercise"},
+			{Key: "preserveNullAndEmptyArrays", Value: true},
+		}}},
 	}
 
 	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
