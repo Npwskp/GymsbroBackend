@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
-	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user/enums"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 )

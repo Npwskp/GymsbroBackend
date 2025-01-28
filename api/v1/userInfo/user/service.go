@@ -12,7 +12,7 @@ import (
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
-	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user/enums"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

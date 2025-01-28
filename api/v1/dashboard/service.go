@@ -13,7 +13,7 @@ import (
 	dashboardEnums "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/enums"
 	dashboardFunctions "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/functions"
 	foodLog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
-	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"

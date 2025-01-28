@@ -4,7 +4,7 @@ import (
 	"time"
 
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
-	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user/enums"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

@@ -11,7 +11,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/meal"
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	"github.com/Npwskp/GymsbroBackend/api/v1/unit"
-	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	"github.com/Npwskp/GymsbroBackend/api/v1/userInfo/user"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workout"
