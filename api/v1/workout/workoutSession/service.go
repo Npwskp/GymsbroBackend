@@ -141,11 +141,11 @@ func (s *WorkoutSessionService) EndSession(id string, userId string) (*WorkoutSe
 	}
 
 	update := bson.D{{Key: "$set", Value: bson.D{
-		{Key: "endTime", Value: endTime},
+		{Key: "end_time", Value: endTime},
 		{Key: "status", Value: StatusCompleted},
 		{Key: "duration", Value: duration},
-		{Key: "totalVolume", Value: totalVolume},
-		{Key: "updatedAt", Value: time.Now()},
+		{Key: "total_volume", Value: totalVolume},
+		{Key: "updated_at", Value: time.Now()},
 	}}}
 
 	after := options.After

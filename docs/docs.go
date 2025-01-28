@@ -2024,7 +2024,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all units",
                 "parameters": [
@@ -2059,7 +2059,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all body part measure units",
                 "responses": {
@@ -2085,7 +2085,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Convert between units",
                 "parameters": [
@@ -2130,7 +2130,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all weight units",
                 "responses": {
@@ -2156,7 +2156,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get unit information",
                 "parameters": [
@@ -4665,10 +4665,6 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
-                "hip": {
-                    "type": "number",
-                    "default": 0
-                },
                 "id": {
                     "type": "string"
                 },
@@ -4678,10 +4674,6 @@ const docTemplate = `{
                 },
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
-                },
-                "neck": {
-                    "type": "number",
-                    "default": 0
                 },
                 "oauth_id": {
                     "type": "string"
@@ -4703,10 +4695,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 3
-                },
-                "waist": {
-                    "type": "number",
-                    "default": 0
                 },
                 "weight": {
                     "type": "number",

@@ -2022,7 +2022,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all units",
                 "parameters": [
@@ -2057,7 +2057,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all body part measure units",
                 "responses": {
@@ -2083,7 +2083,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Convert between units",
                 "parameters": [
@@ -2128,7 +2128,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all weight units",
                 "responses": {
@@ -2154,7 +2154,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get unit information",
                 "parameters": [
@@ -4663,10 +4663,6 @@
                     "type": "number",
                     "default": 0
                 },
-                "hip": {
-                    "type": "number",
-                    "default": 0
-                },
                 "id": {
                     "type": "string"
                 },
@@ -4676,10 +4672,6 @@
                 },
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
-                },
-                "neck": {
-                    "type": "number",
-                    "default": 0
                 },
                 "oauth_id": {
                     "type": "string"
@@ -4701,10 +4693,6 @@
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 3
-                },
-                "waist": {
-                    "type": "number",
-                    "default": 0
                 },
                 "weight": {
                     "type": "number",
