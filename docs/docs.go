@@ -4522,14 +4522,6 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
-                "hip": {
-                    "type": "number",
-                    "default": 0
-                },
-                "neck": {
-                    "type": "number",
-                    "default": 0
-                },
                 "oauth_id": {
                     "type": "string"
                 },
@@ -4547,10 +4539,6 @@ const docTemplate = `{
                     "maxLength": 20,
                     "minLength": 3
                 },
-                "waist": {
-                    "type": "number",
-                    "default": 0
-                },
                 "weight": {
                     "type": "number",
                     "default": 0
@@ -4560,35 +4548,23 @@ const docTemplate = `{
         "user.UpdateBodyDto": {
             "type": "object",
             "properties": {
-                "activityLevel": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
-                },
                 "age": {
                     "type": "integer"
                 },
-                "bmr": {
-                    "type": "number"
+                "body_composition": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.BodyCompositionInfo"
                 },
                 "gender": {
                     "$ref": "#/definitions/authEnums.GenderType"
                 },
-                "goal": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
-                },
                 "height": {
-                    "type": "number"
-                },
-                "hip": {
                     "type": "number"
                 },
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
                 },
-                "neck": {
-                    "type": "number"
-                },
-                "waist": {
-                    "type": "number"
+                "nutrition_info": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.NutritionInfo"
                 },
                 "weight": {
                     "type": "number"
@@ -4622,26 +4598,13 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
-                "activitylevel": {
-                    "default": "sedentary",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
-                        }
-                    ]
-                },
                 "age": {
                     "type": "integer",
                     "maximum": 120,
                     "minimum": 1
                 },
-                "bmi": {
-                    "type": "number",
-                    "default": 0
-                },
-                "bmr": {
-                    "type": "number",
-                    "default": 0
+                "body_composition": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.BodyCompositionInfo"
                 },
                 "created_at": {
                     "type": "string",
@@ -4652,14 +4615,6 @@ const docTemplate = `{
                 },
                 "gender": {
                     "$ref": "#/definitions/authEnums.GenderType"
-                },
-                "goal": {
-                    "default": "maintain",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
-                        }
-                    ]
                 },
                 "height": {
                     "type": "number",
@@ -4674,6 +4629,9 @@ const docTemplate = `{
                 },
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
+                },
+                "nutrition_info": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.NutritionInfo"
                 },
                 "oauth_id": {
                     "type": "string"
@@ -4719,17 +4677,48 @@ const docTemplate = `{
                 "ActivityExtraActive"
             ]
         },
+        "userFitnessPreferenceEnums.BodyCompositionInfo": {
+            "type": "object",
+            "properties": {
+                "bmi": {
+                    "type": "number",
+                    "default": 0
+                },
+                "bodyfat_mass": {
+                    "type": "number",
+                    "default": 0
+                },
+                "bodyfat_percentage": {
+                    "type": "number",
+                    "default": 0
+                },
+                "ecw_ratio": {
+                    "type": "number",
+                    "default": 0
+                },
+                "extracellular_water": {
+                    "type": "number",
+                    "default": 0
+                },
+                "skeletal_muscle_mass": {
+                    "type": "number",
+                    "default": 0
+                }
+            }
+        },
         "userFitnessPreferenceEnums.CarbPreferenceType": {
             "type": "string",
             "enum": [
                 "moderate_carb",
                 "low_carb",
-                "high_carb"
+                "high_carb",
+                "manual"
             ],
             "x-enum-varnames": [
                 "CarbModerate",
                 "CarbLow",
-                "CarbHigh"
+                "CarbHigh",
+                "CarbManual"
             ]
         },
         "userFitnessPreferenceEnums.EnergyConsumptionPlan": {
@@ -4782,6 +4771,20 @@ const docTemplate = `{
                 },
                 "protein": {
                     "type": "number"
+                }
+            }
+        },
+        "userFitnessPreferenceEnums.NutritionInfo": {
+            "type": "object",
+            "properties": {
+                "activity_level": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
+                },
+                "bmr": {
+                    "type": "number"
+                },
+                "goal": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 }
             }
         },
