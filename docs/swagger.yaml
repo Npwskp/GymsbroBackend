@@ -54,6 +54,39 @@ definitions:
     x-enum-varnames:
     - GenderMale
     - GenderFemale
+  dashboard.BodyCompositionAnalysisResponse:
+    properties:
+      changes:
+        items:
+          $ref: '#/definitions/dashboard.DailyBodyCompositionSummary'
+        type: array
+      data:
+        items:
+          $ref: '#/definitions/dashboard.DailyBodyCompositionSummary'
+        type: array
+      labels:
+        description: Date labels in "2024-01-01" format
+        items:
+          type: string
+        type: array
+    type: object
+  dashboard.DailyBodyCompositionSummary:
+    properties:
+      bmi:
+        type: number
+      bodyfat_mass:
+        type: number
+      bodyfat_percentage:
+        type: number
+      ecw_ratio:
+        type: number
+      extracellular_water:
+        type: number
+      skeletal_muscle_mass:
+        type: number
+      weight:
+        type: number
+    type: object
   dashboard.DailyNutritionSummary:
     properties:
       date:
@@ -1485,6 +1518,33 @@ paths:
       summary: Get workout dashboard
       tags:
       - dashboard
+  /dashboard/body-composition:
+    get:
+      consumes:
+      - application/json
+      description: Get body composition metrics and trends over time
+      parameters:
+      - description: Start date
+        in: query
+        name: startDate
+        type: string
+      - description: End date
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.BodyCompositionAnalysisResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get body composition analysis
+      tags:
+      - dashboard
   /dashboard/nutrition-summary:
     get:
       consumes:
@@ -2833,25 +2893,6 @@ paths:
       tags:
       - units
   /user:
-    get:
-      consumes:
-      - application/json
-      description: Get all users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/user.User'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get all users
-      tags:
-      - users
     post:
       consumes:
       - application/json

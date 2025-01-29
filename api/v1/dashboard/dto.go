@@ -94,3 +94,19 @@ type NutritionSummaryResponse struct {
 	AverageCarbs    float64                 `json:"average_carbs"`
 	AverageFat      float64                 `json:"average_fat"`
 }
+
+type DailyBodyCompositionSummary struct {
+	Weight             float64 `json:"weight"`
+	BMI                float64 `json:"bmi"`
+	BodyFatMass        float64 `json:"bodyfat_mass"`
+	BodyFatPercentage  float64 `json:"bodyfat_percentage"`
+	SkeletalMuscleMass float64 `json:"skeletal_muscle_mass"`
+	ExtracellularWater float64 `json:"extracellular_water"`
+	ECWRatio           float64 `json:"ecw_ratio"`
+}
+
+type BodyCompositionAnalysisResponse struct {
+	Labels  []string                      `json:"labels"` // Date labels in "2024-01-01" format
+	Data    []DailyBodyCompositionSummary `json:"data"`
+	Changes []DailyBodyCompositionSummary `json:"changes"`
+}

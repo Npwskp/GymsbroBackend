@@ -189,6 +189,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/body-composition": {
+            "get": {
+                "description": "Get body composition metrics and trends over time",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get body composition analysis",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.BodyCompositionAnalysisResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/dashboard/nutrition-summary": {
             "get": {
                 "description": "Get nutrition summary",
@@ -2190,34 +2231,6 @@ const docTemplate = `{
             }
         },
         "/user": {
-            "get": {
-                "description": "Get all users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/user.User"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Create a user",
                 "consumes": [
@@ -3271,6 +3284,56 @@ const docTemplate = `{
                 "GenderMale",
                 "GenderFemale"
             ]
+        },
+        "dashboard.BodyCompositionAnalysisResponse": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.DailyBodyCompositionSummary"
+                    }
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.DailyBodyCompositionSummary"
+                    }
+                },
+                "labels": {
+                    "description": "Date labels in \"2024-01-01\" format",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dashboard.DailyBodyCompositionSummary": {
+            "type": "object",
+            "properties": {
+                "bmi": {
+                    "type": "number"
+                },
+                "bodyfat_mass": {
+                    "type": "number"
+                },
+                "bodyfat_percentage": {
+                    "type": "number"
+                },
+                "ecw_ratio": {
+                    "type": "number"
+                },
+                "extracellular_water": {
+                    "type": "number"
+                },
+                "skeletal_muscle_mass": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
         },
         "dashboard.DailyNutritionSummary": {
             "type": "object",
