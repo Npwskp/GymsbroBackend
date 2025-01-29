@@ -244,7 +244,15 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string, userid string) 
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "userid", Value: userid}}
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+		{Key: "userid", Value: userid},
+		{Key: "$or", Value: []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": ""},
+		}},
+	}
+
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "description", Value: doc.Description},
@@ -259,7 +267,17 @@ func (ns *MealService) UpdateMeal(doc *UpdateMealDto, id string, userid string) 
 	if _, err := ns.DB.Collection("meal").UpdateOne(context.Background(), filter, update); err != nil {
 		return nil, err
 	}
-	return ns.GetMeal(id, userid)
+
+	result, err := ns.GetMeal(id, userid)
+	if err != nil {
+		return nil, err
+	}
+	if !result.DeletedAt.IsZero() {
+		return nil, errors.New("meal deleted")
+	}
+
+	return result, nil
+
 }
 
 func (ns *MealService) SearchFilteredMeals(filters SearchFilters) ([]*Meal, error) {

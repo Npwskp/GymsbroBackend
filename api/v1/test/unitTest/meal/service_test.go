@@ -29,6 +29,9 @@ func createTestMeal(userid string) *meal.Meal {
 		Ingredients: []types.Ingredient{
 			{IngredientId: primitive.NewObjectID().Hex(), Amount: 100, Unit: "g"},
 		},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		DeletedAt: time.Time{}, // Initialize with zero time for non-deleted meals
 	}
 }
 
@@ -82,6 +85,7 @@ func TestCreateMeal(t *testing.T) {
 		assert.Equal(t, userid, createdMeal.UserID)
 		assert.Equal(t, dto.Name, createdMeal.Name)
 		assert.Equal(t, dto.Calories, createdMeal.Calories)
+		assert.True(t, createdMeal.DeletedAt.IsZero()) // Verify meal is not deleted when created
 	})
 }
 
@@ -98,6 +102,7 @@ func TestGetMeal(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, meal)
 		assert.Equal(t, testMeal.ID, meal.ID)
+		assert.True(t, meal.DeletedAt.IsZero()) // Verify meal is not deleted
 	})
 
 	t.Run("Get non-existing meal", func(t *testing.T) {
@@ -105,6 +110,18 @@ func TestGetMeal(t *testing.T) {
 		meal, err := service.GetMeal(nonExistingID, "test_user")
 		assert.Error(t, err)
 		assert.Nil(t, meal)
+	})
+
+	t.Run("Get soft-deleted meal", func(t *testing.T) {
+		// First soft delete the meal
+		err := service.DeleteMeal(testMeal.ID.Hex(), testMeal.UserID)
+		assert.NoError(t, err)
+
+		// Try to get the soft-deleted meal
+		meal, err := service.GetMeal(testMeal.ID.Hex(), testMeal.UserID)
+		assert.NoError(t, err)
+		assert.NotNil(t, meal)
+		assert.False(t, meal.DeletedAt.IsZero()) // Verify DeletedAt is set
 	})
 }
 
@@ -121,10 +138,20 @@ func TestGetMealByUser(t *testing.T) {
 	_, err := db.Collection("meal").InsertMany(context.Background(), testMeals)
 	assert.NoError(t, err)
 
-	t.Run("Get user meals", func(t *testing.T) {
+	t.Run("Get user meals excluding deleted", func(t *testing.T) {
 		meals, err := service.GetMealByUser(userid)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(meals))
+
+		// Soft delete one meal
+		err = service.DeleteMeal(meals[0].ID.Hex(), userid)
+		assert.NoError(t, err)
+
+		// Get meals again - should only return non-deleted meal
+		mealsAfterDelete, err := service.GetMealByUser(userid)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(mealsAfterDelete))
+		assert.True(t, mealsAfterDelete[0].DeletedAt.IsZero())
 	})
 }
 
@@ -149,6 +176,22 @@ func TestUpdateMeal(t *testing.T) {
 		updated, err := service.UpdateMeal(updateDto, testMeal.ID.Hex(), testMeal.UserID)
 		assert.NoError(t, err)
 		assert.Equal(t, updateDto.Calories, updated.Calories)
+		assert.True(t, updated.DeletedAt.IsZero()) // Verify update doesn't affect DeletedAt
+	})
+
+	t.Run("Update soft-deleted meal should fail", func(t *testing.T) {
+		// First soft delete the meal
+		err := service.DeleteMeal(testMeal.ID.Hex(), testMeal.UserID)
+		assert.NoError(t, err)
+
+		updateDto := &meal.UpdateMealDto{
+			Description: "Should Not Update",
+			Calories:    700,
+		}
+
+		// Attempt to update deleted meal
+		_, err = service.UpdateMeal(updateDto, testMeal.ID.Hex(), testMeal.UserID)
+		assert.Error(t, err)
 	})
 }
 
@@ -192,6 +235,8 @@ func TestSearchFilteredMeals(t *testing.T) {
 			Category:    "Main Course",
 			Calories:    500,
 			DeletedAt:   time.Time{}, // Not deleted
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
 		},
 		&meal.Meal{
 			ID:          primitive.NewObjectID(),
@@ -201,6 +246,8 @@ func TestSearchFilteredMeals(t *testing.T) {
 			Category:    "Main Course",
 			Calories:    500,
 			DeletedAt:   time.Now(), // Deleted
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
 		},
 	}
 
@@ -216,6 +263,7 @@ func TestSearchFilteredMeals(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Chicken Rice", results[0].Name)
+		assert.True(t, results[0].DeletedAt.IsZero()) // Verify returned meal is not deleted
 	})
 }
 
@@ -240,6 +288,7 @@ func TestGetPublicMeal(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, meal)
 		assert.Equal(t, publicMeal.ID, meal.ID)
+		assert.True(t, meal.DeletedAt.IsZero()) // Verify meal is not deleted
 	})
 
 	t.Run("Get public meal with null UserID", func(t *testing.T) {
@@ -247,6 +296,7 @@ func TestGetPublicMeal(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, meal)
 		assert.Equal(t, nullUserMeal.ID, meal.ID)
+		assert.True(t, meal.DeletedAt.IsZero()) // Verify meal is not deleted
 	})
 }
 
