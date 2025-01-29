@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
+	"github.com/Npwskp/GymsbroBackend/api/v1/nutrition/types"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
@@ -243,5 +244,65 @@ func TestUpdateFoodLogController(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestCalculateDailyNutrientsController(t *testing.T) {
+	app, mockService := setupTest()
+
+	// Test case 1: Successful calculation
+	t.Run("Success", func(t *testing.T) {
+		expectedResponse := &foodlog.DailyNutrientResponse{
+			Date:     "2024-03-20",
+			Calories: 2000.0,
+			Nutrients: []types.Nutrient{
+				{
+					Name:   "Protein",
+					Amount: 150.0,
+					Unit:   "g",
+				},
+				{
+					Name:   "Carbohydrates",
+					Amount: 250.0,
+					Unit:   "g",
+				},
+			},
+		}
+
+		mockService.On("CalculateDailyNutrients", "2024-03-20", "test-user-id").
+			Return(expectedResponse, nil).Once()
+
+		req := httptest.NewRequest("GET", "/foodlog/nutrients/2024-03-20", nil)
+		req.Header.Set("X-User-ID", "test-user-id")
+
+		resp, err := app.Test(req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+		var result foodlog.DailyNutrientResponse
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedResponse.Date, result.Date)
+		assert.Equal(t, expectedResponse.Calories, result.Calories)
+		assert.Len(t, result.Nutrients, len(expectedResponse.Nutrients))
+	})
+
+	// Test case 2: Invalid date format
+	t.Run("Invalid Date Format", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/foodlog/nutrients/invalid-date", nil)
+		req.Header.Set("X-User-ID", "test-user-id")
+
+		resp, err := app.Test(req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+		var errorResponse map[string]string
+		err = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		assert.Nil(t, err)
+		assert.Contains(t, errorResponse["error"], "Invalid date format")
+	})
+
 	mockService.AssertExpectations(t)
 }
