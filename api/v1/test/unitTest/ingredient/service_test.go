@@ -100,18 +100,77 @@ func TestGetIngredientByUser(t *testing.T) {
 	service := &ingredient.IngredientService{DB: db}
 
 	userid := "test_user"
+	otherUserId := "other_user"
+
+	// Create test ingredients for our test user
 	testIngredients := []interface{}{
-		createTestIngredient(userid),
-		createTestIngredient(userid),
+		&ingredient.Ingredient{
+			ID:          primitive.NewObjectID(),
+			UserID:      userid,
+			Name:        "Test Ingredient 1",
+			Description: "Test Description 1",
+			Category:    "Category 1",
+			Calories:    100,
+			DeletedAt:   time.Time{}, // Not deleted
+		},
+		&ingredient.Ingredient{
+			ID:          primitive.NewObjectID(),
+			UserID:      userid,
+			Name:        "Test Ingredient 2",
+			Description: "Test Description 2",
+			Category:    "Category 2",
+			Calories:    200,
+			DeletedAt:   time.Time{}, // Not deleted
+		},
+		&ingredient.Ingredient{
+			ID:          primitive.NewObjectID(),
+			UserID:      userid,
+			Name:        "Deleted Ingredient",
+			Description: "Should not appear",
+			Category:    "Category 1",
+			Calories:    150,
+			DeletedAt:   time.Now(), // Deleted
+		},
+		&ingredient.Ingredient{
+			ID:          primitive.NewObjectID(),
+			UserID:      otherUserId,
+			Name:        "Other User Ingredient",
+			Description: "Should not appear",
+			Category:    "Category 1",
+			Calories:    300,
+			DeletedAt:   time.Time{}, // Not deleted
+		},
 	}
 
 	_, err := db.Collection("ingredient").InsertMany(context.Background(), testIngredients)
 	assert.NoError(t, err)
 
-	t.Run("Get user ingredients", func(t *testing.T) {
+	t.Run("Get user ingredients - should return only non-deleted ingredients for user", func(t *testing.T) {
 		ingredients, err := service.GetIngredientByUser(userid)
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(ingredients))
+		assert.Equal(t, 2, len(ingredients), "Should return only 2 non-deleted ingredients")
+
+		// Verify the returned ingredients belong to the user and are not deleted
+		for _, ing := range ingredients {
+			assert.Equal(t, userid, ing.UserID, "Ingredient should belong to the test user")
+			assert.True(t, ing.DeletedAt.IsZero(), "Ingredient should not be deleted")
+		}
+	})
+
+	t.Run("Get ingredients for user with no ingredients", func(t *testing.T) {
+		emptyUserID := "empty_user"
+		ingredients, err := service.GetIngredientByUser(emptyUserID)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(ingredients), "Should return empty slice for user with no ingredients")
+	})
+
+	// Test ordering if the service implements it
+	t.Run("Verify ingredients are ordered by name", func(t *testing.T) {
+		ingredients, err := service.GetIngredientByUser(userid)
+		assert.NoError(t, err)
+		if len(ingredients) > 1 {
+			assert.True(t, ingredients[0].Name < ingredients[1].Name, "Ingredients should be ordered by name")
+		}
 	})
 }
 

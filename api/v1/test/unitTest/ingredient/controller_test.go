@@ -162,6 +162,46 @@ func TestGetIngredientController(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
+func TestGetIngredientByUserController(t *testing.T) {
+	app, mockService := setupTest()
+
+	expectedResponse := []*ingredient.Ingredient{
+		{
+			ID:          primitive.NewObjectID(),
+			UserID:      "test-user-id",
+			Name:        "Test Ingredient",
+			Description: "Test Description",
+			Category:    "Test Category",
+			Calories:    100,
+		},
+		{
+			ID:          primitive.NewObjectID(),
+			UserID:      "test-user-id",
+			Name:        "Another Ingredient",
+			Description: "Another Description",
+			Category:    "Test Category",
+			Calories:    200,
+		},
+	}
+
+	mockService.On("GetIngredientByUser", "test-user-id").Return(expectedResponse, nil)
+
+	req := httptest.NewRequest("GET", "/ingredient/user", nil)
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var response []*ingredient.Ingredient
+	body, _ := io.ReadAll(resp.Body)
+	json.Unmarshal(body, &response)
+
+	assert.Equal(t, len(expectedResponse), len(response))
+	mockService.AssertExpectations(t)
+}
+
 func TestDeleteIngredientController(t *testing.T) {
 	app, mockService := setupTest()
 
