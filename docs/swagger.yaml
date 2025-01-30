@@ -2120,6 +2120,43 @@ paths:
       summary: Search and filter exercises
       tags:
       - exercises
+  /exercise/similar/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Find exercises similar to the given exercise based on name, body
+        parts, and target muscles
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Maximum number of similar exercises to return (default: 5)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Get similar exercises
+      tags:
+      - exercises
   /exercise/targetmuscle:
     get:
       consumes:

@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -36,6 +38,7 @@ type IExerciseService interface {
 	UpdateExercise(doc *UpdateExerciseDto, id string, userId string) (*Exercise, error)
 	UpdateExerciseImage(c *fiber.Ctx, id string, file io.Reader, filename string, contentType string, userId string) (*Exercise, error)
 	SearchAndFilterExercise(equipment []exerciseEnums.Equipment, mechanics []exerciseEnums.Mechanics, force []exerciseEnums.Force, bodyPart []exerciseEnums.BodyPart, targetMuscle []exerciseEnums.TargetMuscle, query string, userID string) ([]*Exercise, error)
+	FindSimilarExercises(id string, userId string, limit int) ([]*Exercise, error)
 }
 
 func (es *ExerciseService) CreateExercise(exercise *CreateExerciseDto, userId string) (*Exercise, error) {
@@ -392,4 +395,159 @@ func (es *ExerciseService) SearchAndFilterExercise(
 		return nil, err
 	}
 	return exercises, nil
+}
+
+type SimilarityScore struct {
+	Exercise *Exercise
+	Score    float64
+}
+
+func (es *ExerciseService) FindSimilarExercises(id string, userId string, limit int) ([]*Exercise, error) {
+	// Get the source exercise
+	sourceExercise, err := es.GetExercise(id, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get all exercises
+	allExercises, err := es.GetAllExercises(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate similarity scores
+	var scores []SimilarityScore
+	for _, exercise := range allExercises {
+		// Skip the source exercise itself
+		if exercise.ID == sourceExercise.ID {
+			continue
+		}
+
+		// Calculate name similarity (using case-insensitive comparison)
+		nameSimilarity := calculateStringSimilarity(strings.ToLower(sourceExercise.Name), strings.ToLower(exercise.Name))
+
+		// Calculate body part overlap
+		bodyPartOverlap := calculateOverlap(sourceExercise.BodyPart, exercise.BodyPart)
+
+		// Calculate target muscle overlap
+		targetMuscleOverlap := calculateOverlap(sourceExercise.TargetMuscle, exercise.TargetMuscle)
+
+		// Equipment similarity
+		equipmentSimilarity := 0.0
+		if sourceExercise.Equipment == exercise.Equipment {
+			equipmentSimilarity = 1.0
+		}
+
+		// Mechanics similarity
+		mechanicsSimilarity := 0.0
+		if sourceExercise.Mechanics == exercise.Mechanics {
+			mechanicsSimilarity = 1.0
+		}
+
+		// Calculate total score (weighted sum)
+		totalScore := (nameSimilarity * 0.2) +
+			(bodyPartOverlap * 0.3) +
+			(targetMuscleOverlap * 0.3) +
+			(equipmentSimilarity * 0.1) +
+			(mechanicsSimilarity * 0.1)
+
+		scores = append(scores, SimilarityScore{
+			Exercise: exercise,
+			Score:    totalScore,
+		})
+	}
+
+	// Sort by similarity score
+	sort.Slice(scores, func(i, j int) bool {
+		return scores[i].Score > scores[j].Score
+	})
+
+	// Get top N similar exercises
+	if limit <= 0 {
+		limit = 5 // Default limit
+	}
+	if limit > len(scores) {
+		limit = len(scores)
+	}
+
+	result := make([]*Exercise, limit)
+	for i := 0; i < limit; i++ {
+		result[i] = scores[i].Exercise
+	}
+
+	return result, nil
+}
+
+// calculateStringSimilarity calculates similarity between two strings
+// using Levenshtein distance normalized to [0,1]
+func calculateStringSimilarity(s1, s2 string) float64 {
+	d := levenshteinDistance(s1, s2)
+	maxLen := math.Max(float64(len(s1)), float64(len(s2)))
+	if maxLen == 0 {
+		return 1.0
+	}
+	return 1.0 - float64(d)/maxLen
+}
+
+// levenshteinDistance calculates the Levenshtein distance between two strings
+func levenshteinDistance(s1, s2 string) int {
+	if len(s1) == 0 {
+		return len(s2)
+	}
+	if len(s2) == 0 {
+		return len(s1)
+	}
+
+	matrix := make([][]float64, len(s1)+1)
+	for i := range matrix {
+		matrix[i] = make([]float64, len(s2)+1)
+		matrix[i][0] = float64(i)
+	}
+	for j := range matrix[0] {
+		matrix[0][j] = float64(j)
+	}
+
+	for i := 1; i <= len(s1); i++ {
+		for j := 1; j <= len(s2); j++ {
+			cost := 1
+			if s1[i-1] == s2[j-1] {
+				cost = 0
+			}
+			matrix[i][j] = math.Min(
+				math.Min(matrix[i-1][j]+1,
+					matrix[i][j-1]+1),
+				matrix[i-1][j-1]+float64(cost),
+			)
+		}
+	}
+
+	return int(matrix[len(s1)][len(s2)])
+}
+
+// calculateOverlap calculates the overlap ratio between two slices
+func calculateOverlap[T comparable](s1, s2 []T) float64 {
+	if len(s1) == 0 && len(s2) == 0 {
+		return 1.0
+	}
+	if len(s1) == 0 || len(s2) == 0 {
+		return 0.0
+	}
+
+	// Count matching elements
+	matches := 0
+	for _, v1 := range s1 {
+		for _, v2 := range s2 {
+			if v1 == v2 {
+				matches++
+				break
+			}
+		}
+	}
+
+	// Calculate Jaccard similarity coefficient
+	union := float64(len(s1) + len(s2) - matches)
+	if union == 0 {
+		return 1.0
+	}
+	return float64(matches) / union
 }

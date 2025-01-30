@@ -399,6 +399,44 @@ func (ec *ExerciseController) SearchAndFilterExerciseHandler(c *fiber.Ctx) error
 	return c.JSON(exercises)
 }
 
+// @Summary     Get similar exercises
+// @Description Find exercises similar to the given exercise based on name, body parts, and target muscles
+// @Tags        exercises
+// @Accept      json
+// @Produce     json
+// @Param       id path string true "Exercise ID"
+// @Param       limit query int false "Maximum number of similar exercises to return (default: 5)"
+// @Success     200 {array} Exercise
+// @Failure     400 {object} Error
+// @Failure     401 {object} Error
+// @Failure     404 {object} Error
+// @Router      /exercise/similar/{id} [get]
+func (ec *ExerciseController) GetSimilarExercisesHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userId := function.GetUserIDFromContext(c)
+	limit := c.QueryInt("limit", 5) // Default to 5 if not specified
+
+	if limit <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Limit must be greater than 0",
+		})
+	}
+
+	exercises, err := ec.Service.FindSimilarExercises(id, userId, limit)
+	if err != nil {
+		if err.Error() == "exercise not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "Exercise not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(exercises)
+}
+
 func (ec *ExerciseController) Handle() {
 	g := ec.Instance.Group("/exercise")
 
@@ -412,6 +450,7 @@ func (ec *ExerciseController) Handle() {
 	g.Get("/targetmuscle", ec.GetAllTargetMusclesHandler)
 	g.Get("/search", ec.SearchAndFilterExerciseHandler)
 	g.Get("/:id", ec.GetExerciseHandler)
+	g.Get("/similar/:id", ec.GetSimilarExercisesHandler)
 	g.Delete("/:id", ec.DeleteExerciseHandler)
 	g.Put("/:id", ec.UpdateExerciseHandler)
 	g.Patch("/:id/image", ec.UpdateExerciseImageHandler)
