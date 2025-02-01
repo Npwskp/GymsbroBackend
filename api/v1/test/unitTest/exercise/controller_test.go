@@ -330,3 +330,81 @@ func TestSearchAndFilterExerciseHandler(t *testing.T) {
 		assert.Equal(t, expectedExercises[0].Name, result[0].Name)
 	})
 }
+
+func TestGetAllEquipmentHandler(t *testing.T) {
+	app, _ := setupTest()
+
+	req := httptest.NewRequest("GET", "/api/v1/exercise/equipment", nil)
+	resp, err := app.Test(req)
+	assert.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var equipment []exerciseEnums.Equipment
+	json.NewDecoder(resp.Body).Decode(&equipment)
+
+	// Verify all defined equipment constants are present
+	expectedEquipment := exerciseEnums.GetAllEquipment()
+	assert.ElementsMatch(t, expectedEquipment, equipment)
+}
+
+func TestGetAllMechanicsHandler(t *testing.T) {
+	app, _ := setupTest()
+
+	req := httptest.NewRequest("GET", "/api/v1/exercise/mechanics", nil)
+	resp, err := app.Test(req)
+	assert.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var mechanics []exerciseEnums.Mechanics
+	json.NewDecoder(resp.Body).Decode(&mechanics)
+
+	expectedMechanics := exerciseEnums.GetAllMechanics()
+	assert.ElementsMatch(t, expectedMechanics, mechanics)
+}
+
+func TestGetAllForceHandler(t *testing.T) {
+	app, _ := setupTest()
+
+	req := httptest.NewRequest("GET", "/api/v1/exercise/force", nil)
+	resp, err := app.Test(req)
+	assert.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var forces []exerciseEnums.Force
+	json.NewDecoder(resp.Body).Decode(&forces)
+
+	expectedForces := exerciseEnums.GetAllForces()
+	assert.ElementsMatch(t, expectedForces, forces)
+}
+
+func TestGetAllBodyPartHandler(t *testing.T) {
+	app, _ := setupTest()
+
+	req := httptest.NewRequest("GET", "/api/v1/exercise/bodypart", nil)
+	resp, err := app.Test(req)
+	assert.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var bodyParts []exerciseEnums.BodyPart
+	json.NewDecoder(resp.Body).Decode(&bodyParts)
+
+	// Get all defined body parts from the enums package
+	expectedBodyParts := exerciseEnums.GetAllBodyParts()
+	assert.ElementsMatch(t, expectedBodyParts, bodyParts)
+}
+
+func TestGetAllTargetMusclesHandler(t *testing.T) {
+	app, _ := setupTest()
+
+	req := httptest.NewRequest("GET", "/api/v1/exercise/targetmuscle", nil)
+	resp, err := app.Test(req)
+	assert.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var targetMuscles []exerciseEnums.TargetMuscle
+	json.NewDecoder(resp.Body).Decode(&targetMuscles)
+
+	// Get all defined target muscles from the enums package
+	expectedTargetMuscles := exerciseEnums.GetAllTargetMuscles()
+	assert.ElementsMatch(t, expectedTargetMuscles, targetMuscles)
+}
