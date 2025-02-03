@@ -13,9 +13,33 @@ if (-not $SkipTests) {
 
     # Run all tests
     Write-Host "Running tests..." -ForegroundColor Green
-    go test ./api/v1/test/... -v
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Tests failed! Build aborted." -ForegroundColor Red
+    $testOutput = go test ./api/v1/test/... -v -json | ForEach-Object { $_ | ConvertFrom-Json }
+    
+    # Initialize counters and tracking
+    $testNames = @{}
+    $passed = 0
+    $failed = 0
+
+    # Count test results
+    $testOutput | ForEach-Object {
+        if ($_.Action -eq "run") {
+            $testNames[$_.Test] = $true
+        }
+        if ($_.Action -eq "pass") { $passed++ }
+        if ($_.Action -eq "fail") { $failed++ }
+    }
+
+    # Get total unique tests
+    $total = $testNames.Count
+
+    # Display test summary
+    Write-Host "`nTest Summary:" -ForegroundColor Cyan
+    Write-Host "Total Tests: $total" -ForegroundColor White
+    Write-Host "Passed: $passed" -ForegroundColor Green
+    Write-Host "Failed: $failed" -ForegroundColor Red
+
+    if ($failed -gt 0) {
+        Write-Host "`nTests failed! Build aborted." -ForegroundColor Red
         # Cleanup
         docker stop test-mongo
         docker rm test-mongo

@@ -15,6 +15,27 @@ type GoalType string
 // CarbPreferenceType represents the carb preference enum
 type CarbPreferenceType string
 
+type NutritionInfo struct {
+	BMR           float64           `json:"bmr"`
+	ActivityLevel ActivityLevelType `json:"activity_level"`
+	Goal          GoalType          `json:"goal"`
+}
+
+type EnergyConsumptionPlan struct {
+	BMR            float64           `json:"bmr"`
+	ActivityLevel  ActivityLevelType `json:"activity_level"`
+	Goal           GoalType          `json:"goal"`
+	Macronutrients []*Macronutrients `json:"macronutrients"`
+}
+
+type Macronutrients struct {
+	CarbPreference CarbPreferenceType `json:"carb_preference"`
+	Calories       float64            `json:"calories"`
+	Protein        float64            `json:"protein"`
+	Fat            float64            `json:"fat"`
+	Carbs          float64            `json:"carbs"`
+}
+
 const (
 	// Activity Levels
 	ActivitySedentary     ActivityLevelType = "sedentary"
@@ -32,6 +53,7 @@ const (
 	CarbModerate CarbPreferenceType = "moderate_carb"
 	CarbLow      CarbPreferenceType = "low_carb"
 	CarbHigh     CarbPreferenceType = "high_carb"
+	CarbManual   CarbPreferenceType = "manual"
 )
 
 // Replace the slice variables with functions that return all possible values
@@ -61,27 +83,6 @@ func GetAllCarbPreferences() []CarbPreferenceType {
 	}
 }
 
-// Update the struct to use the new types
-type EnergyConsumptionPlan struct {
-	BMR            float64           `json:"bmr"`
-	ActivityLevel  ActivityLevelType `json:"activity_level"`
-	Goal           GoalType          `json:"goal"`
-	Macronutrients []*Macronutrients `json:"macronutrients"`
-}
-
-type CalPerActivity struct {
-	ActivityName string
-	Calories     float64
-}
-
-type Macronutrients struct {
-	CarbPreference CarbPreferenceType `json:"carb_preference"`
-	Calories       float64            `json:"calories"`
-	Protein        float64            `json:"protein"`
-	Fat            float64            `json:"fat"`
-	Carbs          float64            `json:"carbs"`
-}
-
 func CalculateBMR(weight float64, height float64, age int, gender authEnums.GenderType) float64 {
 	if gender == authEnums.GenderMale {
 		return (10 * weight) + (6.25 * height) - (5 * float64(age)) + 5
@@ -90,15 +91,6 @@ func CalculateBMR(weight float64, height float64, age int, gender authEnums.Gend
 	}
 
 	return 0
-}
-
-func CalculateBMI(weight float64, height float64) float64 {
-	// Convert height from cm to meters
-	heightInMeters := height / 100
-	if heightInMeters == 0 {
-		return 0
-	}
-	return math.Round((weight/(heightInMeters*heightInMeters))*10) / 10
 }
 
 func CalculateCaloriesPerDay(bmr float64, activityLevel ActivityLevelType, goal GoalType) float64 {

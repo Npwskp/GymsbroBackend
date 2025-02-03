@@ -58,7 +58,7 @@ func (fs *FoodLogService) AddMealToFoodLog(foodlog *AddMealToFoodLogDto, userid 
 		Date:      foodlog.Date,
 		Meals:     foodlog.Meals,
 		CreatedAt: time.Now(),
-		UpdateAt:  time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	// Insert the new food log
@@ -145,7 +145,7 @@ func (fs *FoodLogService) UpdateFoodLog(doc *UpdateFoodLogDto, id string, userid
 		{Key: "$set", Value: bson.D{
 			{Key: "date", Value: doc.Date},
 			{Key: "meals", Value: doc.Meals},
-			{Key: "update_at", Value: time.Now()},
+			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
 

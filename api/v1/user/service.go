@@ -13,6 +13,8 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/function"
 	minio "github.com/Npwskp/GymsbroBackend/api/v1/storage"
 	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
+	bodyCompositionLog "github.com/Npwskp/GymsbroBackend/api/v1/userLog/userBodyComposition"
+	macronutrientLog "github.com/Npwskp/GymsbroBackend/api/v1/userLog/userMacronutrient"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,8 +22,10 @@ import (
 )
 
 type UserService struct {
-	DB           *mongo.Database
-	MinioService minio.MinioService
+	DB                    *mongo.Database
+	MinioService          minio.MinioService
+	BodyCompositionLogger bodyCompositionLog.IBodyCompositionLogService
+	MacronutrientLogger   macronutrientLog.IMacronutrientLogService
 }
 
 const (
@@ -30,7 +34,6 @@ const (
 
 type IUserService interface {
 	CreateUser(user *CreateUserDto) (*User, error)
-	GetAllUsers() ([]*User, error)
 	GetUser(id string) (*User, error)
 	GetUserByEmail(email string) (*User, error)
 	GetUserByOAuthID(oauthid string) (*User, error)
@@ -46,7 +49,7 @@ func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 	model := CreateUserModel(user)
 
 	// Calculate BMR if possible
-	calculateAndUpdateBMR(model)
+	calculateAndUpdateBMRAndBMI(model)
 
 	find := bson.D{{Key: "email", Value: user.Email}}
 	check, err := us.DB.Collection("users").CountDocuments(context.Background(), find)
@@ -67,18 +70,6 @@ func (us *UserService) CreateUser(user *CreateUserDto) (*User, error) {
 		return nil, err
 	}
 	return createdUser, nil
-}
-
-func (us *UserService) GetAllUsers() ([]*User, error) {
-	cursor, err := us.DB.Collection("users").Find(context.Background(), bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	users := make([]*User, 0)
-	if err := cursor.All(context.Background(), &users); err != nil {
-		return nil, err
-	}
-	return users, nil
 }
 
 func (us *UserService) GetUser(id string) (*User, error) {
@@ -122,7 +113,7 @@ func (us *UserService) GetUserEnergyConsumePlan(id string) (*userFitnessPreferen
 		return nil, err
 	}
 
-	return userFitnessPreferenceEnums.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.ActivityLevel, user.Goal)
+	return userFitnessPreferenceEnums.GetUserEnergyConsumePlan(user.Weight, user.Height, user.Age, user.Gender, user.NutritionInfo.ActivityLevel, user.NutritionInfo.Goal)
 }
 
 func (us *UserService) DeleteUser(id string) error {
@@ -192,16 +183,53 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		return nil, err
 	}
 
-	// Create a temporary user with the updated values to check if BMR and BMI can be calculated
-	tempUser := &User{
-		Weight: function.Coalesce(doc.Weight, user.Weight).(float64),
-		Height: function.Coalesce(doc.Height, user.Height).(float64),
-		Age:    function.Coalesce(doc.Age, user.Age).(int),
-		Gender: function.Coalesce(doc.Gender, user.Gender).(authEnums.GenderType),
+	new_weight := function.Coalesce(doc.Weight, user.Weight).(float64)
+	new_height := function.Coalesce(doc.Height, user.Height).(float64)
+	new_age := function.Coalesce(doc.Age, user.Age).(int)
+	new_gender := function.Coalesce(doc.Gender, user.Gender).(authEnums.GenderType)
+
+	new_BMR := userFitnessPreferenceEnums.CalculateBMR(new_weight, new_height, new_age, new_gender)
+	new_BMI := userFitnessPreferenceEnums.CalculateBMI(new_weight, new_height)
+
+	// Initialize NutritionInfo if nil
+	if doc.NutritionInfo == (userFitnessPreferenceEnums.NutritionInfo{}) {
+		doc.NutritionInfo = user.NutritionInfo
+	}
+	doc.NutritionInfo.BMR = new_BMR
+
+	// Initialize BodyComposition if nil
+	if doc.BodyComposition == (userFitnessPreferenceEnums.BodyCompositionInfo{}) {
+		doc.BodyComposition = user.BodyComposition
+	}
+	doc.BodyComposition.BMI = new_BMI
+
+	// Initialize Macronutrients if nil
+	if doc.Macronutrients == (userFitnessPreferenceEnums.Macronutrients{}) {
+		doc.Macronutrients = user.Macronutrients
 	}
 
-	// Calculate new BMR and BMI if possible
-	calculateAndUpdateBMIAndBMR(tempUser)
+	new_macronutrients := userFitnessPreferenceEnums.Macronutrients{
+		CarbPreference: function.Coalesce(doc.Macronutrients.CarbPreference, user.Macronutrients.CarbPreference).(userFitnessPreferenceEnums.CarbPreferenceType),
+		Calories:       function.Coalesce(doc.Macronutrients.Calories, user.Macronutrients.Calories).(float64),
+		Protein:        function.Coalesce(doc.Macronutrients.Protein, user.Macronutrients.Protein).(float64),
+		Fat:            function.Coalesce(doc.Macronutrients.Fat, user.Macronutrients.Fat).(float64),
+		Carbs:          function.Coalesce(doc.Macronutrients.Carbs, user.Macronutrients.Carbs).(float64),
+	}
+
+	new_nutrition_info := userFitnessPreferenceEnums.NutritionInfo{
+		BMR:           new_BMR,
+		ActivityLevel: function.Coalesce(doc.NutritionInfo.ActivityLevel, user.NutritionInfo.ActivityLevel).(userFitnessPreferenceEnums.ActivityLevelType),
+		Goal:          function.Coalesce(doc.NutritionInfo.Goal, user.NutritionInfo.Goal).(userFitnessPreferenceEnums.GoalType),
+	}
+
+	new_body_composition := userFitnessPreferenceEnums.BodyCompositionInfo{
+		BMI:                new_BMI,
+		BodyFatMass:        function.Coalesce(doc.BodyComposition.BodyFatMass, user.BodyComposition.BodyFatMass).(float64),
+		BodyFatPercentage:  function.Coalesce(doc.BodyComposition.BodyFatPercentage, user.BodyComposition.BodyFatPercentage).(float64),
+		SkeletalMuscleMass: function.Coalesce(doc.BodyComposition.SkeletalMuscleMass, user.BodyComposition.SkeletalMuscleMass).(float64),
+		ExtracellularWater: function.Coalesce(doc.BodyComposition.ExtracellularWater, user.BodyComposition.ExtracellularWater).(float64),
+		ECWRatio:           function.Coalesce(doc.BodyComposition.ECWRatio, user.BodyComposition.ECWRatio).(float64),
+	}
 
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
@@ -209,14 +237,9 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 			{Key: "height", Value: function.Coalesce(doc.Height, user.Height)},
 			{Key: "age", Value: function.Coalesce(doc.Age, user.Age)},
 			{Key: "gender", Value: function.Coalesce(doc.Gender, user.Gender)},
-			{Key: "neck", Value: function.Coalesce(doc.Neck, user.Neck)},
-			{Key: "waist", Value: function.Coalesce(doc.Waist, user.Waist)},
-			{Key: "hip", Value: function.Coalesce(doc.Hip, user.Hip)},
-			{Key: "activitylevel", Value: function.Coalesce(doc.ActivityLevel, user.ActivityLevel)},
-			{Key: "goal", Value: function.Coalesce(doc.Goal, user.Goal)},
-			{Key: "macronutrients", Value: function.Coalesce(doc.Macronutrients, user.Macronutrients)},
-			{Key: "bmr", Value: tempUser.BMR}, // Use the newly calculated BMR
-			{Key: "bmi", Value: tempUser.BMI}, // Use the newly calculated BMI
+			{Key: "nutrition_info", Value: new_nutrition_info},
+			{Key: "body_composition", Value: new_body_composition},
+			{Key: "macronutrients", Value: new_macronutrients},
 			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
@@ -230,6 +253,30 @@ func (us *UserService) UpdateBody(doc *UpdateBodyDto, id string) (*User, error) 
 		return nil, errors.New("no user found for the given ID")
 	}
 
+	if us.BodyCompositionLogger != nil {
+		bodyCompLogDto := &bodyCompositionLog.CreateBodyCompositionLogDto{
+			UserID:          id,
+			Weight:          new_weight,
+			BodyComposition: new_body_composition,
+		}
+		_, err = us.BodyCompositionLogger.CreateBodyCompositionLog(bodyCompLogDto)
+		if err != nil {
+			fmt.Printf("Error logging body composition: %v\n", err)
+		}
+	}
+
+	if us.MacronutrientLogger != nil {
+		macroLogDto := &macronutrientLog.CreateMacronutrientLogDto{
+			UserID:         id,
+			Macronutrients: new_macronutrients,
+		}
+		_, err = us.MacronutrientLogger.CreateMacronutrientLog(macroLogDto)
+		if err != nil {
+			fmt.Printf("Error logging macronutrients: %v\n", err)
+		}
+	}
+
+	// Retrieve the updated document
 	filter = bson.D{{Key: "_id", Value: oid}}
 	UpdatedUser := &User{}
 	updatedRecord := us.DB.Collection("users").FindOne(context.Background(), filter)
@@ -346,10 +393,10 @@ func validateUserForEnergyPlan(user *User) error {
 	if user.Gender == "" {
 		missingFields = append(missingFields, "Gender")
 	}
-	if user.ActivityLevel == "" {
+	if user.NutritionInfo.ActivityLevel == "" {
 		missingFields = append(missingFields, "ActivityLevel")
 	}
-	if user.Goal == "" {
+	if user.NutritionInfo.Goal == "" {
 		missingFields = append(missingFields, "Goal")
 	}
 	if len(missingFields) > 0 {
@@ -362,32 +409,18 @@ func canCalculateBMR(user *User) bool {
 	return user.Weight > 0 &&
 		user.Height > 0 &&
 		user.Age > 0 &&
-		(user.Gender == "male" || user.Gender == "female")
+		(user.Gender == authEnums.GenderMale || user.Gender == authEnums.GenderFemale)
 }
 
-func calculateAndUpdateBMR(user *User) {
+func calculateAndUpdateBMRAndBMI(user *User) {
 	if canCalculateBMR(user) {
-		user.BMR = userFitnessPreferenceEnums.CalculateBMR(
+		user.NutritionInfo.BMR = userFitnessPreferenceEnums.CalculateBMR(
 			user.Weight,
 			user.Height,
 			user.Age,
 			user.Gender,
 		)
-	}
-}
-
-func calculateAndUpdateBMIAndBMR(user *User) {
-	if canCalculateBMR(user) {
-		user.BMR = userFitnessPreferenceEnums.CalculateBMR(
-			user.Weight,
-			user.Height,
-			user.Age,
-			user.Gender,
-		)
-	}
-
-	if user.Weight > 0 && user.Height > 0 {
-		user.BMI = userFitnessPreferenceEnums.CalculateBMI(
+		user.BodyComposition.BMI = userFitnessPreferenceEnums.CalculateBMI(
 			user.Weight,
 			user.Height,
 		)

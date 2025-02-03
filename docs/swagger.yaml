@@ -54,12 +54,103 @@ definitions:
     x-enum-varnames:
     - GenderMale
     - GenderFemale
+  dashboard.BodyCompositionAnalysisResponse:
+    properties:
+      changes:
+        items:
+          $ref: '#/definitions/dashboard.DailyBodyCompositionSummary'
+        type: array
+      data:
+        items:
+          $ref: '#/definitions/dashboard.DailyBodyCompositionSummary'
+        type: array
+      labels:
+        description: Date labels in "2024-01-01" format
+        items:
+          type: string
+        type: array
+    type: object
+  dashboard.DailyBodyCompositionSummary:
+    properties:
+      bmi:
+        type: number
+      bodyfat_mass:
+        type: number
+      bodyfat_percentage:
+        type: number
+      ecw_ratio:
+        type: number
+      extracellular_water:
+        type: number
+      skeletal_muscle_mass:
+        type: number
+      weight:
+        type: number
+    type: object
+  dashboard.DailyNutritionSummary:
+    properties:
+      date:
+        type: string
+      total_calories:
+        type: number
+      total_carbs:
+        type: number
+      total_fat:
+        type: number
+      total_protein:
+        type: number
+    type: object
   dashboard.DashboardResponse:
     properties:
       analysis:
         $ref: '#/definitions/dashboard.WorkoutAnalysis'
       frequency_graph:
         $ref: '#/definitions/dashboard.FrequencyGraphData'
+      top_frequency:
+        items:
+          $ref: '#/definitions/dashboard.ExerciseFrequency'
+        type: array
+      top_progress:
+        items:
+          $ref: '#/definitions/dashboard.ExerciseProgress'
+        type: array
+    type: object
+  dashboard.ExerciseFrequency:
+    properties:
+      exercise:
+        $ref: '#/definitions/exercise.Exercise'
+      exerciseId:
+        type: string
+      frequency:
+        type: number
+    type: object
+  dashboard.ExerciseProgress:
+    properties:
+      endDate:
+        type: string
+      endOneRM:
+        type: number
+      endVolume:
+        type: number
+      exercise:
+        $ref: '#/definitions/exercise.Exercise'
+      exerciseId:
+        type: string
+      oneRMProgress:
+        description: Percentage increase in 1RM
+        type: number
+      progress:
+        description: Average of volume and 1RM progress
+        type: number
+      startDate:
+        type: string
+      startOneRM:
+        type: number
+      startVolume:
+        type: number
+      volumeProgress:
+        description: Percentage increase in volume
+        type: number
     type: object
   dashboard.FrequencyGraphData:
     properties:
@@ -77,6 +168,21 @@ definitions:
         description: Number of exercises/workouts per day
         items:
           type: integer
+        type: array
+    type: object
+  dashboard.NutritionSummaryResponse:
+    properties:
+      average_calories:
+        type: number
+      average_carbs:
+        type: number
+      average_fat:
+        type: number
+      average_protein:
+        type: number
+      daily_summaries:
+        items:
+          $ref: '#/definitions/dashboard.DailyNutritionSummary'
         type: array
     type: object
   dashboard.RepMaxResponse:
@@ -129,6 +235,8 @@ definitions:
     type: object
   dashboard.WorkoutAnalysis:
     properties:
+      average_workout_duration:
+        type: number
       total_exercises:
         type: integer
       total_volume:
@@ -860,12 +968,6 @@ definitions:
       height:
         default: 0
         type: number
-      hip:
-        default: 0
-        type: number
-      neck:
-        default: 0
-        type: number
       oauth_id:
         type: string
       oauth_provider:
@@ -878,9 +980,6 @@ definitions:
         maxLength: 20
         minLength: 3
         type: string
-      waist:
-        default: 0
-        type: number
       weight:
         default: 0
         type: number
@@ -893,26 +992,18 @@ definitions:
     type: object
   user.UpdateBodyDto:
     properties:
-      activityLevel:
-        $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
       age:
         type: integer
-      bmr:
-        type: number
+      body_composition:
+        $ref: '#/definitions/userFitnessPreferenceEnums.BodyCompositionInfo'
       gender:
         $ref: '#/definitions/authEnums.GenderType'
-      goal:
-        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
       height:
-        type: number
-      hip:
         type: number
       macronutrients:
         $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
-      neck:
-        type: number
-      waist:
-        type: number
+      nutrition_info:
+        $ref: '#/definitions/userFitnessPreferenceEnums.NutritionInfo'
       weight:
         type: number
     type: object
@@ -929,20 +1020,12 @@ definitions:
     type: object
   user.User:
     properties:
-      activitylevel:
-        allOf:
-        - $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
-        default: sedentary
       age:
         maximum: 120
         minimum: 1
         type: integer
-      bmi:
-        default: 0
-        type: number
-      bmr:
-        default: 0
-        type: number
+      body_composition:
+        $ref: '#/definitions/userFitnessPreferenceEnums.BodyCompositionInfo'
       created_at:
         default: "null"
         type: string
@@ -950,14 +1033,7 @@ definitions:
         type: string
       gender:
         $ref: '#/definitions/authEnums.GenderType'
-      goal:
-        allOf:
-        - $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
-        default: maintain
       height:
-        default: 0
-        type: number
-      hip:
         default: 0
         type: number
       id:
@@ -967,9 +1043,8 @@ definitions:
         type: boolean
       macronutrients:
         $ref: '#/definitions/userFitnessPreferenceEnums.Macronutrients'
-      neck:
-        default: 0
-        type: number
+      nutrition_info:
+        $ref: '#/definitions/userFitnessPreferenceEnums.NutritionInfo'
       oauth_id:
         type: string
       oauth_provider:
@@ -985,9 +1060,6 @@ definitions:
         maxLength: 20
         minLength: 3
         type: string
-      waist:
-        default: 0
-        type: number
       weight:
         default: 0
         type: number
@@ -1012,16 +1084,39 @@ definitions:
     - ActivityModerate
     - ActivityVeryActive
     - ActivityExtraActive
+  userFitnessPreferenceEnums.BodyCompositionInfo:
+    properties:
+      bmi:
+        default: 0
+        type: number
+      bodyfat_mass:
+        default: 0
+        type: number
+      bodyfat_percentage:
+        default: 0
+        type: number
+      ecw_ratio:
+        default: 0
+        type: number
+      extracellular_water:
+        default: 0
+        type: number
+      skeletal_muscle_mass:
+        default: 0
+        type: number
+    type: object
   userFitnessPreferenceEnums.CarbPreferenceType:
     enum:
     - moderate_carb
     - low_carb
     - high_carb
+    - manual
     type: string
     x-enum-varnames:
     - CarbModerate
     - CarbLow
     - CarbHigh
+    - CarbManual
   userFitnessPreferenceEnums.EnergyConsumptionPlan:
     properties:
       activity_level:
@@ -1057,6 +1152,15 @@ definitions:
         type: number
       protein:
         type: number
+    type: object
+  userFitnessPreferenceEnums.NutritionInfo:
+    properties:
+      activity_level:
+        $ref: '#/definitions/userFitnessPreferenceEnums.ActivityLevelType'
+      bmr:
+        type: number
+      goal:
+        $ref: '#/definitions/userFitnessPreferenceEnums.GoalType'
     type: object
   workout.CreateWorkoutDto:
     properties:
@@ -1319,6 +1423,55 @@ paths:
       summary: Get all genders
       tags:
       - auth
+  /auth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: Handles the callback from Google OAuth2 after successful authentication
+      parameters:
+      - description: Authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: State parameter for CSRF protection
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirects to frontend with JWT token
+          schema:
+            type: string
+        "401":
+          description: Unauthorized - Failed to exchange token
+          schema: {}
+        "500":
+          description: Internal Server Error - Failed to get user info or create user
+          schema: {}
+      summary: Google OAuth Callback
+      tags:
+      - auth
+  /auth/google/login:
+    get:
+      consumes:
+      - application/json
+      description: Initiates Google OAuth2 login flow
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Redirects to Google OAuth consent screen
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Login with Google
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -1412,6 +1565,60 @@ paths:
           description: Bad Request
           schema: {}
       summary: Get workout dashboard
+      tags:
+      - dashboard
+  /dashboard/body-composition:
+    get:
+      consumes:
+      - application/json
+      description: Get body composition metrics and trends over time
+      parameters:
+      - description: Start date
+        in: query
+        name: startDate
+        type: string
+      - description: End date
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.BodyCompositionAnalysisResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get body composition analysis
+      tags:
+      - dashboard
+  /dashboard/nutrition-summary:
+    get:
+      consumes:
+      - application/json
+      description: Get nutrition summary
+      parameters:
+      - description: Start date
+        in: query
+        name: startDate
+        type: string
+      - description: End date
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.NutritionSummaryResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get nutrition summary
       tags:
       - dashboard
   /dashboard/rep-max/{exerciseId}:
@@ -1960,6 +2167,43 @@ paths:
           description: Unauthorized
           schema: {}
       summary: Search and filter exercises
+      tags:
+      - exercises
+  /exercise/similar/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Find exercises similar to the given exercise based on name, body
+        parts, and target muscles
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Maximum number of similar exercises to return (default: 5)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/exercise.Exercise'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Get similar exercises
       tags:
       - exercises
   /exercise/targetmuscle:
@@ -2640,7 +2884,7 @@ paths:
             type: array
       summary: Get all units
       tags:
-      - Units
+      - units
   /unit/{symbol}:
     get:
       consumes:
@@ -2669,7 +2913,7 @@ paths:
           schema: {}
       summary: Get unit information
       tags:
-      - Units
+      - units
   /unit/bodypart:
     get:
       consumes:
@@ -2686,7 +2930,7 @@ paths:
             type: array
       summary: Get all body part measure units
       tags:
-      - Units
+      - units
   /unit/convert:
     post:
       consumes:
@@ -2716,7 +2960,7 @@ paths:
           schema: {}
       summary: Convert between units
       tags:
-      - Units
+      - units
   /unit/weight:
     get:
       consumes:
@@ -2733,27 +2977,8 @@ paths:
             type: array
       summary: Get all weight units
       tags:
-      - Units
+      - units
   /user:
-    get:
-      consumes:
-      - application/json
-      description: Get all users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/user.User'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Get all users
-      tags:
-      - users
     post:
       consumes:
       - application/json

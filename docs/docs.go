@@ -45,6 +45,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/google/callback": {
+            "get": {
+                "description": "Handles the callback from Google OAuth2 after successful authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Google OAuth Callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization code from Google",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "State parameter for CSRF protection",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirects to frontend with JWT token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Failed to exchange token",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error - Failed to get user info or create user",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/auth/google/login": {
+            "get": {
+                "description": "Initiates Google OAuth2 login flow",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login with Google",
+                "responses": {
+                    "307": {
+                        "description": "Redirects to Google OAuth consent screen",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Login",
@@ -180,6 +253,88 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dashboard.DashboardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/dashboard/body-composition": {
+            "get": {
+                "description": "Get body composition metrics and trends over time",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get body composition analysis",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.BodyCompositionAnalysisResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/dashboard/nutrition-summary": {
+            "get": {
+                "description": "Get nutrition summary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get nutrition summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dashboard.NutritionSummaryResponse"
                         }
                     },
                     "400": {
@@ -810,6 +965,59 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/exercise/similar/{id}": {
+            "get": {
+                "description": "Find exercises similar to the given exercise based on name, body parts, and target muscles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "exercises"
+                ],
+                "summary": "Get similar exercises",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exercise ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum number of similar exercises to return (default: 5)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/exercise.Exercise"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {}
                     }
                 }
@@ -1983,7 +2191,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all units",
                 "parameters": [
@@ -2018,7 +2226,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all body part measure units",
                 "responses": {
@@ -2044,7 +2252,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Convert between units",
                 "parameters": [
@@ -2089,7 +2297,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get all weight units",
                 "responses": {
@@ -2115,7 +2323,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Units"
+                    "units"
                 ],
                 "summary": "Get unit information",
                 "parameters": [
@@ -2149,34 +2357,6 @@ const docTemplate = `{
             }
         },
         "/user": {
-            "get": {
-                "description": "Get all users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/user.User"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Create a user",
                 "consumes": [
@@ -3231,6 +3411,76 @@ const docTemplate = `{
                 "GenderFemale"
             ]
         },
+        "dashboard.BodyCompositionAnalysisResponse": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.DailyBodyCompositionSummary"
+                    }
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.DailyBodyCompositionSummary"
+                    }
+                },
+                "labels": {
+                    "description": "Date labels in \"2024-01-01\" format",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dashboard.DailyBodyCompositionSummary": {
+            "type": "object",
+            "properties": {
+                "bmi": {
+                    "type": "number"
+                },
+                "bodyfat_mass": {
+                    "type": "number"
+                },
+                "bodyfat_percentage": {
+                    "type": "number"
+                },
+                "ecw_ratio": {
+                    "type": "number"
+                },
+                "extracellular_water": {
+                    "type": "number"
+                },
+                "skeletal_muscle_mass": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "dashboard.DailyNutritionSummary": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "total_calories": {
+                    "type": "number"
+                },
+                "total_carbs": {
+                    "type": "number"
+                },
+                "total_fat": {
+                    "type": "number"
+                },
+                "total_protein": {
+                    "type": "number"
+                }
+            }
+        },
         "dashboard.DashboardResponse": {
             "type": "object",
             "properties": {
@@ -3239,6 +3489,73 @@ const docTemplate = `{
                 },
                 "frequency_graph": {
                     "$ref": "#/definitions/dashboard.FrequencyGraphData"
+                },
+                "top_frequency": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ExerciseFrequency"
+                    }
+                },
+                "top_progress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ExerciseProgress"
+                    }
+                }
+            }
+        },
+        "dashboard.ExerciseFrequency": {
+            "type": "object",
+            "properties": {
+                "exercise": {
+                    "$ref": "#/definitions/exercise.Exercise"
+                },
+                "exerciseId": {
+                    "type": "string"
+                },
+                "frequency": {
+                    "type": "number"
+                }
+            }
+        },
+        "dashboard.ExerciseProgress": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "endOneRM": {
+                    "type": "number"
+                },
+                "endVolume": {
+                    "type": "number"
+                },
+                "exercise": {
+                    "$ref": "#/definitions/exercise.Exercise"
+                },
+                "exerciseId": {
+                    "type": "string"
+                },
+                "oneRMProgress": {
+                    "description": "Percentage increase in 1RM",
+                    "type": "number"
+                },
+                "progress": {
+                    "description": "Average of volume and 1RM progress",
+                    "type": "number"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "startOneRM": {
+                    "type": "number"
+                },
+                "startVolume": {
+                    "type": "number"
+                },
+                "volumeProgress": {
+                    "description": "Percentage increase in volume",
+                    "type": "number"
                 }
             }
         },
@@ -3264,6 +3581,29 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "integer"
+                    }
+                }
+            }
+        },
+        "dashboard.NutritionSummaryResponse": {
+            "type": "object",
+            "properties": {
+                "average_calories": {
+                    "type": "number"
+                },
+                "average_carbs": {
+                    "type": "number"
+                },
+                "average_fat": {
+                    "type": "number"
+                },
+                "average_protein": {
+                    "type": "number"
+                },
+                "daily_summaries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.DailyNutritionSummary"
                     }
                 }
             }
@@ -3345,6 +3685,9 @@ const docTemplate = `{
         "dashboard.WorkoutAnalysis": {
             "type": "object",
             "properties": {
+                "average_workout_duration": {
+                    "type": "number"
+                },
                 "total_exercises": {
                     "type": "integer"
                 },
@@ -4368,14 +4711,6 @@ const docTemplate = `{
                     "type": "number",
                     "default": 0
                 },
-                "hip": {
-                    "type": "number",
-                    "default": 0
-                },
-                "neck": {
-                    "type": "number",
-                    "default": 0
-                },
                 "oauth_id": {
                     "type": "string"
                 },
@@ -4393,10 +4728,6 @@ const docTemplate = `{
                     "maxLength": 20,
                     "minLength": 3
                 },
-                "waist": {
-                    "type": "number",
-                    "default": 0
-                },
                 "weight": {
                     "type": "number",
                     "default": 0
@@ -4406,35 +4737,23 @@ const docTemplate = `{
         "user.UpdateBodyDto": {
             "type": "object",
             "properties": {
-                "activityLevel": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
-                },
                 "age": {
                     "type": "integer"
                 },
-                "bmr": {
-                    "type": "number"
+                "body_composition": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.BodyCompositionInfo"
                 },
                 "gender": {
                     "$ref": "#/definitions/authEnums.GenderType"
                 },
-                "goal": {
-                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
-                },
                 "height": {
-                    "type": "number"
-                },
-                "hip": {
                     "type": "number"
                 },
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
                 },
-                "neck": {
-                    "type": "number"
-                },
-                "waist": {
-                    "type": "number"
+                "nutrition_info": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.NutritionInfo"
                 },
                 "weight": {
                     "type": "number"
@@ -4468,26 +4787,13 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
-                "activitylevel": {
-                    "default": "sedentary",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
-                        }
-                    ]
-                },
                 "age": {
                     "type": "integer",
                     "maximum": 120,
                     "minimum": 1
                 },
-                "bmi": {
-                    "type": "number",
-                    "default": 0
-                },
-                "bmr": {
-                    "type": "number",
-                    "default": 0
+                "body_composition": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.BodyCompositionInfo"
                 },
                 "created_at": {
                     "type": "string",
@@ -4499,19 +4805,7 @@ const docTemplate = `{
                 "gender": {
                     "$ref": "#/definitions/authEnums.GenderType"
                 },
-                "goal": {
-                    "default": "maintain",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
-                        }
-                    ]
-                },
                 "height": {
-                    "type": "number",
-                    "default": 0
-                },
-                "hip": {
                     "type": "number",
                     "default": 0
                 },
@@ -4525,9 +4819,8 @@ const docTemplate = `{
                 "macronutrients": {
                     "$ref": "#/definitions/userFitnessPreferenceEnums.Macronutrients"
                 },
-                "neck": {
-                    "type": "number",
-                    "default": 0
+                "nutrition_info": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.NutritionInfo"
                 },
                 "oauth_id": {
                     "type": "string"
@@ -4549,10 +4842,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 3
-                },
-                "waist": {
-                    "type": "number",
-                    "default": 0
                 },
                 "weight": {
                     "type": "number",
@@ -4577,17 +4866,48 @@ const docTemplate = `{
                 "ActivityExtraActive"
             ]
         },
+        "userFitnessPreferenceEnums.BodyCompositionInfo": {
+            "type": "object",
+            "properties": {
+                "bmi": {
+                    "type": "number",
+                    "default": 0
+                },
+                "bodyfat_mass": {
+                    "type": "number",
+                    "default": 0
+                },
+                "bodyfat_percentage": {
+                    "type": "number",
+                    "default": 0
+                },
+                "ecw_ratio": {
+                    "type": "number",
+                    "default": 0
+                },
+                "extracellular_water": {
+                    "type": "number",
+                    "default": 0
+                },
+                "skeletal_muscle_mass": {
+                    "type": "number",
+                    "default": 0
+                }
+            }
+        },
         "userFitnessPreferenceEnums.CarbPreferenceType": {
             "type": "string",
             "enum": [
                 "moderate_carb",
                 "low_carb",
-                "high_carb"
+                "high_carb",
+                "manual"
             ],
             "x-enum-varnames": [
                 "CarbModerate",
                 "CarbLow",
-                "CarbHigh"
+                "CarbHigh",
+                "CarbManual"
             ]
         },
         "userFitnessPreferenceEnums.EnergyConsumptionPlan": {
@@ -4640,6 +4960,20 @@ const docTemplate = `{
                 },
                 "protein": {
                     "type": "number"
+                }
+            }
+        },
+        "userFitnessPreferenceEnums.NutritionInfo": {
+            "type": "object",
+            "properties": {
+                "activity_level": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.ActivityLevelType"
+                },
+                "bmr": {
+                    "type": "number"
+                },
+                "goal": {
+                    "$ref": "#/definitions/userFitnessPreferenceEnums.GoalType"
                 }
             }
         },

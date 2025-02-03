@@ -6,30 +6,12 @@ import (
 	"time"
 
 	foodlog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
-	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-// Common test data
-func createTestFoodLog(userid string) *foodlog.FoodLog {
-	return &foodlog.FoodLog{
-		ID:     primitive.NewObjectID(),
-		UserID: userid,
-		Date:   time.Now().Format("2006-01-02"),
-		Meals:  []string{"meal1"},
-	}
-}
-
-func createTestDTO() *foodlog.AddMealToFoodLogDto {
-	return &foodlog.AddMealToFoodLogDto{
-		Date:  time.Now().Format("2006-01-02"),
-		Meals: []string{"meal1", "meal2"},
-	}
-}
 
 // Setup functions
 func setupTestDB(t *testing.T) *mongo.Database {
@@ -53,17 +35,6 @@ func setupTestDB(t *testing.T) *mongo.Database {
 	})
 
 	return db
-}
-
-func setupTestApp() (*fiber.App, *MockFoodLogService) {
-	app := fiber.New()
-	mockService := new(MockFoodLogService)
-	controller := &foodlog.FoodLogController{
-		Instance: app,
-		Service:  mockService,
-	}
-	controller.Handle()
-	return app, mockService
 }
 
 func TestCreateFoodLog(t *testing.T) {
@@ -208,5 +179,113 @@ func TestDeleteFoodLog(t *testing.T) {
 		var found foodlog.FoodLog
 		err = db.Collection("foodlog").FindOne(context.Background(), bson.M{"_id": testFoodLog.ID}).Decode(&found)
 		assert.Error(t, err)
+	})
+}
+
+func TestCalculateDailyNutrients(t *testing.T) {
+	db := setupTestDB(t)
+	service := &foodlog.FoodLogService{DB: db}
+
+	userid := "test_user"
+	date := time.Now().Format("2006-01-02")
+
+	// Create test food log with meals
+	mealID1 := primitive.NewObjectID()
+	mealID2 := primitive.NewObjectID()
+	testFoodLog := &foodlog.FoodLog{
+		ID:     primitive.NewObjectID(),
+		UserID: userid,
+		Date:   date,
+		Meals:  []string{mealID1.Hex(), mealID2.Hex()}, // Two meal IDs
+	}
+
+	// Insert test food log
+	_, err := db.Collection("foodlog").InsertOne(context.Background(), testFoodLog)
+	assert.NoError(t, err)
+
+	// Insert test meals with nutrients
+	meals := []interface{}{
+		bson.M{
+			"_id":      mealID1,
+			"userId":   userid,
+			"name":     "Breakfast",
+			"calories": 500.0,
+			"nutrients": []bson.M{
+				{
+					"name":   "Protein",
+					"amount": 25.0,
+					"unit":   "g",
+				},
+				{
+					"name":   "Carbohydrates",
+					"amount": 60.0,
+					"unit":   "g",
+				},
+			},
+		},
+		bson.M{
+			"_id":      mealID2,
+			"userId":   userid,
+			"name":     "Lunch",
+			"calories": 700.0,
+			"nutrients": []bson.M{
+				{
+					"name":   "Protein",
+					"amount": 35.0,
+					"unit":   "g",
+				},
+				{
+					"name":   "Carbohydrates",
+					"amount": 80.0,
+					"unit":   "g",
+				},
+			},
+		},
+	}
+
+	_, err = db.Collection("meal").InsertMany(context.Background(), meals)
+	assert.NoError(t, err)
+
+	t.Run("Calculate nutrients for existing food log", func(t *testing.T) {
+		response, err := service.CalculateDailyNutrients(date, userid)
+		assert.NoError(t, err)
+		assert.NotNil(t, response)
+
+		// Verify the response
+		assert.Equal(t, date, response.Date)
+		assert.Equal(t, 1200.0, response.Calories) // 500 + 700
+		assert.Len(t, response.Nutrients, 2)       // Should have protein and carbs
+
+		// Verify nutrients are correctly summed
+		for _, nutrient := range response.Nutrients {
+			switch nutrient.Name {
+			case "Protein":
+				assert.Equal(t, 60.0, nutrient.Amount) // 25 + 35
+				assert.Equal(t, "g", nutrient.Unit)
+			case "Carbohydrates":
+				assert.Equal(t, 140.0, nutrient.Amount) // 60 + 80
+				assert.Equal(t, "g", nutrient.Unit)
+			}
+		}
+	})
+
+	t.Run("Calculate nutrients for non-existing date", func(t *testing.T) {
+		nonExistingDate := "2020-01-01"
+		response, err := service.CalculateDailyNutrients(nonExistingDate, userid)
+		assert.NoError(t, err) // Should not return error for non-existing date
+		assert.NotNil(t, response)
+		assert.Equal(t, nonExistingDate, response.Date)
+		assert.Equal(t, 0.0, response.Calories)
+		assert.Empty(t, response.Nutrients)
+	})
+
+	t.Run("Calculate nutrients with invalid date format", func(t *testing.T) {
+		invalidDate := "invalid-date"
+		response, err := service.CalculateDailyNutrients(invalidDate, userid)
+		assert.NoError(t, err) // The service should handle date validation
+		assert.NotNil(t, response)
+		assert.Equal(t, invalidDate, response.Date)
+		assert.Equal(t, 0.0, response.Calories)
+		assert.Empty(t, response.Nutrients)
 	})
 }

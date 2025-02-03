@@ -21,6 +21,20 @@ type IWorkoutPlanService interface {
 func (s *WorkoutPlanService) CreatePlanByDaysOfWeek(dto *CreatePlanByDaysOfWeekDto, userId string) ([]WorkoutPlan, error) {
 	currentDate := time.Now()
 
+	// Clean up old workout plans first
+	newWorkoutIds := []string{
+		dto.MondayWorkoutID,
+		dto.TuesdayWorkoutID,
+		dto.WednesdayWorkoutID,
+		dto.ThursdayWorkoutID,
+		dto.FridayWorkoutID,
+		dto.SaturdayWorkoutID,
+		dto.SundayWorkoutID,
+	}
+	if err := s.cleanupOldWorkoutPlans(userId, currentDate, newWorkoutIds); err != nil {
+		return nil, err
+	}
+
 	// Map to group dates by workoutID
 	workoutDates := make(map[string][]time.Time)
 
@@ -57,15 +71,7 @@ func (s *WorkoutPlanService) CreatePlanByDaysOfWeek(dto *CreatePlanByDaysOfWeekD
 	filter := bson.M{
 		"userid": userId,
 		"workoutid": bson.M{
-			"$in": []string{
-				dto.MondayWorkoutID,
-				dto.TuesdayWorkoutID,
-				dto.WednesdayWorkoutID,
-				dto.ThursdayWorkoutID,
-				dto.FridayWorkoutID,
-				dto.SaturdayWorkoutID,
-				dto.SundayWorkoutID,
-			},
+			"$in": newWorkoutIds,
 		},
 	}
 
@@ -157,6 +163,11 @@ func (s *WorkoutPlanService) CreatePlanByDaysOfWeek(dto *CreatePlanByDaysOfWeekD
 
 func (s *WorkoutPlanService) CreatePlanByCyclicWorkout(dto *CreatePlanByCyclicWorkoutDto, userId string) ([]WorkoutPlan, error) {
 	currentDate := time.Now()
+
+	// Clean up old workout plans first
+	if err := s.cleanupOldWorkoutPlans(userId, currentDate, dto.WorkoutIDs); err != nil {
+		return nil, err
+	}
 
 	// Map to group dates by workoutID
 	workoutDates := make(map[string][]time.Time)
@@ -282,4 +293,58 @@ func (s *WorkoutPlanService) GetWorkoutPlansByUser(userId string) ([]WorkoutPlan
 	}
 
 	return workoutPlans, nil
+}
+
+// Helper function to clean up old workout plans
+func (s *WorkoutPlanService) cleanupOldWorkoutPlans(userId string, currentDate time.Time, newWorkoutIds []string) error {
+	startOfDay := currentDate.Truncate(24 * time.Hour)
+
+	// Find all existing plans for the user that are not in the new workout IDs
+	// and have at least one date greater than or equal to today
+	filter := bson.M{
+		"userid": userId,
+		"workoutid": bson.M{
+			"$nin": newWorkoutIds,
+		},
+		"dates": bson.M{
+			"$elemMatch": bson.M{
+				"$gte": startOfDay,
+			},
+		},
+	}
+
+	var plansToUpdate []WorkoutPlan
+	cursor, err := s.DB.Collection("workoutPlan").Find(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(context.Background())
+
+	if err := cursor.All(context.Background(), &plansToUpdate); err != nil {
+		return err
+	}
+
+	// Update each plan to remove future dates
+	for _, plan := range plansToUpdate {
+		var pastDates []time.Time
+		for _, date := range plan.Dates {
+			if date.Before(startOfDay) {
+				pastDates = append(pastDates, date)
+			}
+		}
+
+		_, err := s.DB.Collection("workoutPlan").UpdateOne(
+			context.Background(),
+			bson.M{"_id": plan.ID},
+			bson.M{"$set": bson.M{
+				"dates":      pastDates,
+				"updated_at": time.Now(),
+			}},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

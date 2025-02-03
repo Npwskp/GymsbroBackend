@@ -6,31 +6,44 @@ import (
 	"errors"
 	"math"
 	"os"
+	"sort"
 	"time"
 
 	authEnums "github.com/Npwskp/GymsbroBackend/api/v1/auth/enums"
 	dashboardEnums "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/enums"
 	dashboardFunctions "github.com/Npwskp/GymsbroBackend/api/v1/dashboard/functions"
+	foodLog "github.com/Npwskp/GymsbroBackend/api/v1/nutrition/foodLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/user"
+	userFitnessPreferenceEnums "github.com/Npwskp/GymsbroBackend/api/v1/user/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise"
 	exerciseEnums "github.com/Npwskp/GymsbroBackend/api/v1/workout/exercise/enums"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workoutSession"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DashboardService struct {
 	DB *mongo.Database
 }
 
+type ExerciseData struct {
+	ID           string                    `bson:"_id"`
+	RootExercise exercise.Exercise         `bson:"exercise"`
+	Logs         []exerciseLog.ExerciseLog `bson:"logs"`
+}
+
 type IDashboardService interface {
 	GetDashboard(userId string, startDate, endDate time.Time) (*DashboardResponse, error)
 	GetUserStrengthStandards(userId string) (*UserStrengthStandards, error)
 	GetRepMax(userId string, exerciseId string, useLatest bool) (*RepMaxResponse, error)
+	GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error)
+	GetBodyCompositionAnalysis(userId string, startDate, endDate time.Time) (*BodyCompositionAnalysisResponse, error)
 }
 
-func calculateMovingAverage(values []int, window int) []float64 {
+func calculateMovingAverageInt(values []int, window int) []float64 {
 	result := make([]float64, len(values))
 	for i := range values {
 		count := 0
@@ -44,18 +57,44 @@ func calculateMovingAverage(values []int, window int) []float64 {
 	return result
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+// Helper function to calculate max set volume
+func calculateMaxSetVolume(sets []exerciseLog.SetLog) float64 {
+	maxSetVolume := 0.0
+	for _, set := range sets {
+		setVolume := set.Weight * float64(set.Reps)
+		if setVolume > maxSetVolume {
+			maxSetVolume = setVolume
+		}
 	}
-	return b
+	return maxSetVolume
+}
+
+// Helper function to calculate best 1RM from sets
+func calculateBestOneRM(sets []exerciseLog.SetLog) (float64, error) {
+	bestOneRM := 0.0
+	for _, set := range sets {
+		if set.Weight <= 0 || set.Reps <= 0 {
+			continue
+		}
+		oneRM, err := dashboardFunctions.CalculateOneRepMax(set.Weight, float64(set.Reps))
+		if err != nil {
+			continue
+		}
+		if oneRM > bestOneRM {
+			bestOneRM = oneRM
+		}
+	}
+	if bestOneRM <= 0 {
+		return 0, errors.New("no valid sets found for 1RM calculation")
+	}
+	return bestOneRM, nil
 }
 
 func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.Time) (*DashboardResponse, error) {
 	// Get workout sessions with date filter
 	sessionFilter := bson.D{
 		{Key: "userid", Value: userId},
-		{Key: "starttime", Value: bson.D{
+		{Key: "start_time", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
 		}},
@@ -106,12 +145,14 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	// Prepare frequency graph data
 	dailyCount := make(map[string]int)
 	var totalVolume float64
+	var totalDuration float64
 
 	// Process sessions
 	for _, session := range sessions {
 		dateStr := session.StartTime.Format("2006-01-02")
 		dailyCount[dateStr]++
 		totalVolume += session.TotalVolume
+		totalDuration += float64(session.Duration)
 	}
 
 	// Process exercise logs
@@ -130,15 +171,52 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 	}
 
 	// Calculate trend line (7-day moving average)
-	response.FrequencyGraph.TrendLine = calculateMovingAverage(response.FrequencyGraph.Values, 7)
+	response.FrequencyGraph.TrendLine = calculateMovingAverageInt(response.FrequencyGraph.Values, 7)
 	response.Analysis.TotalVolume = totalVolume
+
+	// Handle potential division by zero for average workout duration
+	if len(sessions) > 0 {
+		avgDuration := totalDuration / float64(len(sessions))
+		if !math.IsNaN(avgDuration) && !math.IsInf(avgDuration, 0) {
+			response.Analysis.AverageWorkoutDuration = avgDuration
+		} else {
+			response.Analysis.AverageWorkoutDuration = 0
+		}
+	} else {
+		response.Analysis.AverageWorkoutDuration = 0
+	}
+
+	exerciseData, err := ds.getExerciseLogsData(userId, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get top progress exercises
+	topProgress, err := ds.GetTopProgressExercises(exerciseData)
+	if err == nil && len(topProgress) > 0 {
+		response.TopProgress = topProgress
+	} else {
+		response.TopProgress = make([]ExerciseProgress, 0)
+	}
+
+	// Get top frequency exercises
+	topFrequency, err := ds.GetTopFrequencyExercises(exerciseData)
+	if err == nil && len(topFrequency) > 0 {
+		response.TopFrequency = topFrequency
+	} else {
+		response.TopFrequency = make([]ExerciseFrequency, 0)
+	}
 
 	return response, nil
 }
 
 func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStrengthStandards, error) {
 	var userObj user.User
-	err := ds.DB.Collection("users").FindOne(context.Background(), bson.D{{Key: "userid", Value: userId}}).Decode(&userObj)
+	objectId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Collection("users").FindOne(context.Background(), bson.D{{Key: "_id", Value: objectId}}).Decode(&userObj)
 	if err != nil {
 		return nil, err
 	}
@@ -165,79 +243,66 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 		}
 	}
 
-	exercise_pipeline := []bson.D{
-		{{Key: "$match", Value: bson.D{
-			{Key: "$or", Value: orConditions},
-		}}},
-	}
-
-	exercise_cursor, err := ds.DB.Collection("exercises").Aggregate(context.Background(), exercise_pipeline)
+	// Find matching exercises
+	var exercises []exercise.Exercise
+	cursor, err := ds.DB.Collection("exercises").Find(context.Background(), bson.D{
+		{Key: "$or", Value: orConditions},
+	})
 	if err != nil {
 		return nil, err
 	}
-	defer exercise_cursor.Close(context.Background())
-
-	var exercises []exercise.Exercise
-	if err := exercise_cursor.All(context.Background(), &exercises); err != nil {
+	if err = cursor.All(context.Background(), &exercises); err != nil {
 		return nil, err
 	}
 
-	if len(exercises) != len(dashboardEnums.ConsiderExercises) {
-		return nil, errors.New("consider exercise count mismatch")
-	}
-
-	// Map queried exercises to ConsiderExercises
+	// Create a map of exercise IDs
+	exerciseIds := make([]string, len(exercises))
 	exerciseMap := make(map[string]exercise.Exercise)
-	for _, ex := range exercises {
+	for i, ex := range exercises {
+		exerciseIds[i] = ex.ID.Hex()
 		exerciseMap[ex.ID.Hex()] = ex
 	}
 
-	// Now you can use exerciseMap to look up exercise info by ID
-	exerciseIds := make([]string, 0)
-	for _, exercise := range exercises {
-		exerciseIds = append(exerciseIds, exercise.ID.Hex())
-	}
-
-	// Find Latest Exercise Logs for each exercise
+	// Find latest exercise logs
 	pipeline := []bson.D{
 		{{Key: "$match", Value: bson.D{
 			{Key: "userid", Value: userId},
 			{Key: "exerciseid", Value: bson.D{{Key: "$in", Value: exerciseIds}}},
 		}}},
 		{{Key: "$sort", Value: bson.D{
-			{Key: "exerciseid", Value: 1},
 			{Key: "datetime", Value: -1},
 		}}},
 		{{Key: "$group", Value: bson.D{
-			{Key: "exerciseid", Value: "$exerciseid"},
-			{Key: "doc", Value: bson.D{{Key: "$first", Value: "$$ROOT"}}},
+			{Key: "_id", Value: "$exerciseid"},
+			{Key: "latestLog", Value: bson.D{{Key: "$first", Value: "$$ROOT"}}},
 		}}},
-		{{Key: "$replaceRoot", Value: bson.D{{Key: "newRoot", Value: "$doc"}}}},
 	}
 
-	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	logCursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
 	if err != nil {
 		return nil, err
 	}
 
-	var latestLogs []exerciseLog.ExerciseLog
-	if err := cursor.All(context.Background(), &latestLogs); err != nil {
+	var logResults []struct {
+		ID        string                  `bson:"_id"`
+		LatestLog exerciseLog.ExerciseLog `bson:"latestLog"`
+	}
+	if err = logCursor.All(context.Background(), &logResults); err != nil {
 		return nil, err
 	}
 
-	// Create a map of exercise name to latest log for easy lookup
+	// Create a map of exercise ID to latest log
 	latestLogsMap := make(map[string]exerciseLog.ExerciseLog)
-	for _, log := range latestLogs {
-		latestLogsMap[log.ExerciseID] = log
+	for _, result := range logResults {
+		latestLogsMap[result.ID] = result.LatestLog
 	}
 
-	// Replace the inline struct with the one from enums
+	// Read strength standards
 	var strengthStandards struct {
 		Male   dashboardEnums.StrengthStandards `json:"Male"`
 		Female dashboardEnums.StrengthStandards `json:"Female"`
 	}
 
-	// Read and parse the JSON file
 	jsonFile, err := os.ReadFile("api/v1/dashboard/json/strengthStandard.json")
 	if err != nil {
 		return nil, err
@@ -251,26 +316,21 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 	userStrengthStandards := make([]UserStrengthStandardPerExercise, 0)
 	muscleGroupStrengths := make(map[exerciseEnums.TargetMuscle][]float64)
 
-	for exerciseId, considerExercise := range exerciseMap {
+	for exerciseId, ex := range exerciseMap {
 		latestLog, exists := latestLogsMap[exerciseId]
-
 		if !exists {
 			continue
 		}
 
-		exerciseName := considerExercise.Name
-		exerciseEquipment := considerExercise.Equipment
-
 		// Find the closest bodyweight standards
 		var standards dashboardEnums.StrengthStandards
-
-		if userGender == "Male" {
+		if userGender == authEnums.GenderMale {
 			standards = strengthStandards.Male
 		} else {
 			standards = strengthStandards.Female
 		}
 
-		exerciseStandards, exists := standards[exerciseName]
+		exerciseStandards, exists := standards[ex.Name]
 		if !exists {
 			continue
 		}
@@ -278,7 +338,6 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 		// Find closest bodyweight bracket
 		closestStandardWeight := math.Floor(userBodyWeight/5) * 5
 		var closestStandard dashboardEnums.StrengthStandard
-
 		for _, standard := range exerciseStandards {
 			if standard.Bodyweight == closestStandardWeight {
 				closestStandard = standard
@@ -286,7 +345,7 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 			}
 		}
 
-		// Find the set with maximum weight
+		// Calculate max weight and reps
 		var maxWeight float64
 		var maxReps int
 		for _, set := range latestLog.Sets {
@@ -296,18 +355,18 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 			}
 		}
 
-		// Calculate 1RM using Brzycki formula if more than 1 rep
+		// Calculate 1RM if more than 1 rep
 		if maxReps > 1 {
 			maxWeight, err = dashboardFunctions.CalculateOneRepMax(maxWeight, float64(maxReps))
 			if err != nil {
-				return nil, err
+				continue
 			}
 		}
 
-		// Calculate relative strength (as percentage of bodyweight)
+		// Calculate relative strength
 		relativeStrength := maxWeight / userBodyWeight
 
-		// Calculate strength level based on standards
+		// Calculate strength level and score
 		var strengthLevel dashboardEnums.StrengthType
 		var score float64
 
@@ -333,14 +392,14 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 		}
 
 		// Add to muscle group calculations
-		for _, muscleGroup := range considerExercise.TargetMuscle {
+		for _, muscleGroup := range ex.TargetMuscle {
 			muscleGroupStrengths[muscleGroup] = append(muscleGroupStrengths[muscleGroup], score)
 		}
 
 		// Add to exercise standards
 		userStrengthStandards = append(userStrengthStandards, UserStrengthStandardPerExercise{
-			Exercise:         exerciseName,
-			Equipment:        exerciseEquipment,
+			Exercise:         ex.Name,
+			Equipment:        ex.Equipment,
 			RepMax:           maxWeight,
 			RelativeStrength: relativeStrength,
 			StrengthLevel:    strengthLevel,
@@ -452,4 +511,277 @@ func (ds *DashboardService) GetRepMax(userId string, exerciseId string, useLates
 		TwelveRepMax: twelveRM,
 		LastUpdated:  results[0].LastUpdated,
 	}, nil
+}
+
+func (ds *DashboardService) GetTopProgressExercises(exerciseData []ExerciseData) ([]ExerciseProgress, error) {
+	// Calculate progress for each exercise
+	var progressList []ExerciseProgress
+	for _, exercise := range exerciseData {
+		logs := exercise.Logs
+		if len(logs) < 2 {
+			continue // Skip if we don't have at least 2 logs
+		}
+
+		firstLog := logs[0]
+		lastLog := logs[len(logs)-1]
+
+		// Skip if logs are on the same day
+		if firstLog.DateTime.Equal(lastLog.DateTime) {
+			continue
+		}
+
+		// Calculate Volume Progress
+		startMaxSetVolume, endMaxSetVolume := calculateMaxSetVolume(firstLog.Sets), calculateMaxSetVolume(lastLog.Sets)
+		if startMaxSetVolume <= 0 || endMaxSetVolume <= 0 {
+			continue
+		}
+
+		volumeProgress := ((endMaxSetVolume - startMaxSetVolume) / startMaxSetVolume) * 100
+		if math.IsNaN(volumeProgress) || math.IsInf(volumeProgress, 0) {
+			continue
+		}
+
+		// Calculate 1RM Progress
+		startOneRM, err := calculateBestOneRM(firstLog.Sets)
+		if err != nil {
+			continue
+		}
+		endOneRM, err := calculateBestOneRM(lastLog.Sets)
+		if err != nil {
+			continue
+		}
+
+		oneRMProgress := ((endOneRM - startOneRM) / startOneRM) * 100
+		if math.IsNaN(oneRMProgress) || math.IsInf(oneRMProgress, 0) {
+			continue
+		}
+
+		// Use the average of both progress metrics
+		averageProgress := (volumeProgress + oneRMProgress) / 2
+		if math.IsNaN(averageProgress) || math.IsInf(averageProgress, 0) {
+			continue
+		}
+
+		progressList = append(progressList, ExerciseProgress{
+			ExerciseID:     exercise.ID,
+			Exercise:       exercise.RootExercise,
+			StartVolume:    startMaxSetVolume,
+			EndVolume:      endMaxSetVolume,
+			VolumeProgress: math.Round(volumeProgress*100) / 100,
+			StartOneRM:     startOneRM,
+			EndOneRM:       endOneRM,
+			OneRMProgress:  math.Round(oneRMProgress*100) / 100,
+			Progress:       math.Round(averageProgress*100) / 100,
+			StartDate:      firstLog.DateTime,
+			EndDate:        lastLog.DateTime,
+		})
+	}
+
+	// Sort by average progress in descending order
+	sort.Slice(progressList, func(i, j int) bool {
+		return progressList[i].Progress > progressList[j].Progress
+	})
+
+	return progressList, nil
+}
+
+func (ds *DashboardService) GetTopFrequencyExercises(exerciseData []ExerciseData) ([]ExerciseFrequency, error) {
+	// Calculate frequency for each exercise
+	var frequencyList []ExerciseFrequency
+	for _, exercise := range exerciseData {
+		frequency := ExerciseFrequency{
+			ExerciseID: exercise.ID,
+			Exercise:   exercise.RootExercise,
+			Frequency:  float64(len(exercise.Logs)),
+		}
+		frequencyList = append(frequencyList, frequency)
+	}
+
+	// Sort by frequency in descending order
+	sort.Slice(frequencyList, func(i, j int) bool {
+		return frequencyList[i].Frequency > frequencyList[j].Frequency
+	})
+
+	return frequencyList, nil
+}
+
+func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDate time.Time) ([]ExerciseData, error) {
+	pipeline := []bson.D{
+		{{Key: "$match", Value: bson.D{
+			{Key: "userid", Value: userId},
+			{Key: "datetime", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lte", Value: endDate},
+			}},
+		}}},
+		{{Key: "$addFields", Value: bson.D{
+			{Key: "exerciseObjectId", Value: bson.D{
+				{Key: "$toObjectId", Value: "$exerciseid"},
+			}},
+		}}},
+		{{Key: "$sort", Value: bson.D{
+			{Key: "datetime", Value: 1},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$exerciseid"},
+			{Key: "logs", Value: bson.D{{Key: "$push", Value: "$$ROOT"}}},
+		}}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "exercises"},
+			{Key: "localField", Value: "logs.exerciseObjectId"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "exercise"},
+		}}},
+		{{Key: "$unwind", Value: bson.D{
+			{Key: "path", Value: "$exercise"},
+			{Key: "preserveNullAndEmptyArrays", Value: true},
+		}}},
+	}
+
+	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var exerciseData []ExerciseData
+	if err := cursor.All(context.Background(), &exerciseData); err != nil {
+		return nil, err
+	}
+
+	return exerciseData, nil
+}
+
+func (s *DashboardService) GetNutritionSummary(userid string, startDate, endDate time.Time) (*NutritionSummaryResponse, error) {
+	foodLogService := &foodLog.FoodLogService{DB: s.DB}
+
+	var dailySummaries []DailyNutritionSummary
+	totalCalories, totalProtein, totalCarbs, totalFat := 0.0, 0.0, 0.0, 0.0
+	daysCount := 0
+
+	// Iterate through each day in the range
+	for currentDate := startDate; !currentDate.After(endDate); currentDate = currentDate.AddDate(0, 0, 1) {
+		dateStr := currentDate.Format("2006-01-02")
+		nutrients, err := foodLogService.CalculateDailyNutrients(dateStr, userid)
+		if err != nil || len(nutrients.Nutrients) == 0 || nutrients.Calories == 0 {
+			// Skip days with no data
+			continue
+		}
+
+		// Extract macronutrients from nutrients array
+		var protein, carbs, fat float64
+		for _, nutrient := range nutrients.Nutrients {
+			switch nutrient.Name {
+			case "Protein":
+				protein = nutrient.Amount
+			case "Carbohydrate, by difference":
+				carbs = nutrient.Amount
+			case "Total lipid (fat)":
+				fat = nutrient.Amount
+			}
+		}
+
+		summary := DailyNutritionSummary{
+			Date:          dateStr,
+			TotalCalories: nutrients.Calories,
+			TotalProtein:  protein,
+			TotalCarbs:    carbs,
+			TotalFat:      fat,
+		}
+
+		dailySummaries = append(dailySummaries, summary)
+		totalCalories += nutrients.Calories
+		totalProtein += protein
+		totalCarbs += carbs
+		totalFat += fat
+		daysCount++
+	}
+
+	// Calculate averages
+	var response NutritionSummaryResponse
+	if daysCount > 0 {
+		response = NutritionSummaryResponse{
+			DailySummaries:  dailySummaries,
+			AverageCalories: totalCalories / float64(daysCount),
+			AverageProtein:  totalProtein / float64(daysCount),
+			AverageCarbs:    totalCarbs / float64(daysCount),
+			AverageFat:      totalFat / float64(daysCount),
+		}
+	} else {
+		response = NutritionSummaryResponse{
+			DailySummaries: []DailyNutritionSummary{},
+		}
+	}
+
+	return &response, nil
+}
+
+func (ds *DashboardService) GetBodyCompositionAnalysis(userId string, startDate, endDate time.Time) (*BodyCompositionAnalysisResponse, error) {
+	// Query body composition logs within date range
+	filter := bson.D{
+		{Key: "userid", Value: userId},
+		{Key: "created_at", Value: bson.D{
+			{Key: "$gte", Value: startDate},
+			{Key: "$lte", Value: endDate},
+		}},
+	}
+
+	// Sort by date ascending
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: 1}})
+	cursor, err := ds.DB.Collection("bodyCompositionLog").Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var logs []struct {
+		CreatedAt       time.Time                                      `bson:"created_at"`
+		Weight          float64                                        `bson:"weight"`
+		BodyComposition userFitnessPreferenceEnums.BodyCompositionInfo `bson:"body_composition"`
+	}
+
+	if err := cursor.All(context.Background(), &logs); err != nil {
+		return nil, err
+	}
+
+	if len(logs) == 0 {
+		return &BodyCompositionAnalysisResponse{
+			Labels:  []string{},
+			Data:    []DailyBodyCompositionSummary{},
+			Changes: []DailyBodyCompositionSummary{},
+		}, nil
+	}
+
+	response := BodyCompositionAnalysisResponse{
+		Labels:  []string{},
+		Data:    []DailyBodyCompositionSummary{},
+		Changes: []DailyBodyCompositionSummary{},
+	}
+
+	for i, log := range logs {
+		response.Labels = append(response.Labels, log.CreatedAt.Format("2006-01-02"))
+		response.Data = append(response.Data, DailyBodyCompositionSummary{
+			Weight:             log.Weight,
+			BMI:                log.BodyComposition.BMI,
+			BodyFatMass:        log.BodyComposition.BodyFatMass,
+			BodyFatPercentage:  log.BodyComposition.BodyFatPercentage,
+			SkeletalMuscleMass: log.BodyComposition.SkeletalMuscleMass,
+			ExtracellularWater: log.BodyComposition.ExtracellularWater,
+			ECWRatio:           log.BodyComposition.ECWRatio,
+		})
+		if i > 0 {
+			response.Changes = append(response.Changes, DailyBodyCompositionSummary{
+				Weight:             log.Weight - logs[i-1].Weight,
+				BMI:                log.BodyComposition.BMI - logs[i-1].BodyComposition.BMI,
+				BodyFatMass:        log.BodyComposition.BodyFatMass - logs[i-1].BodyComposition.BodyFatMass,
+				BodyFatPercentage:  log.BodyComposition.BodyFatPercentage - logs[i-1].BodyComposition.BodyFatPercentage,
+				SkeletalMuscleMass: log.BodyComposition.SkeletalMuscleMass - logs[i-1].BodyComposition.SkeletalMuscleMass,
+				ECWRatio:           log.BodyComposition.ECWRatio - logs[i-1].BodyComposition.ECWRatio,
+				ExtracellularWater: log.BodyComposition.ExtracellularWater - logs[i-1].BodyComposition.ExtracellularWater,
+			})
+		} else {
+			response.Changes = append(response.Changes, DailyBodyCompositionSummary{})
+		}
+	}
+	return &response, nil
 }

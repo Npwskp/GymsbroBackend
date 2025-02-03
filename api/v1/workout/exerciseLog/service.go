@@ -83,7 +83,7 @@ func (s *ExerciseLogService) GetLogsByUser(userId string) ([]*ExerciseLog, error
 func (s *ExerciseLogService) GetLogsByExercise(exerciseId string, userId string) ([]*ExerciseLog, error) {
 	filter := bson.D{
 		{Key: "userid", Value: userId},
-		{Key: "exerciseId", Value: exerciseId},
+		{Key: "exerciseid", Value: exerciseId},
 	}
 	opts := options.Find().SetSort(bson.D{{Key: "datetime", Value: -1}})
 

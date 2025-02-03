@@ -166,6 +166,38 @@ func TestGetMealController(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
+func TestGetMealByUserController(t *testing.T) {
+	app, mockService := setupTest()
+
+	expectedResponse := []*meal.Meal{
+		{
+			ID:          primitive.NewObjectID(),
+			UserID:      "test-user-id",
+			Name:        "Test Meal",
+			Description: "Test Description",
+			Category:    "Test Category",
+			Calories:    500,
+		},
+	}
+
+	mockService.On("GetMealByUser", "test-user-id").Return(expectedResponse, nil)
+
+	req := httptest.NewRequest("GET", "/meal/user", nil)
+	req.Header.Set("X-User-ID", "test-user-id")
+
+	resp, err := app.Test(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var response []*meal.Meal
+	body, _ := io.ReadAll(resp.Body)
+	json.Unmarshal(body, &response)
+
+	assert.Equal(t, len(expectedResponse), len(response))
+	mockService.AssertExpectations(t)
+}
+
 func TestDeleteMealController(t *testing.T) {
 	app, mockService := setupTest()
 
