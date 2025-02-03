@@ -1423,6 +1423,55 @@ paths:
       summary: Get all genders
       tags:
       - auth
+  /auth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: Handles the callback from Google OAuth2 after successful authentication
+      parameters:
+      - description: Authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: State parameter for CSRF protection
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirects to frontend with JWT token
+          schema:
+            type: string
+        "401":
+          description: Unauthorized - Failed to exchange token
+          schema: {}
+        "500":
+          description: Internal Server Error - Failed to get user info or create user
+          schema: {}
+      summary: Google OAuth Callback
+      tags:
+      - auth
+  /auth/google/login:
+    get:
+      consumes:
+      - application/json
+      description: Initiates Google OAuth2 login flow
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Redirects to Google OAuth consent screen
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Login with Google
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:

@@ -40,11 +40,30 @@ func InitGoogleOAuth() {
 	}
 }
 
+// @Summary		Login with Google
+// @Description	Initiates Google OAuth2 login flow
+// @Tags		auth
+// @Accept		json
+// @Produce		json
+// @Success		307	{string}	string	"Redirects to Google OAuth consent screen"
+// @Failure		400	{object}	Error	"Bad Request"
+// @Router		/auth/google/login [get]
 func (ac *AuthController) GoogleLogin(c *fiber.Ctx) error {
 	url := googleOauthConfig.AuthCodeURL("state")
 	return c.Redirect(url, fiber.StatusTemporaryRedirect)
 }
 
+// @Summary		Google OAuth Callback
+// @Description	Handles the callback from Google OAuth2 after successful authentication
+// @Tags		auth
+// @Accept		json
+// @Produce		json
+// @Param		code	query		string	true	"Authorization code from Google"
+// @Param		state	query		string	false	"State parameter for CSRF protection"
+// @Success		302	{object}	string	"Redirects to frontend with JWT token"
+// @Failure		401	{object}	Error	"Unauthorized - Failed to exchange token"
+// @Failure		500	{object}	Error	"Internal Server Error - Failed to get user info or create user"
+// @Router		/auth/google/callback [get]
 func (ac *AuthController) GoogleCallback(c *fiber.Ctx) error {
 	code := c.Query("code")
 	token, err := googleOauthConfig.Exchange(c.Context(), code)
