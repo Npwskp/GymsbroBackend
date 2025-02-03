@@ -20,6 +20,7 @@ import (
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/exerciseLog"
 	"github.com/Npwskp/GymsbroBackend/api/v1/workout/workoutSession"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -211,7 +212,11 @@ func (ds *DashboardService) GetDashboard(userId string, startDate, endDate time.
 
 func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStrengthStandards, error) {
 	var userObj user.User
-	err := ds.DB.Collection("users").FindOne(context.Background(), bson.D{{Key: "userid", Value: userId}}).Decode(&userObj)
+	objectId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Collection("users").FindOne(context.Background(), bson.D{{Key: "_id", Value: objectId}}).Decode(&userObj)
 	if err != nil {
 		return nil, err
 	}
@@ -238,79 +243,66 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 		}
 	}
 
-	exercise_pipeline := []bson.D{
-		{{Key: "$match", Value: bson.D{
-			{Key: "$or", Value: orConditions},
-		}}},
-	}
-
-	exercise_cursor, err := ds.DB.Collection("exercises").Aggregate(context.Background(), exercise_pipeline)
+	// Find matching exercises
+	var exercises []exercise.Exercise
+	cursor, err := ds.DB.Collection("exercises").Find(context.Background(), bson.D{
+		{Key: "$or", Value: orConditions},
+	})
 	if err != nil {
 		return nil, err
 	}
-	defer exercise_cursor.Close(context.Background())
-
-	var exercises []exercise.Exercise
-	if err := exercise_cursor.All(context.Background(), &exercises); err != nil {
+	if err = cursor.All(context.Background(), &exercises); err != nil {
 		return nil, err
 	}
 
-	if len(exercises) != len(dashboardEnums.ConsiderExercises) {
-		return nil, errors.New("consider exercise count mismatch")
-	}
-
-	// Map queried exercises to ConsiderExercises
+	// Create a map of exercise IDs
+	exerciseIds := make([]string, len(exercises))
 	exerciseMap := make(map[string]exercise.Exercise)
-	for _, ex := range exercises {
+	for i, ex := range exercises {
+		exerciseIds[i] = ex.ID.Hex()
 		exerciseMap[ex.ID.Hex()] = ex
 	}
 
-	// Now you can use exerciseMap to look up exercise info by ID
-	exerciseIds := make([]string, 0)
-	for _, exercise := range exercises {
-		exerciseIds = append(exerciseIds, exercise.ID.Hex())
-	}
-
-	// Find Latest Exercise Logs for each exercise
+	// Find latest exercise logs
 	pipeline := []bson.D{
 		{{Key: "$match", Value: bson.D{
 			{Key: "userid", Value: userId},
 			{Key: "exerciseid", Value: bson.D{{Key: "$in", Value: exerciseIds}}},
 		}}},
 		{{Key: "$sort", Value: bson.D{
-			{Key: "exerciseid", Value: 1},
 			{Key: "datetime", Value: -1},
 		}}},
 		{{Key: "$group", Value: bson.D{
-			{Key: "exerciseid", Value: "$exerciseid"},
-			{Key: "doc", Value: bson.D{{Key: "$first", Value: "$$ROOT"}}},
+			{Key: "_id", Value: "$exerciseid"},
+			{Key: "latestLog", Value: bson.D{{Key: "$first", Value: "$$ROOT"}}},
 		}}},
-		{{Key: "$replaceRoot", Value: bson.D{{Key: "newRoot", Value: "$doc"}}}},
 	}
 
-	cursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
+	logCursor, err := ds.DB.Collection("exerciseLogs").Aggregate(context.Background(), pipeline)
 	if err != nil {
 		return nil, err
 	}
 
-	var latestLogs []exerciseLog.ExerciseLog
-	if err := cursor.All(context.Background(), &latestLogs); err != nil {
+	var logResults []struct {
+		ID        string                  `bson:"_id"`
+		LatestLog exerciseLog.ExerciseLog `bson:"latestLog"`
+	}
+	if err = logCursor.All(context.Background(), &logResults); err != nil {
 		return nil, err
 	}
 
-	// Create a map of exercise name to latest log for easy lookup
+	// Create a map of exercise ID to latest log
 	latestLogsMap := make(map[string]exerciseLog.ExerciseLog)
-	for _, log := range latestLogs {
-		latestLogsMap[log.ExerciseID] = log
+	for _, result := range logResults {
+		latestLogsMap[result.ID] = result.LatestLog
 	}
 
-	// Replace the inline struct with the one from enums
+	// Read strength standards
 	var strengthStandards struct {
 		Male   dashboardEnums.StrengthStandards `json:"Male"`
 		Female dashboardEnums.StrengthStandards `json:"Female"`
 	}
 
-	// Read and parse the JSON file
 	jsonFile, err := os.ReadFile("api/v1/dashboard/json/strengthStandard.json")
 	if err != nil {
 		return nil, err
@@ -324,26 +316,21 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 	userStrengthStandards := make([]UserStrengthStandardPerExercise, 0)
 	muscleGroupStrengths := make(map[exerciseEnums.TargetMuscle][]float64)
 
-	for exerciseId, considerExercise := range exerciseMap {
+	for exerciseId, ex := range exerciseMap {
 		latestLog, exists := latestLogsMap[exerciseId]
-
 		if !exists {
 			continue
 		}
 
-		exerciseName := considerExercise.Name
-		exerciseEquipment := considerExercise.Equipment
-
 		// Find the closest bodyweight standards
 		var standards dashboardEnums.StrengthStandards
-
-		if userGender == "Male" {
+		if userGender == authEnums.GenderMale {
 			standards = strengthStandards.Male
 		} else {
 			standards = strengthStandards.Female
 		}
 
-		exerciseStandards, exists := standards[exerciseName]
+		exerciseStandards, exists := standards[ex.Name]
 		if !exists {
 			continue
 		}
@@ -351,7 +338,6 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 		// Find closest bodyweight bracket
 		closestStandardWeight := math.Floor(userBodyWeight/5) * 5
 		var closestStandard dashboardEnums.StrengthStandard
-
 		for _, standard := range exerciseStandards {
 			if standard.Bodyweight == closestStandardWeight {
 				closestStandard = standard
@@ -359,7 +345,7 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 			}
 		}
 
-		// Find the set with maximum weight
+		// Calculate max weight and reps
 		var maxWeight float64
 		var maxReps int
 		for _, set := range latestLog.Sets {
@@ -369,18 +355,18 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 			}
 		}
 
-		// Calculate 1RM using Brzycki formula if more than 1 rep
+		// Calculate 1RM if more than 1 rep
 		if maxReps > 1 {
 			maxWeight, err = dashboardFunctions.CalculateOneRepMax(maxWeight, float64(maxReps))
 			if err != nil {
-				return nil, err
+				continue
 			}
 		}
 
-		// Calculate relative strength (as percentage of bodyweight)
+		// Calculate relative strength
 		relativeStrength := maxWeight / userBodyWeight
 
-		// Calculate strength level based on standards
+		// Calculate strength level and score
 		var strengthLevel dashboardEnums.StrengthType
 		var score float64
 
@@ -406,14 +392,14 @@ func (ds *DashboardService) GetUserStrengthStandards(userId string) (*UserStreng
 		}
 
 		// Add to muscle group calculations
-		for _, muscleGroup := range considerExercise.TargetMuscle {
+		for _, muscleGroup := range ex.TargetMuscle {
 			muscleGroupStrengths[muscleGroup] = append(muscleGroupStrengths[muscleGroup], score)
 		}
 
 		// Add to exercise standards
 		userStrengthStandards = append(userStrengthStandards, UserStrengthStandardPerExercise{
-			Exercise:         exerciseName,
-			Equipment:        exerciseEquipment,
+			Exercise:         ex.Name,
+			Equipment:        ex.Equipment,
 			RepMax:           maxWeight,
 			RelativeStrength: relativeStrength,
 			StrengthLevel:    strengthLevel,
@@ -629,7 +615,7 @@ func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDat
 			}},
 		}}},
 		{{Key: "$addFields", Value: bson.D{
-			{Key: "exerciseid", Value: bson.D{
+			{Key: "exerciseObjectId", Value: bson.D{
 				{Key: "$toObjectId", Value: "$exerciseid"},
 			}},
 		}}},
@@ -642,7 +628,7 @@ func (ds *DashboardService) getExerciseLogsData(userId string, startDate, endDat
 		}}},
 		{{Key: "$lookup", Value: bson.D{
 			{Key: "from", Value: "exercises"},
-			{Key: "localField", Value: "_id"},
+			{Key: "localField", Value: "logs.exerciseObjectId"},
 			{Key: "foreignField", Value: "_id"},
 			{Key: "as", Value: "exercise"},
 		}}},

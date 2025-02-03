@@ -78,6 +78,13 @@ func (e *Exercise) UnmarshalBSON(data []byte) error {
 
 	// Handle BodyPart conversion
 	switch v := temp.BodyPart.(type) {
+	case primitive.A: // Handle MongoDB array type directly
+		e.BodyPart = make([]exerciseEnums.BodyPart, len(v))
+		for i, item := range v {
+			if str, ok := item.(string); ok {
+				e.BodyPart[i] = exerciseEnums.BodyPart(str)
+			}
+		}
 	case []interface{}:
 		e.BodyPart = make([]exerciseEnums.BodyPart, len(v))
 		for i, item := range v {
