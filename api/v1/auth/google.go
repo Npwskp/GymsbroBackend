@@ -49,6 +49,12 @@ func InitGoogleOAuth() {
 // @Failure		400	{object}	Error	"Bad Request"
 // @Router		/auth/google/login [get]
 func (ac *AuthController) GoogleLogin(c *fiber.Ctx) error {
+	// Add CORS headers
+	c.Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	c.Set("Access-Control-Allow-Credentials", "true")
+	c.Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 	url := googleOauthConfig.AuthCodeURL("state")
 	return c.Redirect(url, fiber.StatusTemporaryRedirect)
 }
@@ -65,6 +71,12 @@ func (ac *AuthController) GoogleLogin(c *fiber.Ctx) error {
 // @Failure		500	{object}	Error	"Internal Server Error - Failed to get user info or create user"
 // @Router		/auth/google/callback [get]
 func (ac *AuthController) GoogleCallback(c *fiber.Ctx) error {
+	// Add CORS headers
+	c.Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	c.Set("Access-Control-Allow-Credentials", "true")
+	c.Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 	code := c.Query("code")
 	token, err := googleOauthConfig.Exchange(c.Context(), code)
 	if err != nil {

@@ -84,7 +84,7 @@ func main() {
 
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000, https://gyms-bro-fe.vercel.app/, https://localhost:8080, http://35.240.232.32:8080",
+		AllowOrigins:     "http://localhost:3000, https://gyms-bro-fe.vercel.app/, https://localhost:8080, http://35.240.232.32:8080, https://gymsbro.ragcoon.com",
 		AllowCredentials: true,
 		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Authorization",
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
